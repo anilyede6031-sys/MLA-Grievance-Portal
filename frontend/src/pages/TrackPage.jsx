@@ -1,0 +1,352 @@
+import { useState, useEffect, useRef } from 'react';
+import { Search, CheckCircle, Clock, TrendingUp, XCircle, FileText, ChevronRight, AlertTriangle } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { useLang } from '../context/LangContext';
+import { useAuth } from '../context/AuthContext';
+import api from '../utils/api';
+
+const statusConfig = {
+  Pending:     { label: 'Pending',     mr: 'प्रलंबित',    icon: Clock,        class: 'badge-pending' },
+  'In Progress': { label: 'In Progress', mr: 'प्रक्रियेत',   icon: TrendingUp,   class: 'badge-inprogress' },
+  Resolved:    { label: 'Resolved',    mr: 'निराकृत',    icon: CheckCircle,  class: 'badge-resolved' },
+  Rejected:    { label: 'Rejected',    mr: 'नाकारले',    icon: XCircle,      class: 'badge-rejected' },
+};
+
+export default function TrackPage() {
+  const { t } = useLang();
+  const { user } = useAuth();
+  const [query, setQuery] = useState('');
+  const [complaints, setComplaints] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searched, setSearched] = useState(false);
+  const [replyFiles, setReplyFiles] = useState({});
+  const [replying, setReplying] = useState({});
+  const hasAutoFetched = useRef(false);
+
+  // Auto-fetch complaints for logged-in citizen exactly once on mount
+  useEffect(() => {
+    if (user?.role === 'citizen' && user?.mobile && !hasAutoFetched.current) {
+      hasAutoFetched.current = true;
+      const fetchCitizenComplaints = async () => {
+        setLoading(true);
+        try {
+          const res = await api.get('/complaints/track', { params: { mobile: user.mobile } });
+          setComplaints(res.data.complaints);
+          setSearched(true);
+        } catch (err) {
+          if (err.response?.status === 404) { setComplaints([]); setSearched(true); }
+          // Don't toast error on auto-fetch to avoid spamming
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchCitizenComplaints();
+    }
+  }, [user]);
+
+  const handleSearch = async () => {
+    if (!query.trim()) { toast.error('Enter Complaint ID or Mobile Number'); return; }
+    
+    const isId = query.startsWith('GRV-');
+
+    // Privacy frontend validation
+    if (!isId) {
+      if (!user) {
+        toast.error('Privacy restricted: Please login to track complaints by mobile number.');
+        return;
+      }
+      if (user.role === 'citizen' && query !== user.mobile) {
+        toast.error('Privacy restricted: You can only search your own mobile number.');
+        return;
+      }
+    }
+
+    setLoading(true);
+    setSearched(false);
+    try {
+      const params = isId ? { complaintId: query } : { mobile: query };
+      const res = await api.get('/complaints/track', { params });
+      setComplaints(res.data.complaints);
+      setSearched(true);
+    } catch (err) {
+      if (err.response?.status === 404) { setComplaints([]); setSearched(true); }
+      else if (err.response?.status === 403) { toast.error(err.response.data.message); }
+      else toast.error('Error fetching data. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReplySubmit = async (complaintId) => {
+    const files = replyFiles[complaintId] || [];
+    if (files.length === 0) return toast.error('Please select at least one photo to reply.');
+    
+    const formData = new FormData();
+    files.forEach(f => formData.append('photos', f));
+
+    setReplying(prev => ({ ...prev, [complaintId]: true }));
+    try {
+      const res = await api.post(`/complaints/${complaintId}/reply`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      toast.success('Reply submitted successfully!');
+      
+      // Update local state to show the new photos immediately
+      setComplaints(prev => prev.map(c => {
+        if (c._id === complaintId) {
+          return { ...c, citizenPhotos: [...(c.citizenPhotos || []), ...res.data.paths] };
+        }
+        return c;
+      }));
+      setReplyFiles(prev => ({ ...prev, [complaintId]: [] }));
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Error uploading reply.');
+    } finally {
+      setReplying(prev => ({ ...prev, [complaintId]: false }));
+    }
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-10 animate-fade-in">
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center gap-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-4 py-1.5 rounded-full text-sm font-semibold mb-3">
+          🔍 {t.trackComplaint}
+        </div>
+        <h1 className="text-3xl font-extrabold text-gov-navy dark:text-white mb-1">Track Your Complaint</h1>
+        <p className="font-marathi text-gray-500 dark:text-gray-400">आपल्या तक्रारीची स्थिती तपासा</p>
+      </div>
+
+      {/* Search Card */}
+      <div className="card mb-8">
+        <label className="label text-base mb-2">Complaint ID or Mobile Number</label>
+        <div className="flex gap-3">
+          <input value={query} onChange={e => setQuery(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleSearch()}
+            className="input-field flex-1 text-base"
+            placeholder="e.g. GRV-ABC123-XY or 9876543210" />
+          <button onClick={handleSearch} disabled={loading}
+            className="btn-primary px-6 py-2.5 disabled:opacity-60">
+            <Search size={18} />
+            {loading ? 'Searching...' : 'Search'}
+          </button>
+        </div>
+        <div className="flex justify-between items-center mt-2">
+          <p className="text-xs text-gray-400">💡 Enter the 10-digit mobile or Complaint ID received after submission</p>
+          {user?.role === 'citizen' && (
+            <button onClick={() => { 
+                setQuery(''); 
+                hasAutoFetched.current = false; // allow auto-fetch logic to run again
+                setSearched(false); 
+              }} 
+              className="text-xs font-semibold text-blue-600 hover:underline">
+              View My Complaints
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Results */}
+      {searched && (
+        <div className="animate-slide-up">
+          {complaints.length === 0 ? (
+            <div className="card text-center py-12">
+              <AlertTriangle size={48} className="mx-auto text-yellow-400 mb-4" />
+              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-1">No complaints found</h3>
+              <p className="text-gray-500 dark:text-gray-400">No complaints found for this ID or mobile number.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{complaints.length} complaint(s) found</p>
+              {complaints.map(c => {
+                const cfg = statusConfig[c.status] || statusConfig.Pending;
+                const StatusIcon = cfg.icon;
+                return (
+                  <div key={c.complaintId} className="card border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
+                    {/* Header */}
+                    <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">{c.complaintId}</p>
+                        <h3 className="font-bold text-gray-900 dark:text-white text-lg">{c.name}</h3>
+                      </div>
+                      <span className={`${cfg.class} flex items-center gap-1.5 text-sm px-3 py-1`}>
+                        <StatusIcon size={14} /> {cfg.label}
+                        <span className="font-marathi text-xs opacity-80">({cfg.mr})</span>
+                      </span>
+                    </div>
+
+                    {/* Progress bar */}
+                    <div className="mb-4">
+                      <div className="flex justify-between text-xs text-gray-500 mb-1">
+                        <span>Submitted</span><span>In Progress</span><span>Resolved</span>
+                      </div>
+                      <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div className={`h-full rounded-full transition-all duration-500 ${
+                          c.status === 'Resolved' ? 'w-full bg-green-500' :
+                          c.status === 'In Progress' ? 'w-2/3 bg-blue-500' :
+                          c.status === 'Rejected' ? 'w-full bg-red-500' : 'w-1/3 bg-yellow-500'
+                        }`} />
+                      </div>
+                    </div>
+
+                    {/* Details grid */}
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm mb-4">
+                      {[
+                        { label: 'Village', value: c.village },
+                        { label: 'Taluka', value: c.taluka },
+                        { label: 'Department', value: c.department },
+                        { label: 'Filed On', value: new Date(c.createdAt).toLocaleDateString('en-IN') },
+                        c.resolvedAt && { label: 'Resolved On', value: new Date(c.resolvedAt).toLocaleDateString('en-IN') },
+                      ].filter(Boolean).map(({ label, value }) => (
+                        <div key={label} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2.5">
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
+                          <p className="font-semibold text-gray-800 dark:text-gray-200">{value}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Description */}
+                    <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 mb-3">
+                      <p className="text-xs text-gray-500 mb-1 font-medium">Complaint Description</p>
+                      <p className="text-sm text-gray-700 dark:text-gray-300">{c.description}</p>
+                    </div>
+
+                    {/* Admin remarks */}
+                    {c.remarks && (
+                      <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3 flex gap-2">
+                        <CheckCircle size={16} className="text-green-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-xs font-semibold text-green-700 dark:text-green-400">Admin Remarks</p>
+                          <p className="text-sm text-green-800 dark:text-green-300">{c.remarks}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Admin Reply Photos */}
+                    {Array.isArray(c.adminPhotos) && c.adminPhotos.length > 0 && (
+                      <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700 rounded-lg p-3 mt-3">
+                        <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-400 mb-3 flex items-center gap-2">
+                          📎 Admin Reply Photos
+                          <span className="bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 text-[10px] px-2 py-0.5 rounded-full font-bold">{c.adminPhotos.length} photo{c.adminPhotos.length > 1 ? 's' : ''}</span>
+                        </p>
+                        <div className="grid grid-cols-2 gap-2">
+                          {c.adminPhotos.map((ph, idx) => {
+                            if (!ph || typeof ph !== 'string') return null;
+                            const url = `${api.defaults.baseURL.replace('/api', '')}/${ph.replace(/\\/g, '/')}`;
+                            return (
+                              <div key={idx} className="rounded-lg overflow-hidden border-2 border-indigo-200 dark:border-indigo-600 shadow-sm relative group">
+                                <a href={url} target="_blank" rel="noopener noreferrer">
+                                  <img src={url} alt={`Admin reply ${idx+1}`} className="w-full h-24 object-cover hover:opacity-90 transition-opacity cursor-pointer" />
+                                </a>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Citizen Reply Photos Display */}
+                    {Array.isArray(c.citizenPhotos) && c.citizenPhotos.length > 0 && (
+                      <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 mt-3">
+                        <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 mb-3 flex items-center gap-2">
+                          📤 My Reply Photos
+                          <span className="bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 text-[10px] px-2 py-0.5 rounded-full font-bold">{c.citizenPhotos.length} photo{c.citizenPhotos.length > 1 ? 's' : ''}</span>
+                        </p>
+                        <div className="grid grid-cols-2 gap-2">
+                          {c.citizenPhotos.map((ph, idx) => {
+                            if (!ph || typeof ph !== 'string') return null;
+                            const url = `${api.defaults.baseURL.replace('/api', '')}/${ph.replace(/\\/g, '/')}`;
+                            return (
+                              <div key={idx} className="rounded-lg overflow-hidden border-2 border-amber-200 dark:border-amber-600 shadow-sm relative group">
+                                <a href={url} target="_blank" rel="noopener noreferrer">
+                                  <img src={url} alt={`My reply ${idx+1}`} className="w-full h-24 object-cover hover:opacity-90 transition-opacity cursor-pointer" />
+                                </a>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* User uploaded Photo */}
+                    {c.photo && (
+                      <div className="mt-3">
+                        <p className="text-xs text-gray-500 mb-1">Initial Uploaded Photo <span className="text-[10px] text-gray-400">(click to open)</span></p>
+                        <a href={`${api.defaults.baseURL.replace('/api', '')}/${c.photo}`} target="_blank" rel="noopener noreferrer" className="inline-block transition-transform hover:scale-105 border rounded-lg overflow-hidden shadow-sm hover:shadow-md cursor-pointer">
+                          <img src={`${api.defaults.baseURL.replace('/api', '')}/${c.photo}`}
+                            alt="complaint" className="w-32 h-24 object-cover" />
+                        </a>
+                      </div>
+                    )}
+
+                    {/* Citizen Reply UI (Only if In Progress and photos limit < 5) */}
+                    {c.status === 'In Progress' && (c.citizenPhotos?.length || 0) < 5 && (
+                      <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                        <p className="text-sm font-bold text-gray-800 dark:text-gray-200 mb-2">Reply / Upload More Photos</p>
+                        <p className="text-xs text-gray-500 mb-3">You can upload up to {5 - (c.citizenPhotos?.length || 0)} more photos to support your complaint.</p>
+                        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+                          <label className="flex-1 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors w-full flex flex-col items-center justify-center min-h-[100px]">
+                            {replyFiles[c._id]?.length ? (
+                              <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">
+                                ✅ {replyFiles[c._id].length} file(s) selected
+                              </span>
+                            ) : (
+                              <>
+                                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                  Drag & drop or click to upload
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                  JPG, PNG, PDF up to 5MB
+                                </span>
+                              </>
+                            )}
+                            <input type="file" multiple accept="image/*,application/pdf" className="hidden"
+                              onChange={e => {
+                                const filesArray = Array.from(e.target.files);
+                                // Prevent users from bypassing the individual file size limit of 5MB
+                                const validFiles = filesArray.filter(f => f.size <= 5 * 1024 * 1024);
+                                if (validFiles.length < filesArray.length) {
+                                  toast.error('Some files were ignored because they exceed the 5MB limit.');
+                                }
+                                const selected = validFiles.slice(0, 5 - (c.citizenPhotos?.length || 0));
+                                setReplyFiles(prev => ({...prev, [c._id]: selected}));
+                              }} />
+                          </label>
+                          <button onClick={() => handleReplySubmit(c._id)} disabled={replying[c._id] || !replyFiles[c._id]?.length}
+                            className="w-full sm:w-auto btn-primary px-4 py-2.5 text-sm disabled:opacity-50 flex items-center justify-center gap-2">
+                            {replying[c._id] ? 'Uploading...' : 'Send Reply'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Info card */}
+      {!searched && (
+        <div className="card bg-saffron-50 dark:bg-saffron-900/20 border-saffron-200 dark:border-saffron-700">
+          <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
+            <FileText size={18} className="text-saffron-500" /> Status Guide
+          </h3>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {Object.values(statusConfig).map(cfg => {
+              const Icon = cfg.icon;
+              return (
+                <div key={cfg.label} className="flex items-center gap-2.5">
+                  <span className={`${cfg.class} flex items-center gap-1 px-2 py-1`}>
+                    <Icon size={12} /> {cfg.label}
+                  </span>
+                  <span className="font-marathi text-sm text-gray-600 dark:text-gray-400">{cfg.mr}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
