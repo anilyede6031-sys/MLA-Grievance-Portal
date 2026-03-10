@@ -12,6 +12,9 @@ const complaintRoutes = require('./routes/complaints');
 
 const app = express();
 
+// Trust reverse proxy (required for Render + express-rate-limit)
+app.set('trust proxy', 1);
+
 // Ensure uploads folder exists
 if (!fs.existsSync('uploads')) fs.mkdirSync('uploads');
 
