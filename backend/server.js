@@ -76,8 +76,13 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
 
 (async () => {
   try {
-    const mongoServer = await MongoMemoryServer.create();
-    const uri = mongoServer.getUri();
+    // Use real MongoDB if URI is provided, else fallback to memory (for local tests)
+    const uri = process.env.MONGODB_URI;
+    
+    if (!uri) {
+      console.error('❌ MONGODB_URI environment variable is missing.');
+      process.exit(1);
+    }
 
     // Disable buffering so requests fail immediately if DB is disconnected
     mongoose.set('bufferCommands', false);
