@@ -22,6 +22,8 @@ if (!fs.existsSync('uploads')) fs.mkdirSync('uploads');
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 const allowedOrigins = [
   process.env.FRONTEND_URL,
+  'https://rahulkulmla.com',
+  'https://www.rahulkulmla.com',
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:3000',
