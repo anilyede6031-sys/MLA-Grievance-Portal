@@ -357,7 +357,7 @@ export default function AdminDashboard() {
   const [total, setTotal] = useState(0);
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingComp, setLoadingComp] = useState(true);
-  const [filters, setFilters] = useState({ taluka: '', department: '', status: '', page: 1 });
+  const [filters, setFilters] = useState({ taluka: '', department: '', status: '', mobile: '', page: 1 });
 
   const fetchStats = useCallback(async () => {
     setLoadingStats(true);
@@ -373,6 +373,7 @@ export default function AdminDashboard() {
       if (!params.taluka) delete params.taluka;
       if (!params.department) delete params.department;
       if (!params.status) delete params.status;
+      if (!params.mobile) delete params.mobile;
       const r = await api.get('/complaints', { params });
       setComplaints(r.data.complaints);
       setTotal(r.data.total);
@@ -389,6 +390,7 @@ export default function AdminDashboard() {
       if (filters.taluka) params.taluka = filters.taluka;
       if (filters.department) params.department = filters.department;
       if (filters.status) params.status = filters.status;
+      if (filters.mobile) params.mobile = filters.mobile;
       const r = await api.get('/complaints/export', { params, responseType: 'blob' });
       const url = URL.createObjectURL(new Blob([r.data]));
       const a = document.createElement('a'); a.href = url; a.download = 'complaints.csv'; a.click();
@@ -560,6 +562,11 @@ export default function AdminDashboard() {
                     className="input-field text-sm py-2">
                     {STATUSES.map(s => <option key={s} value={s}>{s || 'All Statuses'}</option>)}
                   </select>
+                  <div className="relative">
+                    <input type="text" value={filters.mobile} onChange={e => setFilters(f => ({...f, mobile: e.target.value, page: 1}))}
+                      placeholder="Search Mobile..." className="input-field text-sm py-2 pr-8" />
+                    <Search size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                  </div>
                   <button onClick={fetchComplaints} className="btn-secondary text-sm py-2">
                     <Filter size={14} /> Apply
                   </button>

@@ -67,11 +67,12 @@ const trackComplaint = async (req, res) => {
 // GET /api/complaints - Admin
 const getAllComplaints = async (req, res) => {
   try {
-    const { taluka, department, status, page = 1, limit = 20 } = req.query;
+    const { taluka, department, status, mobile, page = 1, limit = 20 } = req.query;
     const filter = {};
     if (taluka) filter.taluka = taluka;
     if (department) filter.department = department;
     if (status) filter.status = status;
+    if (mobile) filter.mobile = mobile;
 
     // Taluka coordinators see only their taluka
     if (req.user.role === 'taluka_coordinator' && req.user.taluka) {
@@ -185,11 +186,12 @@ const updateComplaint = async (req, res) => {
 // GET /api/complaints/export - Admin only
 const exportCSV = async (req, res) => {
   try {
-    const { taluka, department, status } = req.query;
+    const { taluka, department, status, mobile } = req.query;
     const filter = {};
     if (taluka) filter.taluka = taluka;
     if (department) filter.department = department;
     if (status) filter.status = status;
+    if (mobile) filter.mobile = mobile;
     if (req.user.role === 'taluka_coordinator' && req.user.taluka) filter.taluka = req.user.taluka;
 
     const complaints = await Complaint.find(filter).select('-__v -_id').lean();
