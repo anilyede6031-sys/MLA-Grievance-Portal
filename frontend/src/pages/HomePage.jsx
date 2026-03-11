@@ -2,8 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { FileText, Search, CheckCircle, Clock, AlertCircle, TrendingUp, ChevronRight, Phone } from 'lucide-react';
 import { useLang } from '../context/LangContext';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:10000';
+import api from '../utils/api';
 
 function AnimatedCounter({ target, duration = 2000 }) {
   const [count, setCount] = useState(0);
@@ -33,10 +32,9 @@ export default function HomePage() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/complaints/public-stats`);
-        const data = await res.json();
-        if (data.success) {
-          setStats(data.stats);
+        const res = await api.get('/complaints/public-stats');
+        if (res.data.success) {
+          setStats(res.data.stats);
         }
       } catch (err) {
         console.error('Failed to fetch stats:', err);
