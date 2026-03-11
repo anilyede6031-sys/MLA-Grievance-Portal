@@ -5,7 +5,7 @@ const path = require('path');
 const { authenticate, authorize } = require('../middleware/auth');
 const {
   createComplaint, trackComplaint, getAllComplaints,
-  getStats, updateComplaint, exportCSV, complaintValidation, addCitizenReply
+  getStats, getPublicStats, updateComplaint, exportCSV, complaintValidation, addCitizenReply
 } = require('../controllers/complaintController');
 
 // Multer config
