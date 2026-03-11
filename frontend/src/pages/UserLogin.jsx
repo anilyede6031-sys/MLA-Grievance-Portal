@@ -32,7 +32,7 @@ export default function UserLogin() {
       login(res.data.user, res.data.token);
       toast.success(`Welcome, ${res.data.user.name}!`);
       if (res.data.user.role === 'citizen') {
-        navigate('/complaint');
+        navigate('/track');
       } else {
         navigate('/admin');
       }

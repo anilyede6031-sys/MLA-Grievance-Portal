@@ -21,8 +21,12 @@ function Navbar({ darkMode, setDarkMode }) {
   const navLinks = [
     { to: '/', label: t.home }
   ];
-  if (!user || user.role === 'citizen') navLinks.push({ to: '/complaint', label: t.fileComplaint });
-  navLinks.push({ to: '/track', label: t.trackComplaint });
+  if (!user || user.role === 'citizen') {
+    navLinks.push({ to: '/complaint', label: t.fileComplaint });
+    navLinks.push({ to: '/track', label: user ? 'My Complaints' : t.trackComplaint });
+  } else {
+    navLinks.push({ to: '/track', label: t.trackComplaint });
+  }
 
   const isActive = (path) => location.pathname === path;
 
@@ -162,7 +166,7 @@ export default function Layout({ children, darkMode, setDarkMode }) {
                 <ul className="space-y-1 text-sm text-gray-400">
                   <li><Link to="/" className="hover:text-white transition-colors">Home</Link></li>
                   <li><Link to="/complaint" className="hover:text-white transition-colors">File Complaint</Link></li>
-                  <li><Link to="/track" className="hover:text-white transition-colors">Track Complaint</Link></li>
+                  <li><Link to="/track" className="hover:text-white transition-colors">{user?.role === 'citizen' ? 'My Complaints' : 'Track Complaint'}</Link></li>
                 </ul>
               </div>
               <div>

@@ -112,8 +112,12 @@ export default function TrackPage() {
         <div className="inline-flex items-center gap-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-4 py-1.5 rounded-full text-sm font-semibold mb-3">
           🔍 {t.trackComplaint}
         </div>
-        <h1 className="text-3xl font-extrabold text-gov-navy dark:text-white mb-1">Track Your Complaint</h1>
-        <p className="font-marathi text-gray-500 dark:text-gray-400">आपल्या तक्रारीची स्थिती तपासा</p>
+        <h1 className="text-3xl font-extrabold text-gov-navy dark:text-white mb-1">
+          {user?.role === 'citizen' ? 'My Complaints' : 'Track Your Complaint'}
+        </h1>
+        <p className="font-marathi text-gray-500 dark:text-gray-400">
+          {user?.role === 'citizen' ? 'माझ्या तक्रारी' : 'आपल्या तक्रारीची स्थिती तपासा'}
+        </p>
       </div>
 
       {/* Search Card */}
@@ -330,7 +334,7 @@ export default function TrackPage() {
       {!searched && (
         <div className="card bg-saffron-50 dark:bg-saffron-900/20 border-saffron-200 dark:border-saffron-700">
           <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
-            <FileText size={18} className="text-saffron-500" /> Status Guide
+            <FileText size={18} className="text-saffron-500" /> {user?.role === 'citizen' ? 'Complaint Guide' : 'Status Guide'}
           </h3>
           <div className="grid sm:grid-cols-2 gap-3">
             {Object.values(statusConfig).map(cfg => {
@@ -345,6 +349,11 @@ export default function TrackPage() {
               );
             })}
           </div>
+          {user?.role === 'citizen' && (
+            <div className="mt-4 pt-4 border-t border-saffron-200 dark:border-saffron-800 text-sm text-saffron-800 dark:text-saffron-400">
+              <p>📍 All complaints filed with your mobile number **{user.mobile}** are automatically shown above.</p>
+            </div>
+          )}
         </div>
       )}
     </div>
