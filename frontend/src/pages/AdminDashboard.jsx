@@ -357,7 +357,7 @@ export default function AdminDashboard() {
   const [total, setTotal] = useState(0);
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingComp, setLoadingComp] = useState(true);
-  const [filters, setFilters] = useState({ taluka: '', department: '', status: '', mobile: '', page: 1 });
+  const [filters, setFilters] = useState({ taluka: '', department: '', status: '', mobile: '', complaintId: '', page: 1 });
 
   const fetchStats = useCallback(async () => {
     setLoadingStats(true);
@@ -370,27 +370,34 @@ export default function AdminDashboard() {
     setLoadingComp(true);
     try {
       const params = { ...filters };
-      if (!params.taluka) delete params.taluka;
-      if (!params.department) delete params.department;
-      if (!params.status) delete params.status;
-      if (!params.mobile) delete params.mobile;
+      Object.keys(params).forEach(key => {
+        if (params[key] === '' || params[key] === null) delete params[key];
+      });
       const r = await api.get('/complaints', { params });
-      setComplaints(r.data.complaints);
-      setTotal(r.data.total);
-    } catch { toast.error('Failed to load complaints'); }
+      setComplaints(r.data.complaints || []);
+      setTotal(r.data.total || 0);
+    } catch (err) { 
+      console.error(err);
+      toast.error('Failed to load complaints'); 
+    }
     finally { setLoadingComp(false); }
   }, [filters]);
 
   useEffect(() => { fetchStats(); }, [fetchStats]);
-  useEffect(() => { if (tab === 'complaints') fetchComplaints(); }, [tab, fetchComplaints]);
+  useEffect(() => { 
+    if (tab === 'complaints') {
+      const handler = setTimeout(() => {
+        fetchComplaints();
+      }, 300); // Debounce search
+      return () => clearTimeout(handler);
+    }
+  }, [tab, fetchComplaints]);
 
   const handleExport = async () => {
     try {
-      const params = {};
-      if (filters.taluka) params.taluka = filters.taluka;
-      if (filters.department) params.department = filters.department;
-      if (filters.status) params.status = filters.status;
-      if (filters.mobile) params.mobile = filters.mobile;
+      const params = { ...filters };
+      delete params.page;
+      Object.keys(params).forEach(key => { if (!params[key]) delete params[key]; });
       const r = await api.get('/complaints/export', { params, responseType: 'blob' });
       const url = URL.createObjectURL(new Blob([r.data]));
       const a = document.createElement('a'); a.href = url; a.download = 'complaints.csv'; a.click();
@@ -548,8 +555,18 @@ export default function AdminDashboard() {
               </div>
 
               {/* Filters */}
-              <div className="card mb-4">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="card mb-4 bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700">
+                <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                  <div className="relative">
+                    <input type="text" value={filters.complaintId} onChange={e => setFilters(f => ({...f, complaintId: e.target.value.toUpperCase(), page: 1}))}
+                      placeholder="Complaint ID..." className="input-field text-sm py-2 pr-8" />
+                    <Search size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                  </div>
+                  <div className="relative">
+                    <input type="text" value={filters.mobile} onChange={e => setFilters(f => ({...f, mobile: e.target.value, page: 1}))}
+                      placeholder="Mobile..." className="input-field text-sm py-2 pr-8" />
+                    <Search size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                  </div>
                   <select value={filters.taluka} onChange={e => setFilters(f => ({...f, taluka: e.target.value, page: 1}))}
                     className="input-field text-sm py-2">
                     {TALUKAS.map(t => <option key={t} value={t}>{t || 'All Talukas'}</option>)}
@@ -558,18 +575,16 @@ export default function AdminDashboard() {
                     className="input-field text-sm py-2">
                     {DEPARTMENTS.map(d => <option key={d} value={d}>{d || 'All Departments'}</option>)}
                   </select>
-                  <select value={filters.status} onChange={e => setFilters(f => ({...f, status: e.target.value, page: 1}))}
-                    className="input-field text-sm py-2">
-                    {STATUSES.map(s => <option key={s} value={s}>{s || 'All Statuses'}</option>)}
-                  </select>
-                  <div className="relative">
-                    <input type="text" value={filters.mobile} onChange={e => setFilters(f => ({...f, mobile: e.target.value, page: 1}))}
-                      placeholder="Search Mobile..." className="input-field text-sm py-2 pr-8" />
-                    <Search size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <div className="flex gap-2">
+                    <select value={filters.status} onChange={e => setFilters(f => ({...f, status: e.target.value, page: 1}))}
+                      className="input-field text-sm py-2 flex-1">
+                      {STATUSES.map(s => <option key={s} value={s}>{s || 'All Statuses'}</option>)}
+                    </select>
+                    <button onClick={() => setFilters({ taluka: '', department: '', status: '', mobile: '', complaintId: '', page: 1 })} 
+                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors border border-gray-200 dark:border-gray-700" title="Clear Filters">
+                      <XCircle size={18} />
+                    </button>
                   </div>
-                  <button onClick={fetchComplaints} className="btn-secondary text-sm py-2">
-                    <Filter size={14} /> Apply
-                  </button>
                 </div>
               </div>
 
@@ -610,6 +625,7 @@ export default function AdminDashboard() {
 }
 
 function AnalyticsTab({ stats, loadingStats }) {
+  const { t } = useLang();
   if (loadingStats) return <div className="flex justify-center py-20"><Loader2 size={32} className="animate-spin text-saffron-500" /></div>;
   if (!stats) return <div className="text-center py-20 text-gray-400">No data available</div>;
 
@@ -625,7 +641,6 @@ function AnalyticsTab({ stats, loadingStats }) {
         <p className="text-gray-500 text-sm">{t.resolutionInsights}</p>
       </div>
 
-      {/* Summary pills */}
       <div className="flex gap-3 flex-wrap">
         {[
           { label: 'Resolution Rate', value: `${stats.stats.total ? Math.round((stats.stats.resolved / stats.stats.total) * 100) : 0}%`, color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
@@ -639,7 +654,6 @@ function AnalyticsTab({ stats, loadingStats }) {
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Department Bar Chart */}
         <div className="card">
           <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-4">📊 {t.complaintsByDept}</h3>
           <div className="space-y-3">
@@ -657,7 +671,6 @@ function AnalyticsTab({ stats, loadingStats }) {
           </div>
         </div>
 
-        {/* Taluka Bar Chart */}
         <div className="card">
           <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-4">🗺️ {t.complaintsByTaluka}</h3>
           <div className="space-y-3">
@@ -676,7 +689,6 @@ function AnalyticsTab({ stats, loadingStats }) {
         </div>
       </div>
 
-      {/* Monthly Trend */}
       {stats.monthly?.length > 0 && (
         <div className="card">
           <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-4">📈 {t.monthlyTrend}</h3>
@@ -703,14 +715,14 @@ function UsersTab() {
   const [form, setForm] = useState({ name:'', mobile:'', password:'', role:'data_entry_operator', taluka:'' });
   const [saving, setSaving] = useState(false);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
     try { const r = await api.get('/auth/users'); setUsers(r.data.users); }
     catch { toast.error('Failed to load users.'); }
     finally { setLoading(false); }
-  };
+  }, []);
 
-  useEffect(() => { fetchUsers(); }, []);
+  useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
   const handleCreate = async e => {
     e.preventDefault();
@@ -724,11 +736,27 @@ function UsersTab() {
     finally { setSaving(false); }
   };
 
+  const handleToggleStatus = async (id) => {
+    try {
+      await api.patch(`/auth/users/${id}/status`);
+      toast.success('User status updated');
+      fetchUsers();
+    } catch (err) { toast.error('Update failed'); }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this user?')) return;
+    try {
+      await api.delete(`/auth/users/${id}`);
+      toast.success('User deleted');
+      fetchUsers();
+    } catch (err) { toast.error('Delete failed'); }
+  };
+
   return (
     <div className="animate-fade-in space-y-6">
       <h1 className="text-2xl font-extrabold text-gov-navy dark:text-white">{t.users}</h1>
 
-      {/* Create user */}
       <div className="card">
         <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-4">{t.createUserInfo}</h3>
         <form onSubmit={handleCreate} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -756,13 +784,12 @@ function UsersTab() {
         </form>
       </div>
 
-      {/* Users table */}
       <div className="card overflow-x-auto">
         <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-4">All Users ({users.length})</h3>
         {loading ? <div className="flex justify-center py-8"><Loader2 size={24} className="animate-spin text-saffron-500" /></div> : (
           <table className="w-full text-sm">
             <thead><tr className="border-b border-gray-200 dark:border-gray-700 text-left">
-              {['Name','Mobile','Role','Taluka','Status','Created'].map(h => <th key={h} className="pb-2 text-xs text-gray-500 font-semibold pr-4">{h}</th>)}
+              {['Name','Mobile','Role','Taluka','Status','Created', 'Actions'].map(h => <th key={h} className="pb-2 text-xs text-gray-500 font-semibold pr-4">{h}</th>)}
             </tr></thead>
             <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
               {users.map(u => (
@@ -771,8 +798,17 @@ function UsersTab() {
                   <td className="py-2.5 pr-4 text-gray-600 dark:text-gray-400">{u.mobile}</td>
                   <td className="py-2.5 pr-4"><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${u.role === 'super_admin' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : u.role === 'taluka_coordinator' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}>{u.role.replace(/_/g,' ')}</span></td>
                   <td className="py-2.5 pr-4 text-gray-500 dark:text-gray-400">{u.taluka || '—'}</td>
-                  <td className="py-2.5 pr-4"><span className={`text-xs px-2 py-0.5 rounded-full ${u.isActive ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-600'}`}>{u.isActive ? 'Active' : 'Inactive'}</span></td>
+                  <td className="py-2.5 pr-4">
+                    <button onClick={() => handleToggleStatus(u._id)} className={`text-xs px-2 py-0.5 rounded-full ${u.isActive ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-600 hover:bg-red-200'}`}>
+                      {u.isActive ? 'Active' : 'Inactive'}
+                    </button>
+                  </td>
                   <td className="py-2.5 text-gray-400 text-xs">{new Date(u.createdAt).toLocaleDateString('en-IN')}</td>
+                  <td className="py-2.5">
+                    <button onClick={() => handleDelete(u._id)} className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition-colors">
+                      <XCircle size={14} />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -785,6 +821,7 @@ function UsersTab() {
 
 function SettingsTab() {
   const { user, login } = useAuth();
+  const { t } = useLang();
   const [form, setForm] = useState({ name: user?.name || '', password: '', newPassword: '' });
   const [saving, setSaving] = useState(false);
 
@@ -794,7 +831,6 @@ function SettingsTab() {
     setSaving(true);
     try {
       const res = await api.patch('/auth/profile', form);
-      // Update local storage with new user data but same token
       login({ ...user, name: res.data.user.name }, localStorage.getItem('token'));
       toast.success('Profile updated successfully!');
       setForm({ name: res.data.user.name, password: '', newPassword: '' });
