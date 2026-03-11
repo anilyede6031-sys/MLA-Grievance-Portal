@@ -412,7 +412,7 @@ export default function AdminDashboard() {
     { key: 'complaints', icon: FileText, label: t.manageComplaints },
     { key: 'analytics', icon: BarChart2, label: t.analytics },
     ...(user?.role === 'super_admin' ? [{ key: 'users', icon: Users, label: t.users }] : []),
-    { key: 'settings', icon: Settings, label: 'Settings' },
+    { key: 'settings', icon: Settings, label: t.settings },
   ];
 
   return (
@@ -627,7 +627,7 @@ export default function AdminDashboard() {
 function AnalyticsTab({ stats, loadingStats }) {
   const { t } = useLang();
   if (loadingStats) return <div className="flex justify-center py-20"><Loader2 size={32} className="animate-spin text-saffron-500" /></div>;
-  if (!stats) return <div className="text-center py-20 text-gray-400">No data available</div>;
+  if (!stats) return <div className="text-center py-20 text-gray-400">{t.noData || 'No data available'}</div>;
 
   const maxByDept = Math.max(...(stats.byDepartment?.map(d => d.count) || [1]));
   const maxByTaluka = Math.max(...(stats.byTaluka?.map(d => d.count) || [1]));
@@ -643,9 +643,9 @@ function AnalyticsTab({ stats, loadingStats }) {
 
       <div className="flex gap-3 flex-wrap">
         {[
-          { label: 'Resolution Rate', value: `${stats.stats.total ? Math.round((stats.stats.resolved / stats.stats.total) * 100) : 0}%`, color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
-          { label: 'Pending Rate', value: `${stats.stats.total ? Math.round((stats.stats.pending / stats.stats.total) * 100) : 0}%`, color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' },
-          { label: 'Rejected', value: stats.stats.rejected, color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
+          { label: t.resolutionRate, value: `${stats.stats.total ? Math.round((stats.stats.resolved / stats.stats.total) * 100) : 0}%`, color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
+          { label: t.pendingRate, value: `${stats.stats.total ? Math.round((stats.stats.pending / stats.stats.total) * 100) : 0}%`, color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' },
+          { label: t.rejected, value: stats.stats.rejected, color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
         ].map(p => (
           <div key={p.label} className={`px-4 py-2 rounded-full font-semibold text-sm ${p.color}`}>
             {p.label}: <strong>{p.value}</strong>
@@ -760,47 +760,47 @@ function UsersTab() {
       <div className="card">
         <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-4">{t.createUserInfo}</h3>
         <form onSubmit={handleCreate} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          <div><label className="label">Name</label><input value={form.name} onChange={e => setForm(f=>({...f,name:e.target.value}))} className="input-field text-sm" placeholder="Full name" required /></div>
-          <div><label className="label">Mobile</label><input type="tel" value={form.mobile} onChange={e => setForm(f=>({...f,mobile:e.target.value}))} className="input-field text-sm" placeholder="10-digit mobile" maxLength={10} required /></div>
-          <div><label className="label">Password</label><input type="password" value={form.password} onChange={e => setForm(f=>({...f,password:e.target.value}))} className="input-field text-sm" placeholder="Min 6 chars" required /></div>
-          <div><label className="label">Role</label>
+          <div><label className="label">{t.name}</label><input value={form.name} onChange={e => setForm(f=>({...f,name:e.target.value}))} className="input-field text-sm" placeholder={t.name} required /></div>
+          <div><label className="label">{t.mobile}</label><input type="tel" value={form.mobile} onChange={e => setForm(f=>({...f,mobile:e.target.value}))} className="input-field text-sm" placeholder={t.mobile} maxLength={10} required /></div>
+          <div><label className="label">{t.password}</label><input type="password" value={form.password} onChange={e => setForm(f=>({...f,password:e.target.value}))} className="input-field text-sm" placeholder={t.password} required /></div>
+          <div><label className="label">{t.role}</label>
             <select value={form.role} onChange={e => setForm(f=>({...f,role:e.target.value}))} className="input-field text-sm">
-              <option value="data_entry_operator">Data Entry Operator</option>
-              <option value="taluka_coordinator">Taluka Coordinator</option>
-              <option value="super_admin">Super Admin</option>
+              <option value="data_entry_operator">{t.roles.data_entry_operator}</option>
+              <option value="taluka_coordinator">{t.roles.taluka_coordinator}</option>
+              <option value="super_admin">{t.roles.super_admin}</option>
             </select>
           </div>
-          <div><label className="label">Taluka (optional)</label>
+          <div><label className="label">{t.taluka} ({t.optional || 'optional'})</label>
             <select value={form.taluka} onChange={e => setForm(f=>({...f,taluka:e.target.value}))} className="input-field text-sm">
-              <option value="">— Select —</option>
+              <option value="">— {t.select || 'Select'} —</option>
               {['Pune', 'Haveli', 'Khed', 'Baramati', 'Junnar', 'Shirur', 'Indapur', 'Daund', 'Mawal', 'Ambegaon', 'Purandhar', 'Bhor', 'Mulshi', 'Velhe'].map(tl => <option key={tl}>{tl}</option>)}
             </select>
           </div>
           <div className="flex items-end">
             <button type="submit" disabled={saving} className="btn-primary w-full justify-center text-sm py-2.5 disabled:opacity-60">
-              {saving ? <Loader2 size={14} className="animate-spin" /> : '+' } Create User
+              {saving ? <Loader2 size={14} className="animate-spin" /> : '+' } {t.createUser}
             </button>
           </div>
         </form>
       </div>
 
       <div className="card overflow-x-auto">
-        <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-4">All Users ({users.length})</h3>
+        <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-4">{t.allUsers} ({users.length})</h3>
         {loading ? <div className="flex justify-center py-8"><Loader2 size={24} className="animate-spin text-saffron-500" /></div> : (
           <table className="w-full text-sm">
             <thead><tr className="border-b border-gray-200 dark:border-gray-700 text-left">
-              {['Name','Mobile','Role','Taluka','Status','Created', 'Actions'].map(h => <th key={h} className="pb-2 text-xs text-gray-500 font-semibold pr-4">{h}</th>)}
+              {[t.name, t.mobile, t.role, t.taluka, t.status, t.date, t.actions].map(h => <th key={h} className="pb-2 text-xs text-gray-500 font-semibold pr-4">{h}</th>)}
             </tr></thead>
             <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
               {users.map(u => (
                 <tr key={u._id} className="hover:bg-gray-50 dark:hover:bg-gray-750">
                   <td className="py-2.5 pr-4 font-semibold text-gray-800 dark:text-gray-200">{u.name}</td>
                   <td className="py-2.5 pr-4 text-gray-600 dark:text-gray-400">{u.mobile}</td>
-                  <td className="py-2.5 pr-4"><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${u.role === 'super_admin' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : u.role === 'taluka_coordinator' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}>{u.role.replace(/_/g,' ')}</span></td>
+                  <td className="py-2.5 pr-4"><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${u.role === 'super_admin' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : u.role === 'taluka_coordinator' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}>{t.roles[u.role] || u.role}</span></td>
                   <td className="py-2.5 pr-4 text-gray-500 dark:text-gray-400">{u.taluka || '—'}</td>
                   <td className="py-2.5 pr-4">
                     <button onClick={() => handleToggleStatus(u._id)} className={`text-xs px-2 py-0.5 rounded-full ${u.isActive ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-600 hover:bg-red-200'}`}>
-                      {u.isActive ? 'Active' : 'Inactive'}
+                      {u.isActive ? t.active : t.inactive}
                     </button>
                   </td>
                   <td className="py-2.5 text-gray-400 text-xs">{new Date(u.createdAt).toLocaleDateString('en-IN')}</td>
@@ -849,24 +849,24 @@ function SettingsTab() {
         <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-4">{t.profileUpdate}</h3>
         <form onSubmit={handleUpdate} className="space-y-4">
           <div>
-            <label className="label">Full Name</label>
+            <label className="label">{t.name}</label>
             <input value={form.name} onChange={e => setForm(f => ({...f, name: e.target.value}))}
-              className="input-field max-w-sm" placeholder="Your name" required />
+              className="input-field max-w-sm" placeholder={t.name} required />
           </div>
 
           <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
-            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Change Password (Optional)</h4>
+            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{t.changePassword}</h4>
             <div className="space-y-3">
               <div>
-                <label className="label">Current Password</label>
+                <label className="label">{t.currentPassword}</label>
                 <input type="password" value={form.password} onChange={e => setForm(f => ({...f, password: e.target.value}))}
-                  className="input-field max-w-sm" placeholder="Leave blank to keep unchanged" />
+                  className="input-field max-w-sm" placeholder={t.passwordPlaceholder} />
               </div>
               {form.password && (
                 <div>
-                  <label className="label">New Password</label>
+                  <label className="label">{t.newPassword}</label>
                   <input type="password" value={form.newPassword} onChange={e => setForm(f => ({...f, newPassword: e.target.value}))}
-                    className="input-field max-w-sm" placeholder="Min 6 characters" required={!!form.password} minLength="6" />
+                    className="input-field max-w-sm" placeholder={t.minChars} required={!!form.password} minLength="6" />
                 </div>
               )}
             </div>
@@ -875,7 +875,7 @@ function SettingsTab() {
           <div className="pt-4">
             <button type="submit" disabled={saving} className="btn-primary py-2.5 px-6 disabled:opacity-60 flex items-center gap-2">
               {saving ? <Loader2 size={16} className="animate-spin" /> : <Settings size={16} />} 
-              Save Changes
+              {t.saveChanges}
             </button>
           </div>
         </form>
