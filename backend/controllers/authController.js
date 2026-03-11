@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
 
-const generateToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
+const generateToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET || 'SuperSecretKeyMLA2026', { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
 
 // POST /api/auth/login
 const login = async (req, res) => {
@@ -32,7 +32,8 @@ const login = async (req, res) => {
       user: { id: user._id, name: user.name, mobile: user.mobile, role: user.role, taluka: user.taluka },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error.' });
+    console.error('Login Error:', err.message || err);
+    res.status(500).json({ success: false, message: err.message || 'Server error.' });
   }
 };
 
