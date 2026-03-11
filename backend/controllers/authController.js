@@ -3,7 +3,10 @@ const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
 
-const generateToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET || 'SuperSecretKeyMLA2026', { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
+const getSecret = () => (process.env.JWT_SECRET && process.env.JWT_SECRET.trim() !== '') ? process.env.JWT_SECRET.trim() : 'SuperSecretKeyMLA2026';
+const getExpires = () => (process.env.JWT_EXPIRES_IN && process.env.JWT_EXPIRES_IN.trim() !== '') ? process.env.JWT_EXPIRES_IN.trim() : '7d';
+
+const generateToken = (id) => jwt.sign({ id }, getSecret(), { expiresIn: getExpires() });
 
 // POST /api/auth/login
 const login = async (req, res) => {

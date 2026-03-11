@@ -8,7 +8,8 @@ const authenticate = async (req, res, next) => {
   }
   const token = authHeader.split(' ')[1];
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'SuperSecretKeyMLA2026');
+    const secret = (process.env.JWT_SECRET && process.env.JWT_SECRET.trim() !== '') ? process.env.JWT_SECRET.trim() : 'SuperSecretKeyMLA2026';
+    const decoded = jwt.verify(token, secret);
     const user = await User.findById(decoded.id).select('-password');
     if (!user || !user.isActive) {
       return res.status(401).json({ success: false, message: 'Invalid or expired token.' });
