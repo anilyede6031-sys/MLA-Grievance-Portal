@@ -54,7 +54,9 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Static uploads
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+const uploadsPath = path.resolve(__dirname, 'uploads');
+if (!fs.existsSync(uploadsPath)) fs.mkdirSync(uploadsPath, { recursive: true });
+app.use('/uploads', express.static(uploadsPath));
 
 // Request Logger
 app.use((req, res, next) => {
@@ -68,6 +70,18 @@ app.use('/api/complaints', complaintRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ success: true, message: 'MLA Grievance API is running 🇮🇳' }));
+
+// DIAGNOSTIC: List uploads
+app.get('/api/debug-uploads', (req, res) => {
+  const uploadsDir = path.resolve(__dirname, 'uploads');
+  try {
+    if (!fs.existsSync(uploadsDir)) return res.json({ success: false, message: 'Uploads dir not found', path: uploadsDir });
+    const files = fs.readdirSync(uploadsDir);
+    res.json({ success: true, count: files.length, files, path: uploadsDir, cwd: process.cwd() });
+  } catch (err) {
+    res.json({ success: false, error: err.message });
+  }
+});
 
 // Error handler
 app.use((err, req, res, next) => {
