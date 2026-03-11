@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { FileText, Search, CheckCircle, Clock, AlertCircle, TrendingUp, ChevronRight, Phone } from 'lucide-react';
 import { useLang } from '../context/LangContext';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:10000';
+
 function AnimatedCounter({ target, duration = 2000 }) {
   const [count, setCount] = useState(0);
   const ref = useRef(false);
@@ -25,8 +27,25 @@ function AnimatedCounter({ target, duration = 2000 }) {
 
 export default function HomePage() {
   const { t } = useLang();
-  const [stats] = useState({ total: 428, pending: 87, inProgress: 112, resolved: 229 });
-  const [loading] = useState(false);
+  const [stats, setStats] = useState({ total: 0, pending: 0, inProgress: 0, resolved: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/complaints/public-stats`);
+        const data = await res.json();
+        if (data.success) {
+          setStats(data.stats);
+        }
+      } catch (err) {
+        console.error('Failed to fetch stats:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
 
   const statCards = [
     { label: t.totalComplaints, value: stats.total, icon: FileText, color: 'text-gov-navy', bg: 'bg-blue-50 dark:bg-blue-900/20' },

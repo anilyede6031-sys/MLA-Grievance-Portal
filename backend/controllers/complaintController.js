@@ -215,6 +215,25 @@ const complaintValidation = [
     .isLength({ max: 500 }).withMessage('Description cannot exceed 500 characters'),
 ];
 
+// GET /api/complaints/public-stats - Public
+const getPublicStats = async (req, res) => {
+  try {
+    const [total, pending, inProgress, resolved] = await Promise.all([
+      Complaint.countDocuments({}),
+      Complaint.countDocuments({ status: 'Pending' }),
+      Complaint.countDocuments({ status: 'In Progress' }),
+      Complaint.countDocuments({ status: 'Resolved' }),
+    ]);
+
+    res.json({
+      success: true,
+      stats: { total, pending, inProgress, resolved }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error.', error: err.message });
+  }
+};
+
 // POST /api/complaints/:id/reply - Public (Requires Complaint ID)
 const addCitizenReply = async (req, res) => {
   try {
@@ -249,4 +268,4 @@ const addCitizenReply = async (req, res) => {
   }
 };
 
-module.exports = { createComplaint, trackComplaint, getAllComplaints, getStats, updateComplaint, exportCSV, complaintValidation, addCitizenReply };
+module.exports = { createComplaint, trackComplaint, getAllComplaints, getStats, getPublicStats, updateComplaint, exportCSV, complaintValidation, addCitizenReply };
