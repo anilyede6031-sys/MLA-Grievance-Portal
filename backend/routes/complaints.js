@@ -68,9 +68,9 @@ const citizenUpload = multer({
 
 // Protected (Citizen/Admin)
 router.post('/', authenticate, upload.single('photo'), complaintValidation, createComplaint);
+router.post('/:id/reply', authenticate, citizenUpload.array('photos', 5), addCitizenReply);
 
 // Public
-router.post('/:id/reply', citizenUpload.array('photos', 5), addCitizenReply);
 router.get('/public-stats', getPublicStats);
 router.get('/track', trackComplaint);
 

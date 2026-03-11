@@ -2,7 +2,7 @@ const { body, validationResult } = require('express-validator');
 const Complaint = require('../models/Complaint');
 const { Parser } = require('json2csv');
 
-// POST /api/complaints - Public
+// POST /api/complaints - Protected (Citizen)
 const createComplaint = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });

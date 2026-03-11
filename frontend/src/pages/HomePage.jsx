@@ -55,63 +55,102 @@ export default function HomePage() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative bg-gradient-to-br from-gov-navy via-blue-900 to-blue-800 text-white overflow-hidden">
-        {/* Background pattern */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-0 left-0 w-96 h-96 rounded-full bg-saffron-500 -translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full bg-green-500 translate-x-1/2 translate-y-1/2" />
+      <section className="relative min-h-[500px] flex items-center bg-[#0a2444] text-white overflow-hidden py-20">
+        {/* Animated Background Gradients */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+          <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[60%] rounded-full bg-saffron-500/10 blur-[120px] animate-pulse" />
+          <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[60%] rounded-full bg-green-500/10 blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
+          <div className="grid lg:grid-cols-12 gap-12 items-center">
             {/* Text content */}
-            <div className="animate-slide-up">
-              <div className="inline-flex items-center gap-2 bg-saffron-500/20 border border-saffron-400/30 rounded-full px-4 py-1.5 text-saffron-300 text-sm font-medium mb-6">
-                🏛️ Government of Maharashtra
+            <div className="lg:col-span-7 animate-slide-up">
+              <div className="inline-flex items-center gap-2 bg-saffron-500/10 border border-saffron-400/20 backdrop-blur-md rounded-full px-4 py-1.5 text-saffron-400 text-sm font-semibold mb-8 shadow-sm">
+                <span className="flex h-2 w-2 rounded-full bg-saffron-500 animate-ping" />
+                🏛️ {t.mlaName} Office · Daund
               </div>
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight mb-4">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.1] mb-6 tracking-tight bg-gradient-to-r from-white via-white to-white/70 bg-clip-text text-transparent">
                 {t.welcome}
               </h1>
-              <p className="text-blue-200 text-lg mb-3 font-marathi">
+              <p className="text-xl md:text-2xl text-saffron-400 mb-4 font-marathi font-medium">
                 आपल्या समस्यांचे निराकरण आमची प्राथमिकता
               </p>
-              <p className="text-blue-300 mb-8 text-sm md:text-base leading-relaxed">
-                {t.welcomeSub}
+              <p className="text-blue-100/70 mb-10 text-base md:text-lg leading-relaxed max-w-xl">
+                {t.welcomeSub} Join thousands of citizens in Daund who are getting their grievances resolved swiftly and transparently through our official portal.
               </p>
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-5">
                 <Link to="/complaint"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-saffron-500 hover:bg-saffron-600 text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all">
-                  <FileText size={18} /> {t.fileComplaint}
+                  className="group inline-flex items-center gap-2 px-8 py-4 bg-saffron-500 hover:bg-saffron-600 text-white rounded-2xl font-bold shadow-[0_8px_30px_rgb(249,115,22,0.3)] hover:shadow-[0_8px_30px_rgb(249,115,22,0.5)] transition-all duration-300 transform hover:-translate-y-1">
+                  <FileText size={20} className="group-hover:scale-110 transition-transform" /> {t.fileComplaint}
                 </Link>
                 <Link to="/track"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-xl font-semibold transition-all">
-                  <Search size={18} /> {t.trackComplaint}
+                  className="group inline-flex items-center gap-2 px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 backdrop-blur-md text-white rounded-2xl font-bold transition-all duration-300 transform hover:-translate-y-1">
+                  <Search size={20} className="group-hover:scale-110 transition-transform" /> {t.trackComplaint}
                 </Link>
               </div>
 
-              <div className="mt-8 flex items-center gap-3 text-blue-300 text-sm">
-                <Phone size={14} />
-                <span>Constituency Office: Daund, Maharashtra</span>
+              <div className="mt-12 flex items-center gap-6">
+                <div className="flex -space-x-3">
+                  {[1,2,3,4].map(i => (
+                    <div key={i} className="w-10 h-10 rounded-full border-2 border-[#0a2444] bg-blue-900 flex items-center justify-center text-[10px] font-bold">
+                      {['👨', '👩', '👵', '👴'][i-1]}
+                    </div>
+                  ))}
+                </div>
+                <div className="text-sm text-blue-200/60">
+                  <span className="text-white font-bold">5,000+</span> citizens already registered
+                </div>
               </div>
             </div>
 
-            {/* MLA Photo placeholder */}
-            <div className="flex justify-center animate-fade-in">
+            {/* MLA Photo Card */}
+            <div className="lg:col-span-5 flex justify-center lg:justify-end animate-fade-in delay-200">
               <div className="relative">
-                <div className="w-64 h-80 md:w-72 md:h-96 rounded-2xl bg-gradient-to-b from-saffron-400/30 to-white/10 border-2 border-saffron-400/30 flex flex-col items-center justify-center shadow-2xl overflow-hidden">
-                  <div className="w-32 h-32 rounded-full border-4 border-white/80 shadow-lg mb-4 overflow-hidden bg-saffron-100 flex items-center justify-center">
-                    <img src="/mla-photo.png" alt={t.mlaName} className="w-full h-full object-cover object-top" />
+                {/* Decorative glow */}
+                <div className="absolute inset-0 bg-saffron-500/20 blur-[60px] rounded-full scale-110" />
+                
+                <div className="relative w-[320px] md:w-[380px] bg-white/5 backdrop-blur-xl border border-white/10 rounded-[40px] p-6 shadow-2xl overflow-hidden group">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-saffron-500/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:bg-saffron-500/20 transition-colors" />
+                  
+                  <div className="relative aspect-[4/5] rounded-[32px] overflow-hidden bg-gradient-to-b from-blue-900/50 to-transparent border border-white/5 mb-6">
+                    <img src="/mla-photo.png" alt={t.mlaName} className="w-full h-full object-cover object-top transform group-hover:scale-110 transition-transform duration-700" />
+                    
+                    {/* Badge on photo */}
+                    <div className="absolute bottom-4 left-4 right-4 bg-black/40 backdrop-blur-md border border-white/10 p-3 rounded-2xl flex items-center justify-between">
+                       <span className="text-[10px] uppercase tracking-widest font-bold text-saffron-400">Official Portal</span>
+                       <div className="flex h-1.5 w-1.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]" />
+                    </div>
                   </div>
-                  <p className="text-white font-bold text-lg text-center px-4">{t.mlaName}</p>
-                  <p className="text-saffron-300 text-sm font-marathi text-center px-4 mt-1">आमदार</p>
-                  <p className="text-blue-300 text-xs text-center px-4 mt-1">{t.constituency}</p>
-                  <div className="mt-4 px-4 py-2 bg-saffron-500/20 rounded-full">
-                    <p className="text-saffron-300 text-xs font-medium">Maharashtra Legislative Assembly</p>
+
+                  <div className="space-y-1 text-center">
+                    <h3 className="text-2xl font-extrabold text-white tracking-tight">{t.mlaName}</h3>
+                    <p className="text-saffron-400 font-marathi font-semibold">आमदार - दौंड मतदारसंघ</p>
+                    <p className="text-blue-300/60 text-xs font-medium uppercase tracking-[0.2em] pt-2">Maharashtra Legislative Assembly</p>
+                  </div>
+
+                  <div className="mt-8 grid grid-cols-2 gap-3">
+                    <div className="bg-white/5 rounded-2xl p-4 border border-white/5 text-center">
+                      <p className="text-xl font-bold text-white">100%</p>
+                      <p className="text-[10px] text-blue-300/40 uppercase font-bold tracking-wider mt-1">Response Rate</p>
+                    </div>
+                    <div className="bg-white/5 rounded-2xl p-4 border border-white/5 text-center">
+                      <p className="text-xl font-bold text-white">24/7</p>
+                      <p className="text-[10px] text-blue-300/40 uppercase font-bold tracking-wider mt-1">Online Support</p>
+                    </div>
                   </div>
                 </div>
-                {/* Decorative elements */}
-                <div className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-saffron-500 flex items-center justify-center text-lg">🇮🇳</div>
-                <div className="absolute -bottom-3 -left-3 w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white font-bold text-xs">MLA</div>
+
+                {/* Floating badge */}
+                <div className="absolute -bottom-6 -left-6 bg-white dark:bg-gray-800 text-gov-navy dark:text-white p-4 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-gray-100 dark:border-gray-700 animate-bounce transition-transform" style={{ animationDuration: '4s' }}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-saffron-100 dark:bg-saffron-900/30 flex items-center justify-center text-xl">🇮🇳</div>
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Digital India</p>
+                      <p className="text-sm font-extrabold">E-Governance</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

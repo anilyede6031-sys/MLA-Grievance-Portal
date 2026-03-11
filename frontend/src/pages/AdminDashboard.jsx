@@ -21,11 +21,11 @@ const statusConfig = {
   Rejected:      { class: 'badge-rejected',    icon: XCircle },
 };
 
-function StatCard({ label, value, color, loading }) {
+function StatCard({ label, value, color, loading, icon: Icon }) {
   return (
     <div className="card flex items-center gap-4 hover:shadow-md transition-shadow">
       <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color}`}>
-        <Icon size={22} className="text-white" />
+        {Icon && <Icon size={22} className="text-white" />}
       </div>
       <div>
         <p className="text-2xl font-extrabold text-gray-900 dark:text-white">{loading ? '…' : value}</p>
@@ -452,7 +452,7 @@ export default function AdminDashboard() {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h1 className="text-2xl font-extrabold text-gov-navy dark:text-white">{t.dashboard}</h1>
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">Overview of all grievances</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">{t.statsOverview}</p>
                 </div>
                 <button onClick={fetchStats} className="btn-outline py-2 px-4 text-sm">
                   <RefreshCw size={15} /> Refresh
@@ -464,21 +464,21 @@ export default function AdminDashboard() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 text-center">
                   <div className="bg-white/5 dark:bg-white/5 rounded-lg p-3 border border-white/5 hover:bg-white/10 transition-colors">
                     <p className="text-2xl md:text-3xl font-serif font-bold text-saffron-500 mb-1.5">{stats?.stats?.total?.toLocaleString('en-IN') || 0}</p>
-                    <p className="text-[11px] font-bold tracking-widest text-gray-300 uppercase">Total Complaints</p>
+                    <p className="text-[11px] font-bold tracking-widest text-gray-300 uppercase">{t.totalComplaintsLabel}</p>
                   </div>
                   <div className="bg-white/5 dark:bg-white/5 rounded-lg p-3 border border-white/5 hover:bg-white/10 transition-colors">
                     <p className="text-2xl md:text-3xl font-serif font-bold text-saffron-500 mb-1.5">{stats?.stats?.resolved?.toLocaleString('en-IN') || 0}</p>
-                    <p className="text-[11px] font-bold tracking-widest text-gray-300 uppercase">Resolved</p>
+                    <p className="text-[11px] font-bold tracking-widest text-gray-300 uppercase">{t.resolvedLabel}</p>
                   </div>
                   <div className="bg-white/5 dark:bg-white/5 rounded-lg p-3 border border-white/5 hover:bg-white/10 transition-colors">
                     <p className="text-2xl md:text-3xl font-serif font-bold text-saffron-500 mb-1.5">{stats?.stats?.inProgress?.toLocaleString('en-IN') || 0}</p>
-                    <p className="text-[11px] font-bold tracking-widest text-gray-300 uppercase">In Progress</p>
+                    <p className="text-[11px] font-bold tracking-widest text-gray-300 uppercase">{t.inProgressLabel}</p>
                   </div>
                   <div className="bg-white/5 dark:bg-white/5 rounded-lg p-3 border border-white/5 hover:bg-white/10 transition-colors">
                     <p className="text-2xl md:text-3xl font-serif font-bold text-saffron-500 mb-1.5">
                       {Math.round((stats?.stats?.resolved / (stats?.stats?.total || 1)) * 100) || 0}%
                     </p>
-                    <p className="text-[11px] font-bold tracking-widest text-gray-300 uppercase">Resolution %</p>
+                    <p className="text-[11px] font-bold tracking-widest text-gray-300 uppercase">{t.resolutionRate}</p>
                   </div>
                 </div>
               </div>
@@ -486,7 +486,7 @@ export default function AdminDashboard() {
               {/* === Departments Grid === */}
               {stats?.byDepartment?.length > 0 && (
                 <div className="mb-6">
-                  <h2 className="text-xl font-serif font-bold text-gov-navy dark:text-white mb-4">Departments</h2>
+                  <h2 className="text-xl font-serif font-bold text-gov-navy dark:text-white mb-4">{t.departmentsTitle}</h2>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {stats.byDepartment.map(d => {
                       let icon = '📁';
@@ -508,7 +508,7 @@ export default function AdminDashboard() {
                           <h3 className="font-bold text-gray-900 dark:text-white text-[13px] mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis w-full">{displayName}</h3>
                           <p className="text-[11px] text-gray-500 dark:text-gray-400 mb-2">{d.count} complaints</p>
                           <span className="inline-block bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                            {d.pending || 0} pending
+                            {d.pending || 0} {t.pendingLabel}
                           </span>
                         </div>
                       );
@@ -519,11 +519,11 @@ export default function AdminDashboard() {
 
               {/* Quick action */}
               <div className="card bg-saffron-50 dark:bg-saffron-900/20 border-saffron-200 dark:border-saffron-800">
-                <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-2">⚡ Quick Actions</h3>
+                <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-2">⚡ {t.quickActions}</h3>
                 <div className="flex flex-wrap gap-3">
-                  <button onClick={() => setTab('complaints')} className="btn-primary text-sm py-2">View All Complaints</button>
+                  <button onClick={() => setTab('complaints')} className="btn-primary text-sm py-2">{t.viewAllComplaints}</button>
                   {['super_admin', 'taluka_coordinator'].includes(user?.role) && (
-                    <button onClick={handleExport} className="btn-outline text-sm py-2"><Download size={14} /> Export Data</button>
+                    <button onClick={handleExport} className="btn-outline text-sm py-2"><Download size={14} /> {t.exportData}</button>
                   )}
                   <button onClick={() => setTab('analytics')} className="btn-secondary text-sm py-2"><BarChart2 size={14} /> Analytics</button>
                 </div>
@@ -621,8 +621,8 @@ function AnalyticsTab({ stats, loadingStats }) {
   return (
     <div className="animate-fade-in space-y-6">
       <div>
-        <h1 className="text-2xl font-extrabold text-gov-navy dark:text-white">Analytics Dashboard</h1>
-        <p className="text-gray-500 text-sm">Visual insights into grievance data</p>
+        <h1 className="text-2xl font-extrabold text-gov-navy dark:text-white">{t.analyticsTitle}</h1>
+        <p className="text-gray-500 text-sm">{t.resolutionInsights}</p>
       </div>
 
       {/* Summary pills */}
@@ -641,7 +641,7 @@ function AnalyticsTab({ stats, loadingStats }) {
       <div className="grid md:grid-cols-2 gap-6">
         {/* Department Bar Chart */}
         <div className="card">
-          <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-4">📊 Complaints by Department</h3>
+          <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-4">📊 {t.complaintsByDept}</h3>
           <div className="space-y-3">
             {stats.byDepartment?.map(d => (
               <div key={d._id}>
@@ -659,7 +659,7 @@ function AnalyticsTab({ stats, loadingStats }) {
 
         {/* Taluka Bar Chart */}
         <div className="card">
-          <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-4">🗺️ Complaints by Taluka</h3>
+          <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-4">🗺️ {t.complaintsByTaluka}</h3>
           <div className="space-y-3">
             {stats.byTaluka?.map(d => (
               <div key={d._id}>
@@ -679,7 +679,7 @@ function AnalyticsTab({ stats, loadingStats }) {
       {/* Monthly Trend */}
       {stats.monthly?.length > 0 && (
         <div className="card">
-          <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-4">📈 Monthly Complaint Trend</h3>
+          <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-4">📈 {t.monthlyTrend}</h3>
           <div className="flex items-end gap-3 h-40">
             {stats.monthly.map(m => (
               <div key={`${m._id.year}-${m._id.month}`} className="flex-1 flex flex-col items-center gap-1">
@@ -730,7 +730,7 @@ function UsersTab() {
 
       {/* Create user */}
       <div className="card">
-        <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-4">Create New User</h3>
+        <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-4">{t.createUserInfo}</h3>
         <form onSubmit={handleCreate} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <div><label className="label">Name</label><input value={form.name} onChange={e => setForm(f=>({...f,name:e.target.value}))} className="input-field text-sm" placeholder="Full name" required /></div>
           <div><label className="label">Mobile</label><input type="tel" value={form.mobile} onChange={e => setForm(f=>({...f,mobile:e.target.value}))} className="input-field text-sm" placeholder="10-digit mobile" maxLength={10} required /></div>
@@ -807,10 +807,10 @@ function SettingsTab() {
 
   return (
     <div className="animate-fade-in space-y-6 max-w-lg">
-      <h1 className="text-2xl font-extrabold text-gov-navy dark:text-white">Account Settings</h1>
+      <h1 className="text-2xl font-extrabold text-gov-navy dark:text-white">{t.settings}</h1>
       
       <div className="card">
-        <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-4">Update Profile Details</h3>
+        <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-4">{t.profileUpdate}</h3>
         <form onSubmit={handleUpdate} className="space-y-4">
           <div>
             <label className="label">Full Name</label>

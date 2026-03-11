@@ -126,7 +126,7 @@ export default function ComplaintForm() {
           <p className="font-marathi text-gray-600 dark:text-gray-400 mb-6">
             तक्रार नोंदवण्यासाठी कृपया आधी लॉग इन करा. (Please log in to register a complaint.)
           </p>
-          <button onClick={() => navigate('/login')} className="btn-primary w-full max-w-xs mx-auto justify-center">
+          <button onClick={() => navigate('/login')} className="btn-primary font-bold w-full max-w-xs mx-auto justify-center">
             Go to Login
           </button>
         </div>

@@ -143,6 +143,7 @@ function Navbar({ darkMode, setDarkMode }) {
 }
 
 export default function Layout({ children, darkMode, setDarkMode }) {
+  const { user } = useAuth();
   return (
     <div className={darkMode ? 'dark' : ''}>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col">
