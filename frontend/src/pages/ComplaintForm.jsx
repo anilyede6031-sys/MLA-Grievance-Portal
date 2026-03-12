@@ -37,13 +37,13 @@ export default function ComplaintForm() {
 
   const validate = () => {
     const errs = {};
-    if (!form.name.trim()) errs.name = t.required;
-    if (!form.mobile.match(/^[6-9]\d{9}$/)) errs.mobile = 'Enter valid 10-digit mobile number';
-    if (!form.village.trim()) errs.village = t.required;
-    if (!form.taluka) errs.taluka = t.required;
-    if (!form.department) errs.department = t.required;
-    if (!form.description.trim()) errs.description = 'Description is required';
-    else if (form.description.length > 500) errs.description = 'Description cannot exceed 500 characters';
+    if (!form.name.trim()) errs.name = t.required || 'Required';
+    if (!form.mobile.match(/^[6-9]\d{9}$/)) errs.mobile = t.mobilePlaceholder || 'Enter valid 10-digit mobile number';
+    if (!form.village.trim()) errs.village = t.required || 'Required';
+    if (!form.taluka) errs.taluka = t.required || 'Required';
+    if (!form.department) errs.department = t.required || 'Required';
+    if (!form.description.trim()) errs.description = t.required || 'Description is required';
+    else if (form.description.length > 500) errs.description = t.descriptionPlaceholder || 'Description cannot exceed 500 characters';
     return errs;
   };
 
@@ -68,7 +68,7 @@ export default function ComplaintForm() {
       setSuccess(res.data);
       toast.success(t.successSubmit);
     } catch (err) {
-      const msg = err.response?.data?.message || 'Submission failed. Please try again.';
+      const msg = err.response?.data?.message || t.updateError || 'Submission failed. Please try again.';
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -77,7 +77,7 @@ export default function ComplaintForm() {
 
   const copyId = () => {
     navigator.clipboard.writeText(success.complaintId);
-    toast.success('Complaint ID copied!');
+    toast.success(t.copySuccess || 'Complaint ID copied!');
   };
 
   if (success) {
@@ -88,7 +88,7 @@ export default function ComplaintForm() {
             <CheckCircle size={36} className="text-green-600" />
           </div>
           <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white mb-1">{t.successSubmit}</h2>
-          <p className="font-marathi text-green-700 dark:text-green-400 mb-6">आपली तक्रार यशस्वीरित्या नोंदवली गेली.</p>
+          <p className="font-marathi text-green-700 dark:text-green-400 mb-6">{t.successSubmitSub || 'आपली तक्रार यशस्वीरित्या नोंदवली गेली.'}</p>
 
           <div className="bg-saffron-50 dark:bg-saffron-900/20 border border-saffron-200 dark:border-saffron-700 rounded-xl p-5 mb-6">
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{t.complaintId}</p>
@@ -98,17 +98,17 @@ export default function ComplaintForm() {
                 <Copy size={16} className="text-saffron-500" />
               </button>
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">⚠️ Please save this ID to track your complaint</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">⚠️ {t.searchHint || 'Please save this ID to track your complaint'}</p>
           </div>
 
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 rounded-full text-sm font-semibold mb-6">
-            <AlertTriangle size={14} /> Status: Pending Review
+            <AlertTriangle size={14} /> {t.status}: {t.pending}
           </div>
 
           <div className="flex gap-3 justify-center">
-            <button onClick={() => navigate('/track')} className="btn-secondary">Track Complaint</button>
-                        <button onClick={() => { setSuccess(null); setForm({ name:'', mobile: user?.mobile || '', village:'', taluka:'', department:'', description:'' }); setPhoto(null); }}
-              className="btn-outline">File Another</button>
+            <button onClick={() => navigate('/track')} className="btn-secondary">{t.trackComplaint}</button>
+            <button onClick={() => { setSuccess(null); setForm({ name:'', mobile: user?.mobile || '', village:'', taluka:'', department:'', description:'' }); setPhoto(null); }}
+              className="btn-outline">{t.fileComplaint}</button>
           </div>
         </div>
       </div>
@@ -122,12 +122,12 @@ export default function ComplaintForm() {
           <div className="w-16 h-16 bg-saffron-100 dark:bg-saffron-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
             <Lock size={32} className="text-saffron-600" />
           </div>
-          <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white mb-2">Login Required</h2>
+          <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white mb-2">{t.loginRequired}</h2>
           <p className="font-marathi text-gray-600 dark:text-gray-400 mb-6">
-            तक्रार नोंदवण्यासाठी कृपया आधी लॉग इन करा. (Please log in to register a complaint.)
+            {t.loginRequiredSub}
           </p>
           <button onClick={() => navigate('/login')} className="btn-primary font-bold w-full max-w-xs mx-auto justify-center">
-            Go to Login
+            {t.goToLogin}
           </button>
         </div>
       </div>
@@ -141,8 +141,8 @@ export default function ComplaintForm() {
         <div className="inline-flex items-center gap-2 bg-saffron-100 dark:bg-saffron-900/30 text-saffron-700 dark:text-saffron-400 px-4 py-1.5 rounded-full text-sm font-semibold mb-3">
           📝 {t.fileComplaint}
         </div>
-        <h1 className="text-3xl font-extrabold text-gov-navy dark:text-white mb-1">Submit Your Complaint</h1>
-        <p className="font-marathi text-gray-500 dark:text-gray-400">आपली तक्रार येथे नोंदवा</p>
+        <h1 className="text-3xl font-extrabold text-gov-navy dark:text-white mb-1">{t.submitComplaintTitle}</h1>
+        <p className="font-marathi text-gray-500 dark:text-gray-400">{t.submitComplaintSub}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="card space-y-5">
@@ -152,7 +152,7 @@ export default function ComplaintForm() {
             <label className="label">{t.name} *</label>
             <input name="name" value={form.name} onChange={handleChange}
               className={`input-field ${errors.name ? 'border-red-400' : ''}`}
-              placeholder="Enter full name" />
+              placeholder={t.namePlaceholder} />
             {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
           </div>
           <div>
@@ -161,14 +161,14 @@ export default function ComplaintForm() {
               <input name="mobile" value={form.mobile} onChange={mobileReadOnly ? undefined : handleChange}
                 maxLength={10} readOnly={mobileReadOnly}
                 className={`input-field ${errors.mobile ? 'border-red-400' : ''} ${mobileReadOnly ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 cursor-not-allowed pr-28' : ''}`}
-                placeholder="10-digit mobile number" />
+                placeholder={t.mobilePlaceholder} />
               {mobileReadOnly && (
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 text-xs bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full font-semibold">
-                  <Lock size={10} /> Verified
+                  <Lock size={10} /> {t.verified || 'Verified'}
                 </span>
               )}
             </div>
-            {mobileReadOnly && <p className="text-xs text-green-600 dark:text-green-400 mt-1">🔒 Mobile locked to your login account</p>}
+            {mobileReadOnly && <p className="text-xs text-green-600 dark:text-green-400 mt-1">🔒 {t.mobileLocked}</p>}
             {errors.mobile && <p className="text-red-500 text-xs mt-1">{errors.mobile}</p>}
           </div>
         </div>
@@ -179,14 +179,14 @@ export default function ComplaintForm() {
             <label className="label">{t.village} *</label>
             <input name="village" value={form.village} onChange={handleChange}
               className={`input-field ${errors.village ? 'border-red-400' : ''}`}
-              placeholder="Enter your village name" />
+              placeholder={t.villagePlaceholder} />
             {errors.village && <p className="text-red-500 text-xs mt-1">{errors.village}</p>}
           </div>
           <div>
             <label className="label">{t.taluka} *</label>
             <select name="taluka" value={form.taluka} onChange={handleChange}
               className={`input-field ${errors.taluka ? 'border-red-400' : ''}`}>
-              <option value="">— Select Taluka —</option>
+              <option value="">— {t.selectTaluka} —</option>
               {TALUKAS.map(tl => <option key={tl} value={tl}>{tl}</option>)}
             </select>
             {errors.taluka && <p className="text-red-500 text-xs mt-1">{errors.taluka}</p>}
@@ -212,7 +212,7 @@ export default function ComplaintForm() {
           <label className="label">{t.description} * <span className="text-gray-400 text-xs">(max 500 chars)</span></label>
           <textarea name="description" value={form.description} onChange={handleChange} rows={4}
             className={`input-field resize-none ${errors.description ? 'border-red-400' : ''}`}
-            placeholder="Describe your complaint in detail..." />
+            placeholder={t.descriptionPlaceholder} />
           <div className="flex justify-between mt-1">
             {errors.description ? <p className="text-red-500 text-xs">{errors.description}</p> : <span />}
             <p className={`text-xs ${form.description.length > 500 ? 'text-red-500 font-bold' : 'text-gray-500'}`}>{form.description.length} / 500</p>
@@ -221,7 +221,7 @@ export default function ComplaintForm() {
 
         {/* Photo Upload */}
         <div>
-          <label className="label">add Upload Photo <span className="text-gray-400 text-xs">(Optional)</span></label>
+          <label className="label">{t.photo} <span className="text-gray-400 text-xs">({t.optional || 'Optional'})</span></label>
           <div {...getRootProps()} className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all
             ${isDragActive ? 'border-saffron-400 bg-saffron-50 dark:bg-saffron-900/20' : 'border-gray-300 dark:border-gray-600 hover:border-saffron-300'}`}>
             <input {...getInputProps()} />
@@ -240,8 +240,8 @@ export default function ComplaintForm() {
             ) : (
               <div>
                 <Upload size={28} className="mx-auto text-gray-400 mb-2" />
-                <p className="text-sm text-gray-500 dark:text-gray-400">Drag & drop or <span className="text-saffron-500 font-semibold">click to upload</span></p>
-                <p className="text-xs text-gray-400 mt-1">JPG, PNG, PDF up to 15MB</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{t.dragDropHint}</p>
+                <p className="text-xs text-gray-400 mt-1">{t.fileLimitInfo}</p>
               </div>
             )}
           </div>
@@ -250,11 +250,11 @@ export default function ComplaintForm() {
         {/* Submit */}
         <button type="submit" disabled={loading}
           className="btn-primary w-full justify-center py-3 text-base disabled:opacity-60 disabled:cursor-not-allowed">
-          {loading ? <><Loader2 size={18} className="animate-spin" /> Submitting...</> : <><CheckCircle size={18} /> {t.submit}</>}
+          {loading ? <><Loader2 size={18} className="animate-spin" /> {t.submitting}</> : <><CheckCircle size={18} /> {t.submit}</>}
         </button>
 
         <p className="text-center text-xs text-gray-400">
-          By submitting, you agree that this is a genuine complaint. False complaints may result in legal action.
+          {t.genuineComplaintWarning}
         </p>
       </form>
     </div>

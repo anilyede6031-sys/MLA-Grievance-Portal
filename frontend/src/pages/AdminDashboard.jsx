@@ -9,17 +9,13 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
 import api from '../utils/api';
+import { getPhotoUrl, formatDate, formatDateTime } from '../utils/helpers';
 
 const TALUKAS = ['','Pune', 'Haveli', 'Khed', 'Baramati', 'Junnar', 'Shirur', 'Indapur', 'Daund', 'Mawal', 'Ambegaon', 'Purandhar', 'Bhor', 'Mulshi', 'Velhe'];
 const DEPARTMENTS = ['','Road','Water','Electricity','Revenue','Police','Health','Education','Agriculture','Other'];
 const STATUSES = ['','Pending','In Progress','Resolved','Rejected'];
 
-const getPhotoUrl = (ph) => {
-  if (!ph) return '';
-  if (ph.startsWith('http')) return ph;
-  const base = api.defaults.baseURL.replace(/\/api\/?$/, '');
-  return `${base}/${ph.replace(/\\/g, '/')}`.replace(/([^:])\/\//g, '$1/');
-};
+// getPhotoUrl moved to helpers.js
 
 const statusConfig = {
   Pending:       { class: 'badge-pending',     icon: Clock },
@@ -60,7 +56,7 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
     const ed = editing[id] || {};
     // Nothing actually changed
     if (!files?.length && Object.keys(ed).length === 0) {
-      toast.error('No changes to save.');
+      toast.error(t.noChangesError || 'No changes to save.');
       return;
     }
     setSaving(s => ({ ...s, [id]: true }));
@@ -74,14 +70,14 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
       } else {
         await api.patch(`/complaints/${id}`, ed);
       }
-      toast.success('Updated successfully!');
+      toast.success(t.updateSuccess || 'Updated successfully!');
       setEditing(e => { const n = {...e}; delete n[id]; return n; });
       setAdminPhotoFiles(f => { const n = {...f}; delete n[id]; return n; });
       // Refresh parent list; if modal is open for this complaint, close it so stale data isn't shown
       if (viewing?._id === id) setViewing(null);
       onUpdate();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Update failed. Please try again.');
+      toast.error(err.response?.data?.message || t.updateError || 'Update failed. Please try again.');
     } finally {
       setSaving(s => ({ ...s, [id]: false }));
     }
@@ -98,7 +94,7 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
       <table className="w-full text-sm">
         <thead>
           <tr className="bg-gov-navy text-white">
-            {[t.complaintId, t.name, t.village, t.taluka, t.department, t.description, t.date, t.status, t.remarks, t.photo, 'Reply Photos', t.actions].map(h => (
+            {[t.complaintId, t.name, t.village, t.taluka, t.department, t.description, t.date, t.status, t.remarks, t.photo, t.citizenReplyPhotos || 'Reply Photos', t.actions].map(h => (
               <th key={h} className="px-2 py-3 text-left font-semibold text-xs whitespace-nowrap">{h}</th>
             ))}
           </tr>
@@ -129,14 +125,14 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
                   <span className="block truncate max-w-[150px]">{c.description}</span>
                 </td>
                 <td className="px-2 py-2 text-gray-500 dark:text-gray-400 text-xs whitespace-nowrap">
-                  {new Date(c.createdAt).toLocaleDateString('en-IN')}
+                  {formatDate(c.createdAt)}
                 </td>
                 <td className="px-2 py-2">
                   <select
                     value={ed.status ?? c.status}
                     onChange={e => handleStatusChange(c._id, 'status', e.target.value)}
                     className="text-xs border border-gray-200 dark:border-gray-600 rounded-lg px-1.5 py-1 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-1 focus:ring-saffron-400">
-                    {['Pending','In Progress','Resolved','Rejected'].map(s => <option key={s}>{s}</option>)}
+                    {['Pending','In Progress','Resolved','Rejected'].map(s => <option key={s}>{t[s.toLowerCase().replace(' ', '')] || s}</option>)}
                   </select>
                 </td>
                 <td className="px-2 py-2">
@@ -151,7 +147,7 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
                     <a href={getPhotoUrl(c.photo)} 
                        target="_blank" rel="noreferrer" 
                        className="text-saffron-500 hover:text-saffron-600 font-semibold text-xs underline inline-flex items-center gap-1 bg-saffron-50 dark:bg-saffron-900/30 px-1.5 py-1 rounded-md whitespace-nowrap">
-                      <Eye size={11}/> View
+                      <Eye size={11}/> {t.view || 'View'}
                     </a>
                   ) : <span className="text-gray-400 text-xs italic">—</span>}
                 </td>
@@ -161,7 +157,7 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
                       onClick={() => setViewingReplies(c)}
                       className="inline-flex items-center gap-1 text-xs bg-amber-500 hover:bg-amber-600 text-white px-2 py-1 rounded-md font-semibold transition-colors whitespace-nowrap"
                     >
-                      <MessageSquare size={10} /> {c.citizenPhotos.length} Reply
+                      <MessageSquare size={10} /> {c.citizenPhotos.length} {t.reply || 'Reply'}
                     </button>
                   ) : (
                     <span className="text-gray-400 text-xs italic">—</span>
@@ -179,7 +175,7 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
                       <button onClick={() => handleSave(c._id)} disabled={saving[c._id]}
                         className="text-xs bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded font-semibold transition-colors disabled:opacity-60 whitespace-nowrap flex items-center gap-0.5">
                         {saving[c._id] ? <Loader2 size={10} className="animate-spin" /> : <CheckCircle size={10} />}
-                        Save
+                        {t.saveChanges || 'Save'}
                       </button>
                     </div>
                   ) : (
@@ -187,7 +183,7 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
                      <span className={`${cfg.class} flex items-center gap-1 text-xs`}>
                        <StatusIcon size={10} /> {c.status}
                      </span>
-                     <button onClick={() => setViewing(c)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors text-gray-500 hover:text-saffron-500" title="View Details">
+                     <button onClick={() => setViewing(c)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors text-gray-500 hover:text-saffron-500" title={t.viewDetails}>
                        <Eye size={15} />
                      </button>
                     </div>
@@ -204,7 +200,7 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
           <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 animate-slide-up" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-start mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
               <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{t.complaintId} Details</h3>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{t.details}</h3>
                 <p className="text-sm text-gray-500 font-mono font-semibold text-saffron-600">{viewing.complaintId}</p>
               </div>
               <button onClick={() => setViewing(null)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-500 transition-colors">
@@ -223,7 +219,7 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
                     {viewing.department}
                   </span>
                 </div>
-                <div><span className="text-gray-500 block mb-0.5">{t.date} Filed</span><span className="font-semibold text-gray-800 dark:text-gray-200">{new Date(viewing.createdAt).toLocaleString('en-IN')}</span></div>
+                  <div><span className="text-gray-500 block mb-0.5">{t.date} {t.submitted}</span><span className="font-semibold text-gray-800 dark:text-gray-200">{formatDateTime(viewing.createdAt)}</span></div>
               </div>
               
               <div>
@@ -235,7 +231,7 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
 
               {viewing.photo && (
                 <div>
-                  <span className="text-gray-700 dark:text-gray-300 font-bold block mb-2 text-sm flex items-center gap-2"><Eye size={16} /> Citizen Uploaded {t.photo}</span>
+                  <span className="text-gray-700 dark:text-gray-300 font-bold block mb-2 text-sm flex items-center gap-2"><Eye size={16} /> {t.citizenUploaded} {t.photo}</span>
                   <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex justify-center p-2">
                     <img src={getPhotoUrl(viewing.photo)} 
                          alt="Complaint attachment" 
@@ -247,7 +243,7 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
               {Array.isArray(viewing.adminPhotos) && viewing.adminPhotos.length > 0 && (
                 <div>
                   <span className="text-gray-700 dark:text-gray-300 font-bold block mb-3 text-sm flex items-center gap-2">
-                    📎 Admin Reply Photos
+                    📎 {t.adminReplyPhotos}
                     <span className="text-xs bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full font-semibold">{viewing.adminPhotos.length}/5</span>
                   </span>
                   <div className="grid grid-cols-2 gap-3">
@@ -261,11 +257,11 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
                                  className="w-full h-40 object-cover hover:opacity-90 transition-opacity" />
                           </a>
                           <div className="flex items-center gap-2 px-2 py-1.5">
-                            <span className="text-xs text-indigo-500 font-semibold flex-1">Photo {idx+1}</span>
+                            <span className="text-xs text-indigo-500 font-semibold flex-1">CMS-{idx+1}</span>
                             <a href={url} target="_blank" rel="noreferrer"
-                               className="text-[10px] text-indigo-500 underline hover:text-indigo-700">🔍 View</a>
+                               className="text-[10px] text-indigo-500 underline hover:text-indigo-700">🔍 {t.view || 'View'}</a>
                             <a href={url} download
-                               className="inline-flex items-center gap-0.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-semibold px-2 py-0.5 rounded transition-colors">⬇ Save</a>
+                               className="inline-flex items-center gap-0.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-semibold px-2 py-0.5 rounded transition-colors">⬇ {t.save || 'Save'}</a>
                           </div>
                         </div>
                       );
@@ -277,7 +273,7 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
               {Array.isArray(viewing.citizenPhotos) && viewing.citizenPhotos.length > 0 && (
                 <div>
                   <span className="text-gray-700 dark:text-gray-300 font-bold block mb-3 text-sm flex items-center gap-2">
-                    📤 Citizen Reply Photos
+                    📤 {t.citizenReplyPhotos}
                     <span className="text-xs bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-full font-semibold">{viewing.citizenPhotos.length}/5</span>
                   </span>
                   <div className="grid grid-cols-2 gap-3">
@@ -318,7 +314,7 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
           <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 animate-slide-up" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-start mb-5 border-b border-gray-100 dark:border-gray-700 pb-4">
               <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">📤 Citizen Reply Photos</h3>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">📤 {t.citizenReplyPhotos}</h3>
                 <p className="text-sm font-mono font-semibold text-amber-600 mt-0.5">{viewingReplies.complaintId}</p>
                 <p className="text-sm text-gray-400 mt-0.5">📱 {viewingReplies.mobile} &nbsp;&bull;&nbsp; {viewingReplies.name}</p>
               </div>
@@ -336,9 +332,9 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
                       <img src={url} alt={`Citizen reply ${idx + 1}`} className="w-full h-48 object-cover hover:opacity-90 transition-opacity" />
                     </a>
                     <div className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800">
-                      <span className="text-xs text-amber-600 font-bold flex-1">Photo {idx + 1}</span>
-                      <a href={url} target="_blank" rel="noreferrer" className="text-[10px] text-amber-600 underline hover:text-amber-700">🔍 View</a>
-                      <a href={url} download className="inline-flex items-center gap-0.5 bg-amber-600 hover:bg-amber-700 text-white text-[10px] font-semibold px-2 py-0.5 rounded transition-colors">⬇ Save</a>
+                      <span className="text-xs text-amber-600 font-bold flex-1">IMG-{idx + 1}</span>
+                      <a href={url} target="_blank" rel="noreferrer" className="text-[10px] text-amber-600 underline hover:text-amber-700">🔍 {t.view || 'View'}</a>
+                      <a href={url} download className="inline-flex items-center gap-0.5 bg-amber-600 hover:bg-amber-700 text-white text-[10px] font-semibold px-2 py-0.5 rounded transition-colors">⬇ {t.save || 'Save'}</a>
                     </div>
                   </div>
                 );
@@ -408,8 +404,8 @@ export default function AdminDashboard() {
       const r = await api.get('/complaints/export', { params, responseType: 'blob' });
       const url = URL.createObjectURL(new Blob([r.data]));
       const a = document.createElement('a'); a.href = url; a.download = 'complaints.csv'; a.click();
-      toast.success('CSV exported!');
-    } catch { toast.error('Export failed.'); }
+      toast.success(t.exportSuccess || 'CSV exported!');
+    } catch { toast.error(t.exportError || 'Export failed.'); }
   };
 
   const handleLogout = () => { logout(); navigate('/'); };
@@ -520,7 +516,7 @@ export default function AdminDashboard() {
                         <div key={d._id} className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border-t-[3px] ${colorClass} p-4 text-center hover:shadow-md transition-shadow group flex flex-col items-center justify-center`}>
                           <div className="text-3xl mb-2 transform group-hover:scale-110 transition-transform">{icon}</div>
                           <h3 className="font-bold text-gray-900 dark:text-white text-[13px] mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis w-full">{displayName}</h3>
-                          <p className="text-[11px] text-gray-500 dark:text-gray-400 mb-2">{d.count} complaints</p>
+                          <p className="text-[11px] text-gray-500 dark:text-gray-400 mb-2">{d.count} {t.items || 'complaints'}</p>
                           <span className="inline-block bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-[10px] font-bold px-2 py-0.5 rounded-full">
                             {d.pending || 0} {t.pending}
                           </span>
@@ -539,7 +535,7 @@ export default function AdminDashboard() {
                   {['super_admin', 'taluka_coordinator'].includes(user?.role) && (
                     <button onClick={handleExport} className="btn-outline text-sm py-2"><Download size={14} /> {t.exportData}</button>
                   )}
-                  <button onClick={() => setTab('analytics')} className="btn-secondary text-sm py-2"><BarChart2 size={14} /> Analytics</button>
+                  <button onClick={() => setTab('analytics')} className="btn-secondary text-sm py-2"><BarChart2 size={14} /> {t.analytics}</button>
                 </div>
               </div>
             </div>
@@ -551,7 +547,7 @@ export default function AdminDashboard() {
               <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
                 <div>
                   <h1 className="text-2xl font-extrabold text-gov-navy dark:text-white">{t.manageComplaints}</h1>
-                  <p className="text-gray-500 text-sm">{total} total complaints</p>
+                  <p className="text-gray-500 text-sm">{total} {t.total} {t.items || 'complaints'}</p>
                 </div>
                 <div className="flex gap-2 flex-wrap">
                   <button onClick={fetchComplaints} className="btn-outline py-2 px-3 text-sm"><RefreshCw size={14} /> {t.refresh}</button>
@@ -734,7 +730,7 @@ function UsersTab() {
     setSaving(true);
     try {
       await api.post('/auth/register', form);
-      toast.success('User created!');
+      toast.success(t.userCreated || 'User created!');
       setForm({ name:'', mobile:'', password:'', role:'data_entry_operator', taluka:'' });
       fetchUsers();
     } catch (err) { toast.error(err.response?.data?.message || 'Failed.'); }
@@ -750,10 +746,10 @@ function UsersTab() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
+    if (!window.confirm(t.deleteConfirm || 'Are you sure you want to delete this user?')) return;
     try {
       await api.delete(`/auth/users/${id}`);
-      toast.success('User deleted');
+      toast.success(t.userDeleted || 'User deleted');
       fetchUsers();
     } catch (err) { toast.error('Delete failed'); }
   };

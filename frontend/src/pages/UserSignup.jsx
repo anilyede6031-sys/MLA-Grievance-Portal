@@ -6,6 +6,8 @@ import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
 import api from '../utils/api';
 
+const TALUKAS = ['Pune', 'Haveli', 'Khed', 'Baramati', 'Junnar', 'Shirur', 'Indapur', 'Daund', 'Mawal', 'Ambegaon', 'Purandhar', 'Bhor', 'Mulshi', 'Velhe'];
+
 export default function UserSignup() {
   const { login } = useAuth();
   const { t } = useLang();
@@ -61,7 +63,7 @@ export default function UserSignup() {
               <label className="label">Taluka (Optional)</label>
               <select value={form.taluka} onChange={e => setForm(f => ({...f, taluka: e.target.value}))} className="input-field">
                 <option value="">— Select Taluka —</option>
-                {t.talukas.map(tl => <option key={tl} value={tl}>{tl}</option>)}
+                {TALUKAS.map(tl => <option key={tl} value={tl}>{tl}</option>)}
               </select>
             </div>
             <div>

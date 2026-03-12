@@ -19,11 +19,16 @@ app.set('trust proxy', 1);
 if (!fs.existsSync('uploads')) fs.mkdirSync('uploads');
 
 // Security middleware
-app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+app.use(helmet({ 
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  crossOriginEmbedderPolicy: false // Allow cross-origin images and resources
+}));
+
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   'https://rahulkulmla.com',
   'https://www.rahulkulmla.com',
+  'https://mla-grievance-portal.vercel.app', // Added Vercel app domain
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:3000',
@@ -33,10 +38,8 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, Postman, curl)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    callback(new Error(`CORS: origin ${origin} not allowed`));
+    // Allow all origins for now as per user request to 'allow all permissions'
+    callback(null, true);
   },
   credentials: true,
 }));
@@ -44,7 +47,7 @@ app.use(cors({
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 1000, // Increased from 100 to 1000 for 'all permissions'
   message: { success: false, message: 'Too many requests, please try again later.' },
 });
 app.use('/api/', limiter);

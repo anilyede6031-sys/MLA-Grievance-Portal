@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { useLang } from '../context/LangContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
+import { getPhotoUrl, formatDate } from '../utils/helpers';
 
 const statusConfig = {
   Pending:     { label: 'Pending',     mr: 'प्रलंबित',    icon: Clock,        class: 'badge-pending' },
@@ -13,7 +14,7 @@ const statusConfig = {
 };
 
 export default function TrackPage() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const { user } = useAuth();
   const [query, setQuery] = useState('');
   const [complaints, setComplaints] = useState([]);
@@ -45,18 +46,18 @@ export default function TrackPage() {
   }, [user]);
 
   const handleSearch = async () => {
-    if (!query.trim()) { toast.error('Enter Complaint ID or Mobile Number'); return; }
+    if (!query.trim()) { toast.error(t.searchHint || 'Enter Complaint ID or Mobile Number'); return; }
     
     const isId = query.startsWith('GRV-');
 
     // Privacy frontend validation
     if (!isId) {
       if (!user) {
-        toast.error('Privacy restricted: Please login to track complaints by mobile number.');
+        toast.error(t.mobileOwnershipError || 'You must be logged in to search by mobile number.');
         return;
       }
       if (user.role === 'citizen' && query !== user.mobile) {
-        toast.error('Privacy restricted: You can only search your own mobile number.');
+        toast.error(t.privacyError || 'Privacy restricted: You can only search your own mobile number.');
         return;
       }
     }
@@ -71,7 +72,7 @@ export default function TrackPage() {
     } catch (err) {
       if (err.response?.status === 404) { setComplaints([]); setSearched(true); }
       else if (err.response?.status === 403) { toast.error(err.response.data.message); }
-      else toast.error('Error fetching data. Please try again.');
+      else toast.error(t.updateError || 'Error fetching data. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -79,7 +80,7 @@ export default function TrackPage() {
 
   const handleReplySubmit = async (complaintId) => {
     const files = replyFiles[complaintId] || [];
-    if (files.length === 0) return toast.error('Please select at least one photo to reply.');
+    if (files.length === 0) return toast.error(t.atLeastOnePhotoError || 'Please select at least one photo to reply.');
     
     const formData = new FormData();
     files.forEach(f => formData.append('photos', f));
@@ -89,7 +90,7 @@ export default function TrackPage() {
       const res = await api.post(`/complaints/${complaintId}/reply`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      toast.success('Reply submitted successfully!');
+      toast.success(t.replySuccess || 'Reply submitted successfully!');
       
       // Update local state to show the new photos immediately
       setComplaints(prev => prev.map(c => {
@@ -100,7 +101,7 @@ export default function TrackPage() {
       }));
       setReplyFiles(prev => ({ ...prev, [complaintId]: [] }));
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Error uploading reply.');
+      toast.error(err.response?.data?.message || t.updateError || 'Error uploading reply.');
     } finally {
       setReplying(prev => ({ ...prev, [complaintId]: false }));
     }
@@ -113,29 +114,29 @@ export default function TrackPage() {
           🔍 {t.trackComplaint}
         </div>
         <h1 className="text-3xl font-extrabold text-gov-navy dark:text-white mb-1">
-          {user?.role === 'citizen' ? 'My Complaints' : 'Track Your Complaint'}
+          {user?.role === 'citizen' ? t.viewMyComplaints : t.trackComplaint}
         </h1>
         <p className="font-marathi text-gray-500 dark:text-gray-400">
-          {user?.role === 'citizen' ? 'माझ्या तक्रारी' : 'आपल्या तक्रारीची स्थिती तपासा'}
+          {user?.role === 'citizen' ? t.viewMyComplaints : t.trackComplaint}
         </p>
       </div>
 
       {/* Search Card */}
       <div className="card mb-8">
-        <label className="label text-base mb-2">Complaint ID or Mobile Number</label>
+        <label className="label text-base mb-2">{t.complaintId} or {t.mobile}</label>
         <div className="flex gap-3">
           <input value={query} onChange={e => setQuery(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSearch()}
             className="input-field flex-1 text-base"
-            placeholder="e.g. GRV-ABC123-XY or 9876543210" />
+            placeholder={t.searchHint} />
           <button onClick={handleSearch} disabled={loading}
             className="btn-primary px-6 py-2.5 disabled:opacity-60">
             <Search size={18} />
-            {loading ? 'Searching...' : 'Search'}
+            {loading ? t.searching || 'Searching...' : t.search}
           </button>
         </div>
         <div className="flex justify-between items-center mt-2">
-          <p className="text-xs text-gray-400">💡 Enter the 10-digit mobile or Complaint ID received after submission</p>
+          <p className="text-xs text-gray-400">💡 {t.searchHint}</p>
           {user?.role === 'citizen' && (
             <button onClick={() => { 
                 setQuery(''); 
@@ -143,7 +144,7 @@ export default function TrackPage() {
                 setSearched(false); 
               }} 
               className="text-xs font-semibold text-blue-600 hover:underline">
-              View My Complaints
+              {t.viewMyComplaints}
             </button>
           )}
         </div>
@@ -155,12 +156,12 @@ export default function TrackPage() {
           {complaints.length === 0 ? (
             <div className="card text-center py-12">
               <AlertTriangle size={48} className="mx-auto text-yellow-400 mb-4" />
-              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-1">No complaints found</h3>
-              <p className="text-gray-500 dark:text-gray-400">No complaints found for this ID or mobile number.</p>
+              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-1">{t.noComplaintsTitle}</h3>
+              <p className="text-gray-500 dark:text-gray-400">{t.noComplaintsSub}</p>
             </div>
           ) : (
             <div className="space-y-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{complaints.length} complaint(s) found</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{complaints.length} {t.complaintsFoundLabel}</p>
               {complaints.map(c => {
                 const cfg = statusConfig[c.status] || statusConfig.Pending;
                 const StatusIcon = cfg.icon;
@@ -181,7 +182,7 @@ export default function TrackPage() {
                     {/* Progress bar */}
                     <div className="mb-4">
                       <div className="flex justify-between text-xs text-gray-500 mb-1">
-                        <span>Submitted</span><span>In Progress</span><span>Resolved</span>
+                        <span>{t.submitted}</span><span>{t.inProgress}</span><span>{t.resolved}</span>
                       </div>
                       <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                         <div className={`h-full rounded-full transition-all duration-500 ${
@@ -195,11 +196,11 @@ export default function TrackPage() {
                     {/* Details grid */}
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm mb-4">
                       {[
-                        { label: 'Village', value: c.village },
-                        { label: 'Taluka', value: c.taluka },
-                        { label: 'Department', value: c.department },
-                        { label: 'Filed On', value: new Date(c.createdAt).toLocaleDateString('en-IN') },
-                        c.resolvedAt && { label: 'Resolved On', value: new Date(c.resolvedAt).toLocaleDateString('en-IN') },
+                        { label: t.village, value: c.village },
+                        { label: t.taluka, value: c.taluka },
+                        { label: t.department, value: c.department },
+                        { label: t.filedOn, value: formatDate(c.createdAt) },
+                        c.resolvedAt && { label: t.resolvedOn, value: formatDate(c.resolvedAt) },
                       ].filter(Boolean).map(({ label, value }) => (
                         <div key={label} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2.5">
                           <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
@@ -210,7 +211,7 @@ export default function TrackPage() {
 
                     {/* Description */}
                     <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 mb-3">
-                      <p className="text-xs text-gray-500 mb-1 font-medium">Complaint Description</p>
+                      <p className="text-xs text-gray-500 mb-1 font-medium">{t.description}</p>
                       <p className="text-sm text-gray-700 dark:text-gray-300">{c.description}</p>
                     </div>
 
@@ -219,7 +220,7 @@ export default function TrackPage() {
                       <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3 flex gap-2">
                         <CheckCircle size={16} className="text-green-500 flex-shrink-0 mt-0.5" />
                         <div>
-                          <p className="text-xs font-semibold text-green-700 dark:text-green-400">Admin Remarks</p>
+                          <p className="text-xs font-semibold text-green-700 dark:text-green-400">{t.adminRemarks}</p>
                           <p className="text-sm text-green-800 dark:text-green-300">{c.remarks}</p>
                         </div>
                       </div>
@@ -229,13 +230,13 @@ export default function TrackPage() {
                     {Array.isArray(c.adminPhotos) && c.adminPhotos.length > 0 && (
                       <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700 rounded-lg p-3 mt-3">
                         <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-400 mb-3 flex items-center gap-2">
-                          📎 Admin Reply Photos
-                          <span className="bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 text-[10px] px-2 py-0.5 rounded-full font-bold">{c.adminPhotos.length} photo{c.adminPhotos.length > 1 ? 's' : ''}</span>
+                          📎 {t.adminReplyPhotos}
+                          <span className="bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 text-[10px] px-2 py-0.5 rounded-full font-bold">{c.adminPhotos.length}</span>
                         </p>
                         <div className="grid grid-cols-2 gap-2">
                           {c.adminPhotos.map((ph, idx) => {
                             if (!ph || typeof ph !== 'string') return null;
-                            const url = `${api.defaults.baseURL.replace('/api', '')}/${ph.replace(/\\/g, '/')}`;
+                            const url = getPhotoUrl(ph);
                             return (
                               <div key={idx} className="rounded-lg overflow-hidden border-2 border-indigo-200 dark:border-indigo-600 shadow-sm relative group">
                                 <a href={url} target="_blank" rel="noopener noreferrer">
@@ -252,13 +253,13 @@ export default function TrackPage() {
                     {Array.isArray(c.citizenPhotos) && c.citizenPhotos.length > 0 && (
                       <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 mt-3">
                         <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 mb-3 flex items-center gap-2">
-                          📤 My Reply Photos
-                          <span className="bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 text-[10px] px-2 py-0.5 rounded-full font-bold">{c.citizenPhotos.length} photo{c.citizenPhotos.length > 1 ? 's' : ''}</span>
+                          📤 {t.citizenReplyPhotos}
+                          <span className="bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 text-[10px] px-2 py-0.5 rounded-full font-bold">{c.citizenPhotos.length}</span>
                         </p>
                         <div className="grid grid-cols-2 gap-2">
                           {c.citizenPhotos.map((ph, idx) => {
                             if (!ph || typeof ph !== 'string') return null;
-                            const url = `${api.defaults.baseURL.replace('/api', '')}/${ph.replace(/\\/g, '/')}`;
+                            const url = getPhotoUrl(ph);
                             return (
                               <div key={idx} className="rounded-lg overflow-hidden border-2 border-amber-200 dark:border-amber-600 shadow-sm relative group">
                                 <a href={url} target="_blank" rel="noopener noreferrer">
@@ -274,32 +275,41 @@ export default function TrackPage() {
                     {/* User uploaded Photo */}
                     {c.photo && (
                       <div className="mt-3">
-                        <p className="text-xs text-gray-500 mb-1">Initial Uploaded Photo <span className="text-[10px] text-gray-400">(click to open)</span></p>
-                        <a href={`${api.defaults.baseURL.replace('/api', '')}/${c.photo}`} target="_blank" rel="noopener noreferrer" className="inline-block transition-transform hover:scale-105 border rounded-lg overflow-hidden shadow-sm hover:shadow-md cursor-pointer">
-                          <img src={`${api.defaults.baseURL.replace('/api', '')}/${c.photo}`}
+                        <p className="text-xs text-gray-500 mb-1">{t.initialPhoto} <span className="text-[10px] text-gray-400">(click to open)</span></p>
+                        <a href={getPhotoUrl(c.photo)} target="_blank" rel="noopener noreferrer" className="inline-block transition-transform hover:scale-105 border rounded-lg overflow-hidden shadow-sm hover:shadow-md cursor-pointer">
+                          <img src={getPhotoUrl(c.photo)}
                             alt="complaint" className="w-32 h-24 object-cover" />
                         </a>
                       </div>
                     )}
 
-                    {/* Citizen Reply UI (Only if In Progress and photos limit < 5) */}
-                    {c.status === 'In Progress' && (c.citizenPhotos?.length || 0) < 5 && (
+                    {/* Citizen Reply UI (Allowed if NOT Resolved/Rejected and photos limit < 5) */}
+                    {(c.status === 'Pending' || c.status === 'In Progress') && (c.citizenPhotos?.length || 0) < 5 && (
                       <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-                        <p className="text-sm font-bold text-gray-800 dark:text-gray-200 mb-2">Reply / Upload More Photos</p>
-                        <p className="text-xs text-gray-500 mb-3">You can upload up to {5 - (c.citizenPhotos?.length || 0)} more photos to support your complaint.</p>
+                        <div className="flex items-center gap-2 mb-2">
+                          <p className="text-sm font-bold text-gray-800 dark:text-gray-200">{t.replyMorePhotos}</p>
+                          {(c.remarks || (c.adminPhotos?.length > 0)) && (
+                            <span className="animate-pulse bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-[10px] px-2 py-0.5 rounded-full font-bold border border-blue-200 dark:border-blue-800">
+                              {lang === 'en' ? 'Reply Needed' : 'प्रतिसाद आवश्यक'}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-500 mb-3">
+                          {c.remarks ? (lang === 'en' ? 'Admin has left a remark. You can upload more photos if requested.' : 'प्रशासकाने टिप्पणी दिली आहे. विनंती केल्यास आपण अधिक फोटो अपलोड करू शकता.') : t.replyLimitInfo?.replace('{n}', 5 - (c.citizenPhotos?.length || 0))}
+                        </p>
                         <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
                           <label className="flex-1 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors w-full flex flex-col items-center justify-center min-h-[100px]">
                             {replyFiles[c._id]?.length ? (
                               <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">
-                                ✅ {replyFiles[c._id].length} file(s) selected
+                                ✅ {t.fileSelected?.replace('{n}', replyFiles[c._id].length)}
                               </span>
                             ) : (
                               <>
                                 <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                                  Drag & drop or click to upload
+                                  {t.dragDropHint}
                                 </span>
                                 <span className="text-xs text-gray-500">
-                                  JPG, PNG, PDF up to 5MB
+                                  {t.fileLimitInfoSmall}
                                 </span>
                               </>
                             )}
@@ -317,7 +327,7 @@ export default function TrackPage() {
                           </label>
                           <button onClick={() => handleReplySubmit(c._id)} disabled={replying[c._id] || !replyFiles[c._id]?.length}
                             className="w-full sm:w-auto btn-primary px-4 py-2.5 text-sm disabled:opacity-50 flex items-center justify-center gap-2">
-                            {replying[c._id] ? 'Uploading...' : 'Send Reply'}
+                            {replying[c._id] ? t.sendingReply : t.sendReply}
                           </button>
                         </div>
                       </div>

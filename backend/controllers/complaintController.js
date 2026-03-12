@@ -31,36 +31,41 @@ const trackComplaint = async (req, res) => {
     return res.status(400).json({ success: false, message: 'Provide complaintId or mobile.' });
   }
 
-  // Privacy protection: Restrict mobile tracking
-  if (mobile && !complaintId) {
-    let authorized = false;
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-      const jwt = require('jsonwebtoken');
-      try {
-        const token = req.headers.authorization.split(' ')[1];
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const User = require('../models/User');
-        const user = await User.findById(decoded.id);
-        if (user && (user.role !== 'citizen' || user.mobile === mobile)) {
-          authorized = true;
-        }
-      } catch (err) {}
-    }
-    if (!authorized) {
-      return res.status(403).json({ success: false, message: 'Privacy restriction: Login required to search by mobile, or use a Complaint ID instead.' });
-    }
-  }
-
   try {
     let query = {};
-    if (complaintId) query.complaintId = complaintId;
-    else query.mobile = mobile;
+    if (complaintId) {
+      query.complaintId = complaintId;
+    } else {
+      // Mobile search - REQUIRES authentication and privacy check
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ success: false, message: 'Authentication required for mobile search.' });
+      }
+      
+      const token = authHeader.split(' ')[1];
+      const jwt = require('jsonwebtoken');
+      const User = require('../models/User');
+      const secret = (process.env.JWT_SECRET && process.env.JWT_SECRET.trim() !== '') ? process.env.JWT_SECRET.trim() : 'SuperSecretKeyMLA2026';
+      
+      const decoded = jwt.verify(token, secret);
+      const user = await User.findById(decoded.id);
+      
+      if (!user) return res.status(401).json({ success: false, message: 'Invalid user.' });
+
+      // Admins can search any mobile, Citizens only their own
+      if (user.role === 'citizen' && user.mobile !== mobile) {
+        return res.status(403).json({ success: false, message: 'Privacy restricted: You can only track your own mobile number.' });
+      }
+      
+      query.mobile = mobile;
+    }
 
     const complaints = await Complaint.find(query).select('-__v').sort({ createdAt: -1 });
     if (!complaints.length) return res.status(404).json({ success: false, message: 'No complaints found.' });
     res.json({ success: true, complaints });
-  } catch {
-    res.status(500).json({ success: false, message: 'Server error.' });
+  } catch (err) {
+    console.error('Track Error:', err);
+    res.status(401).json({ success: false, message: 'Unauthorized or Session Expired.' });
   }
 };
 
