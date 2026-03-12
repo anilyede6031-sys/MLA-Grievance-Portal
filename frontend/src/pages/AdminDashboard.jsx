@@ -329,7 +329,7 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
             <div className="grid grid-cols-2 gap-4">
               {viewingReplies.citizenPhotos.map((ph, idx) => {
                 if (!ph || typeof ph !== 'string') return null;
-                const url = ph.startsWith('http') ? ph : `${api.defaults.baseURL.replace('/api', '')}/${ph.replace(/\\/g, '/')}`;
+                const url = getPhotoUrl(ph);
                 return (
                   <div key={idx} className="rounded-xl overflow-hidden border-2 border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 shadow-sm">
                     <a href={url} target="_blank" rel="noreferrer">
