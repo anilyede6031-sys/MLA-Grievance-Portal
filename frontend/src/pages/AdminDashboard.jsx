@@ -14,6 +14,13 @@ const TALUKAS = ['','Pune', 'Haveli', 'Khed', 'Baramati', 'Junnar', 'Shirur', 'I
 const DEPARTMENTS = ['','Road','Water','Electricity','Revenue','Police','Health','Education','Agriculture','Other'];
 const STATUSES = ['','Pending','In Progress','Resolved','Rejected'];
 
+const getPhotoUrl = (ph) => {
+  if (!ph) return '';
+  if (ph.startsWith('http')) return ph;
+  const base = api.defaults.baseURL.replace(/\/api\/?$/, '');
+  return `${base}/${ph.replace(/\\/g, '/')}`.replace(/([^:])\/\//g, '$1/');
+};
+
 const statusConfig = {
   Pending:       { class: 'badge-pending',     icon: Clock },
   'In Progress': { class: 'badge-inprogress',  icon: TrendingUp },
@@ -141,7 +148,7 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
                 </td>
                 <td className="px-2 py-2">
                   {c.photo ? (
-                    <a href={c.photo.startsWith('http') ? c.photo : `${api.defaults.baseURL.replace('/api', '')}/${c.photo}`} 
+                    <a href={getPhotoUrl(c.photo)} 
                        target="_blank" rel="noreferrer" 
                        className="text-saffron-500 hover:text-saffron-600 font-semibold text-xs underline inline-flex items-center gap-1 bg-saffron-50 dark:bg-saffron-900/30 px-1.5 py-1 rounded-md whitespace-nowrap">
                       <Eye size={11}/> View
@@ -230,7 +237,7 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
                 <div>
                   <span className="text-gray-700 dark:text-gray-300 font-bold block mb-2 text-sm flex items-center gap-2"><Eye size={16} /> Citizen Uploaded Photo</span>
                   <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex justify-center p-2">
-                    <img src={viewing.photo.startsWith('http') ? viewing.photo : `${api.defaults.baseURL.replace('/api', '')}/${viewing.photo}`} 
+                    <img src={getPhotoUrl(viewing.photo)} 
                          alt="Complaint attachment" 
                          className="max-h-80 object-contain rounded-lg shadow-sm" />
                   </div>
@@ -246,7 +253,7 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
                   <div className="grid grid-cols-2 gap-3">
                     {viewing.adminPhotos.map((ph, idx) => {
                       if (!ph || typeof ph !== 'string') return null;
-                      const url = ph.startsWith('http') ? ph : `${api.defaults.baseURL.replace('/api', '')}/${ph.replace(/\\/g, '/')}`;
+                      const url = getPhotoUrl(ph);
                       return (
                         <div key={idx} className="rounded-xl overflow-hidden border-2 border-indigo-200 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-900/20">
                           <a href={url} target="_blank" rel="noreferrer">
@@ -276,7 +283,7 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
                   <div className="grid grid-cols-2 gap-3">
                     {viewing.citizenPhotos.map((ph, idx) => {
                       if (!ph || typeof ph !== 'string') return null;
-                      const url = ph.startsWith('http') ? ph : `${api.defaults.baseURL.replace('/api', '')}/${ph.replace(/\\/g, '/')}`;
+                      const url = getPhotoUrl(ph);
                       return (
                         <div key={idx} className="rounded-xl overflow-hidden border-2 border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20">
                           <a href={url} target="_blank" rel="noreferrer">
