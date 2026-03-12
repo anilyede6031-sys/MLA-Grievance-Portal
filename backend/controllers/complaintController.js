@@ -67,13 +67,23 @@ const trackComplaint = async (req, res) => {
 // GET /api/complaints - Admin
 const getAllComplaints = async (req, res) => {
   try {
-    const { taluka, department, status, mobile, complaintId, page = 1, limit = 20 } = req.query;
+    const { taluka, department, status, mobile, complaintId, search, page = 1, limit = 20 } = req.query;
     const filter = {};
     if (taluka) filter.taluka = taluka;
     if (department) filter.department = department;
     if (status) filter.status = status;
     if (mobile) filter.mobile = mobile;
     if (complaintId) filter.complaintId = { $regex: complaintId, $options: 'i' };
+    
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { village: { $regex: search, $options: 'i' } },
+        { mobile: { $regex: search, $options: 'i' } },
+        { complaintId: { $regex: search, $options: 'i' } }
+      ];
+    }
 
     // Taluka coordinators see only their taluka
     if (req.user.role === 'taluka_coordinator' && req.user.taluka) {

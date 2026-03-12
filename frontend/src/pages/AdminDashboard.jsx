@@ -98,14 +98,14 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
       <table className="w-full text-sm">
         <thead>
           <tr className="bg-gov-navy text-white">
-            {['ID / Mobile', 'Name', 'Village', 'Taluka', 'Dept', 'Description', 'Date', 'Status', 'Remarks', 'User Photo', 'Reply Photos', 'Actions'].map(h => (
+            {[t.complaintId, t.name, t.village, t.taluka, t.department, t.description, t.date, t.status, t.remarks, t.photo, 'Reply Photos', t.actions].map(h => (
               <th key={h} className="px-2 py-3 text-left font-semibold text-xs whitespace-nowrap">{h}</th>
             ))}
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
           {complaints.length === 0 && (
-            <tr><td colSpan={12} className="text-center py-10 text-gray-400">No complaints found</td></tr>
+            <tr><td colSpan={12} className="text-center py-10 text-gray-400">{t.noComplaintsFound}</td></tr>
           )}
           {complaints.map(c => {
             const ed = editing[c._id] || {};
@@ -144,7 +144,7 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
                     value={ed.remarks ?? c.remarks ?? ''}
                     onChange={e => handleStatusChange(c._id, 'remarks', e.target.value)}
                     className="text-xs border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 w-24 focus:ring-1 focus:ring-saffron-400"
-                    placeholder="Remark..." />
+                    placeholder={`${t.remarks}...`} />
                 </td>
                 <td className="px-2 py-2">
                   {c.photo ? (
@@ -204,7 +204,7 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
           <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 animate-slide-up" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-start mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
               <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Complaint Details</h3>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{t.complaintId} Details</h3>
                 <p className="text-sm text-gray-500 font-mono font-semibold text-saffron-600">{viewing.complaintId}</p>
               </div>
               <button onClick={() => setViewing(null)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-500 transition-colors">
@@ -214,20 +214,20 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
             
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-4 text-sm bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
-                <div><span className="text-gray-500 block mb-0.5">Citizen Name</span><span className="font-semibold text-gray-800 dark:text-gray-200">{viewing.name}</span></div>
-                <div><span className="text-gray-500 block mb-0.5">Mobile</span><span className="font-semibold text-gray-800 dark:text-gray-200">{viewing.mobile}</span></div>
-                <div><span className="text-gray-500 block mb-0.5">Village</span><span className="font-semibold text-gray-800 dark:text-gray-200">{viewing.village}</span></div>
-                <div><span className="text-gray-500 block mb-0.5">Taluka</span><span className="font-semibold text-gray-800 dark:text-gray-200">{viewing.taluka}</span></div>
-                <div><span className="text-gray-500 block mb-0.5">Department</span>
+                <div><span className="text-gray-500 block mb-0.5">{t.name}</span><span className="font-semibold text-gray-800 dark:text-gray-200">{viewing.name}</span></div>
+                <div><span className="text-gray-500 block mb-0.5">{t.mobile}</span><span className="font-semibold text-gray-800 dark:text-gray-200">{viewing.mobile}</span></div>
+                <div><span className="text-gray-500 block mb-0.5">{t.village}</span><span className="font-semibold text-gray-800 dark:text-gray-200">{viewing.village}</span></div>
+                <div><span className="text-gray-500 block mb-0.5">{t.taluka}</span><span className="font-semibold text-gray-800 dark:text-gray-200">{viewing.taluka}</span></div>
+                <div><span className="text-gray-500 block mb-0.5">{t.department}</span>
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs font-semibold mt-0.5">
                     {viewing.department}
                   </span>
                 </div>
-                <div><span className="text-gray-500 block mb-0.5">Date Filed</span><span className="font-semibold text-gray-800 dark:text-gray-200">{new Date(viewing.createdAt).toLocaleString('en-IN')}</span></div>
+                <div><span className="text-gray-500 block mb-0.5">{t.date} Filed</span><span className="font-semibold text-gray-800 dark:text-gray-200">{new Date(viewing.createdAt).toLocaleString('en-IN')}</span></div>
               </div>
               
               <div>
-                <span className="text-gray-700 dark:text-gray-300 font-bold block mb-2 text-sm flex items-center gap-2"><FileText size={16} /> Description</span>
+                <span className="text-gray-700 dark:text-gray-300 font-bold block mb-2 text-sm flex items-center gap-2"><FileText size={16} /> {t.description}</span>
                 <div className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl text-gray-700 dark:text-gray-300 whitespace-pre-wrap text-sm border border-gray-200 dark:border-gray-700 leading-relaxed max-h-48 overflow-y-auto w-full break-words">
                   {viewing.description}
                 </div>
@@ -235,7 +235,7 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
 
               {viewing.photo && (
                 <div>
-                  <span className="text-gray-700 dark:text-gray-300 font-bold block mb-2 text-sm flex items-center gap-2"><Eye size={16} /> Citizen Uploaded Photo</span>
+                  <span className="text-gray-700 dark:text-gray-300 font-bold block mb-2 text-sm flex items-center gap-2"><Eye size={16} /> Citizen Uploaded {t.photo}</span>
                   <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex justify-center p-2">
                     <img src={getPhotoUrl(viewing.photo)} 
                          alt="Complaint attachment" 
@@ -306,7 +306,7 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
             </div>
             
             <div className="mt-8 flex justify-end">
-              <button onClick={() => setViewing(null)} className="btn-secondary px-6">Close</button>
+              <button onClick={() => setViewing(null)} className="btn-secondary px-6">{t.close || 'Close'}</button>
             </div>
           </div>
         </div>
@@ -345,7 +345,7 @@ function ComplaintsTable({ complaints, onUpdate, loading }) {
               })}
             </div>
             <div className="mt-6 flex justify-end">
-              <button onClick={() => setViewingReplies(null)} className="btn-secondary px-6">Close</button>
+              <button onClick={() => setViewingReplies(null)} className="btn-secondary px-6">{t.close || 'Close'}</button>
             </div>
           </div>
         </div>
@@ -364,7 +364,7 @@ export default function AdminDashboard() {
   const [total, setTotal] = useState(0);
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingComp, setLoadingComp] = useState(true);
-  const [filters, setFilters] = useState({ taluka: '', department: '', status: '', mobile: '', complaintId: '', page: 1 });
+  const [filters, setFilters] = useState({ taluka: '', department: '', status: '', mobile: '', complaintId: '', search: '', page: 1 });
 
   const fetchStats = useCallback(async () => {
     setLoadingStats(true);
@@ -469,7 +469,7 @@ export default function AdminDashboard() {
                   <p className="text-gray-500 dark:text-gray-400 text-sm">{t.statsOverview}</p>
                 </div>
                 <button onClick={fetchStats} className="btn-outline py-2 px-4 text-sm">
-                  <RefreshCw size={15} /> Refresh
+                  <RefreshCw size={15} /> {t.refresh}
                 </button>
               </div>
 
@@ -522,7 +522,7 @@ export default function AdminDashboard() {
                           <h3 className="font-bold text-gray-900 dark:text-white text-[13px] mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis w-full">{displayName}</h3>
                           <p className="text-[11px] text-gray-500 dark:text-gray-400 mb-2">{d.count} complaints</p>
                           <span className="inline-block bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                            {d.pending || 0} {t.pendingLabel}
+                            {d.pending || 0} {t.pending}
                           </span>
                         </div>
                       );
@@ -554,7 +554,7 @@ export default function AdminDashboard() {
                   <p className="text-gray-500 text-sm">{total} total complaints</p>
                 </div>
                 <div className="flex gap-2 flex-wrap">
-                  <button onClick={fetchComplaints} className="btn-outline py-2 px-3 text-sm"><RefreshCw size={14} /></button>
+                  <button onClick={fetchComplaints} className="btn-outline py-2 px-3 text-sm"><RefreshCw size={14} /> {t.refresh}</button>
                   {['super_admin', 'taluka_coordinator'].includes(user?.role) && (
                     <button onClick={handleExport} className="btn-primary text-sm py-2"><Download size={14} /> {t.exportCSV}</button>
                   )}
@@ -564,28 +564,26 @@ export default function AdminDashboard() {
               {/* Filters */}
               <div className="card mb-4 bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700">
                 <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                  <div className="relative">
-                    <input type="text" value={filters.complaintId} onChange={e => setFilters(f => ({...f, complaintId: e.target.value.toUpperCase(), page: 1}))}
-                      placeholder="Complaint ID..." className="input-field text-sm py-2 pr-8" />
-                    <Search size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                  </div>
-                  <div className="relative">
-                    <input type="text" value={filters.mobile} onChange={e => setFilters(f => ({...f, mobile: e.target.value, page: 1}))}
-                      placeholder="Mobile..." className="input-field text-sm py-2 pr-8" />
+                  <div className="relative col-span-1 sm:col-span-3 lg:col-span-2">
+                    <input type="text" value={filters.search} onChange={e => setFilters(f => ({...f, search: e.target.value, page: 1}))}
+                      placeholder={t.searchPlaceholder} className="input-field text-sm py-2 pr-8" />
                     <Search size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
                   </div>
                   <select value={filters.taluka} onChange={e => setFilters(f => ({...f, taluka: e.target.value, page: 1}))}
                     className="input-field text-sm py-2">
-                    {TALUKAS.map(t => <option key={t} value={t}>{t || 'All Talukas'}</option>)}
+                    <option value="">{t.allTalukas}</option>
+                    {TALUKAS.filter(Boolean).map(tl => <option key={tl} value={tl}>{tl}</option>)}
                   </select>
                   <select value={filters.department} onChange={e => setFilters(f => ({...f, department: e.target.value, page: 1}))}
                     className="input-field text-sm py-2">
-                    {DEPARTMENTS.map(d => <option key={d} value={d}>{d || 'All Departments'}</option>)}
+                    <option value="">{t.allDepartments}</option>
+                    {DEPARTMENTS.filter(Boolean).map(d => <option key={d} value={d}>{d}</option>)}
                   </select>
                   <div className="flex gap-2">
                     <select value={filters.status} onChange={e => setFilters(f => ({...f, status: e.target.value, page: 1}))}
                       className="input-field text-sm py-2 flex-1">
-                      {STATUSES.map(s => <option key={s} value={s}>{s || 'All Statuses'}</option>)}
+                      <option value="">{t.allStatuses}</option>
+                      {STATUSES.filter(Boolean).map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
                     <button onClick={() => setFilters({ taluka: '', department: '', status: '', mobile: '', complaintId: '', page: 1 })} 
                       className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors border border-gray-200 dark:border-gray-700" title="Clear Filters">
@@ -604,14 +602,14 @@ export default function AdminDashboard() {
 
               {/* Pagination */}
               <div className="flex items-center justify-between mt-4">
-                <p className="text-sm text-gray-500">Page {filters.page} · {total} total</p>
+                <p className="text-sm text-gray-500">{t.page || 'Page'} {filters.page} · {total} {t.total || 'total'}</p>
                 <div className="flex gap-2">
                   <button disabled={filters.page <= 1}
                     onClick={() => setFilters(f => ({...f, page: f.page - 1}))}
-                    className="btn-outline text-sm py-1.5 px-3 disabled:opacity-40">← Prev</button>
+                    className="btn-outline text-sm py-1.5 px-3 disabled:opacity-40">← {t.prev}</button>
                   <button disabled={filters.page * 20 >= total}
                     onClick={() => setFilters(f => ({...f, page: f.page + 1}))}
-                    className="btn-outline text-sm py-1.5 px-3 disabled:opacity-40">Next →</button>
+                    className="btn-outline text-sm py-1.5 px-3 disabled:opacity-40">{t.next} →</button>
                 </div>
               </div>
             </div>
@@ -746,7 +744,7 @@ function UsersTab() {
   const handleToggleStatus = async (id) => {
     try {
       await api.patch(`/auth/users/${id}/status`);
-      toast.success('User status updated');
+      toast.success(t.successProfileUpdate || 'User status updated');
       fetchUsers();
     } catch (err) { toast.error('Update failed'); }
   };
