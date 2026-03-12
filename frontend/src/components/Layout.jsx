@@ -156,7 +156,7 @@ export default function Layout({ children, darkMode, setDarkMode }) {
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-2xl">🇮🇳</span>
                   <div>
-                    <p className="font-bold text-saffron-400">MLA Rahul Subhash Kool</p>
+                    <p className="font-bold text-saffron-400">MLA Rahul Subhash Kul</p>
                     <p className="text-xs text-gray-400">Daund, Maharashtra</p>
                   </div>
                 </div>
@@ -174,11 +174,11 @@ export default function Layout({ children, darkMode, setDarkMode }) {
                 <h4 className="font-semibold text-saffron-400 mb-3">Contact</h4>
                 <p className="text-gray-400 text-sm">Maharashtra Legislative Assembly</p>
                 <p className="text-gray-400 text-sm">Daund Assembly</p>
-                <p className="text-gray-400 text-sm mt-2">This is an official portal of MLA Rahul Subhash Kool office.</p>
+                <p className="text-gray-400 text-sm mt-2">This is an official portal of MLA Rahul Subhash Kul office.</p>
               </div>
             </div>
             <div className="border-t border-gray-700 mt-6 pt-4 text-center text-xs text-gray-500">
-              © {new Date().getFullYear()} MLA Rahul Subhash Kool. Government of Maharashtra. All Rights Reserved.
+              © {new Date().getFullYear()} MLA Rahul Subhash Kul. Government of Maharashtra. All Rights Reserved.
             </div>
           </div>
         </footer>

@@ -6,7 +6,7 @@ const LangContext = createContext(null);
 export const translations = {
   en: {
     siteName: 'MLA Public Grievance Portal',
-    mlaName: 'MLA Rahul Subhash Kool',
+    mlaName: 'MLA Rahul Subhash Kul',
     constituency: 'Daund, Maharashtra',
     welcome: 'Welcome to the MLA Grievance Redressal Portal',
     welcomeSub: 'Your voice matters. Submit your complaints and track their resolution.',
