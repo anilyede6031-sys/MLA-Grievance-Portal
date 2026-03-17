@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { FileText, Search, CheckCircle, Clock, AlertCircle, TrendingUp, ChevronRight, Phone } from 'lucide-react';
+import { FileText, Search, CheckCircle, Clock, AlertCircle, TrendingUp, ChevronRight, Phone, XCircle } from 'lucide-react';
 import { useLang } from '../context/LangContext';
 import api from '../utils/api';
 
@@ -26,23 +26,58 @@ function AnimatedCounter({ target, duration = 2000 }) {
 
 export default function HomePage() {
   const { t } = useLang();
-  const [stats, setStats] = useState({ total: 0, pending: 0, inProgress: 0, resolved: 0 });
+  const [stats, setStats] = useState({ total: 0, pending: 0, resolved: 0 });
+  const [projectSummary, setProjectSummary] = useState({ expenditure: {}, statusCounts: { complete:0, under_process:0, incomplete:0 }, totalBudget: 0, totalProjects: 0 });
+  const [projects, setProjects] = useState([]);
+  const [selectedProject, setSelectedProject] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const res = await api.get('/complaints/public-stats');
-        if (res.data.success) {
-          setStats(res.data.stats);
-        }
-      } catch (err) {
-        console.error('Failed to fetch stats:', err);
-      } finally {
-        setLoading(false);
+  const fetchStats = async () => {
+    try {
+      const res = await api.get('/complaints/public-stats');
+      if (res.data.success) {
+        setStats(res.data);
       }
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    }
+  };
+
+  const fetchProjectSummary = async () => {
+    try {
+      const res = await api.get('/projects/summary');
+      if (res.data.success) setProjectSummary(res.data.data);
+    } catch (error) {
+      console.error("Error fetching project summary:", error);
+    }
+  };
+
+  const fetchProjects = async () => {
+    try {
+      const res = await api.get('/projects');
+      if (res.data.success) setProjects(res.data.projects);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+    }
+  };
+
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      await Promise.all([fetchStats(), fetchProjectSummary(), fetchProjects()]);
+      setLoading(false);
     };
-    fetchStats();
+    
+    loadData();
+
+    // Live Polling every 30 seconds
+    const interval = setInterval(() => {
+      fetchStats();
+      fetchProjectSummary();
+      fetchProjects();
+    }, 30000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const statCards = [
@@ -228,6 +263,113 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Extra Features Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="text-center mb-10">
+          <h2 className="section-title text-3xl">{t.extraFeaturesTitle}</h2>
+          <p className="section-subtitle">{t.extraFeaturesSub}</p>
+        </div>
+        <div className="grid md:grid-cols-3 gap-8">
+          {[
+            { icon: '🤖', title: t.aiAssistantTitle, desc: t.aiAssistantDesc, color: 'text-indigo-600', bg: 'bg-indigo-50 dark:bg-indigo-900/20', link: '/ai-assistant' },
+            { icon: '🗺️', title: t.liveMapTitle, desc: t.liveMapDesc, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20', link: '/live-map' },
+            { icon: '🚨', title: t.emergencyContactsTitle, desc: t.emergencyContactsDesc, color: 'text-red-600', bg: 'bg-red-50 dark:bg-red-900/20', link: '/emergency' },
+          ].map((feature) => (
+            <div key={feature.title} className="card hover:shadow-xl transition-all group border border-gray-100 dark:border-gray-800">
+              <div className={`w-16 h-16 rounded-2xl ${feature.bg} flex items-center justify-center text-4xl mb-6 group-hover:scale-110 transition-transform`}>
+                {feature.icon}
+              </div>
+              <h3 className={`text-xl font-bold mb-3 ${feature.color} dark:text-white`}>{feature.title}</h3>
+              <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-sm">
+                {feature.desc}
+              </p>
+              <Link to={feature.link} className="mt-6 text-sm font-bold flex items-center gap-2 text-gray-400 group-hover:text-gov-navy dark:group-hover:text-saffron-400 transition-colors">
+                {t.viewDetails} <ChevronRight size={16} />
+              </Link>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Transparency Section (MLA Fund Tracker) */}
+      <section className="bg-white dark:bg-gray-950 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="section-title text-3xl">{t.transparencyTitle}</h2>
+            <p className="section-subtitle">{t.transparencySub}</p>
+          </div>
+          
+          <div className="card shadow-2xl border-t-4 border-gov-navy dark:border-saffron-500 overflow-hidden">
+            <div className="p-6 md:p-8">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+                <h3 className="text-xl font-extrabold text-gov-navy dark:text-white flex items-center gap-3">
+                   <div className="w-10 h-10 rounded-full bg-saffron-100 dark:bg-saffron-900/30 flex items-center justify-center text-xl">📊</div>
+                   <div className="flex flex-col">
+                      <span>{t.mlaFundTrackerTitle}</span>
+                      <span className="text-[9px] text-green-500 animate-pulse font-bold tracking-widest uppercase">● Live Updates Active</span>
+                   </div>
+                </h3>
+                <div className="flex items-center gap-4">
+                  <button 
+                    onClick={() => setSelectedProject('list')}
+                    className="text-xs font-bold text-saffron-600 hover:text-saffron-700 underline uppercase tracking-widest"
+                  >
+                    {t.viewDetails}
+                  </button>
+                  <div className="bg-gray-50 dark:bg-gray-800 px-4 py-2 rounded-full border border-gray-100 dark:border-gray-700">
+                  <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mr-2">Total Budget:</span>
+                  <span className="text-gov-navy dark:text-saffron-400 font-bold">₹ {projectSummary.totalBudget || 0} {t.crore}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-8">
+                {[
+                  { label: t.roads, value: projectSummary.expenditure?.Road || 0, color: 'bg-gov-navy' },
+                  { label: t.water, value: projectSummary.expenditure?.Water || 0, color: 'bg-blue-500' },
+                  { label: t.education, value: projectSummary.expenditure?.Education || 0, color: 'bg-saffron-500' },
+                  { label: t.health, value: projectSummary.expenditure?.Health || 0, color: 'bg-green-500' },
+                ].map((item) => (
+                  <div key={item.label} className="group">
+                    <div className="flex justify-between items-center mb-2.5">
+                      <span className="text-sm font-bold text-gray-700 dark:text-gray-300 group-hover:text-gov-navy dark:group-hover:text-saffron-400 transition-colors uppercase tracking-wide">
+                        {item.label}
+                      </span>
+                      <span className="text-sm font-extrabold text-gov-navy dark:text-white">
+                        ₹ {item.value} {t.crore}
+                      </span>
+                    </div>
+                    <div className="h-4 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden border border-gray-50 dark:border-gray-700">
+                      <div 
+                        className={`h-full ${item.color} rounded-full transition-all duration-1000 ease-out relative shadow-[0_0_15px_rgba(0,0,0,0.1)]`}
+                        style={{ width: `${projectSummary.totalBudget > 0 ? (item.value / projectSummary.totalBudget) * 100 : 0}%` }}
+                      >
+                        <div className="absolute inset-0 bg-white/20 animate-[pulse_2s_infinite]" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-12 pt-8 border-t border-gray-100 dark:border-gray-800 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                 {[
+                   { label: t.complete, value: projectSummary.statusCounts?.complete || 0, icon: '✅' },
+                   { label: t.underProcess, value: projectSummary.statusCounts?.under_process || 0, icon: '⏳' },
+                   { label: t.incomplete, value: projectSummary.statusCounts?.incomplete || 0, icon: '❌' },
+                   { label: t.totalProjects, value: projectSummary.totalProjects || 0, icon: '🏗️' }
+                 ].map(info => (
+                   <div key={info.label} className="p-3">
+                     <div className="text-xl mb-1">{info.icon}</div>
+                     <p className="text-xs text-gray-400 uppercase tracking-tighter mb-0.5">{info.label}</p>
+                     <p className="text-sm font-bold text-gray-800 dark:text-gray-200">{info.value}</p>
+                   </div>
+                 ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Quick CTA */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="bg-gradient-to-r from-saffron-500 to-saffron-600 rounded-2xl p-8 md:p-12 text-white text-center shadow-xl">
@@ -245,6 +387,97 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Project Details Modal */}
+      {selectedProject && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in text-left">
+          <div className="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl border border-white/10 flex flex-col">
+            <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
+              <h2 className="text-xl font-extrabold text-gov-navy dark:text-white flex items-center gap-3">
+                <span className="text-2xl">🏗️</span> 
+                {selectedProject === 'list' ? t.allProjects : selectedProject.name}
+              </h2>
+              <button onClick={() => setSelectedProject(null)} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors text-gray-500">
+                <XCircle size={24} />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
+              {selectedProject === 'list' ? (
+                <div className="space-y-4">
+                  {projects.length === 0 ? (
+                    <div className="text-center py-10 text-gray-400">{t.noProjectsFound || 'No projects found'}</div>
+                  ) : (
+                    projects.map(p => (
+                      <div key={p._id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 hover:border-saffron-300 transition-all cursor-pointer group" onClick={() => setSelectedProject(p)}>
+                        <div className="flex justify-between items-start mb-2">
+                          <h4 className="font-bold text-gray-800 dark:text-gray-200 group-hover:text-saffron-600 transition-colors">{p.name}</h4>
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest ${p.status === 'complete' ? 'bg-green-100 text-green-700 dark:bg-green-900/30' : p.status === 'under_process' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30' : 'bg-red-100 text-red-600 dark:bg-red-900/30'}`}>
+                            {t[p.status] || p.status}
+                          </span>
+                        </div>
+                        <div className="flex gap-4 text-xs text-gray-500">
+                          <span><strong>{t.department}:</strong> {p.department}</span>
+                          <span><strong>{t.budget}:</strong> ₹ {p.budget} {t.crore}</span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                     <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl">
+                       <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">{t.department}</p>
+                       <p className="text-sm font-bold text-blue-700 dark:text-blue-400">{selectedProject.department}</p>
+                     </div>
+                     <div className="p-4 bg-saffron-50 dark:bg-saffron-900/20 rounded-2xl">
+                       <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">{t.budget}</p>
+                       <p className="text-sm font-bold text-saffron-700 dark:text-saffron-400">₹ {selectedProject.budget} {t.crore}</p>
+                     </div>
+                     <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-2xl">
+                       <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">{t.status}</p>
+                       <p className="text-sm font-bold text-green-700 dark:text-green-400">{t[selectedProject.status] || selectedProject.status}</p>
+                     </div>
+                  </div>
+                  
+                  {selectedProject.description && (
+                    <div className="space-y-2">
+                      <p className="text-sm font-bold text-gray-700 dark:text-gray-300">{t.projectDesc}</p>
+                      <div className="p-5 bg-gray-50 dark:bg-gray-800 rounded-2xl text-gray-600 dark:text-gray-400 text-sm leading-relaxed border border-gray-100 dark:border-gray-700 italic">
+                        "{selectedProject.description}"
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedProject.expectedCompletionDate && selectedProject.status !== 'complete' && (
+                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                       <Clock size={16} className="text-saffron-500" />
+                       <strong>{t.expectedCompletion}:</strong> {new Date(selectedProject.expectedCompletionDate).toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' })}
+                    </div>
+                  )}
+
+                  <div className="pt-6">
+                    <button 
+                      onClick={() => setSelectedProject('list')}
+                      className="text-sm font-bold text-gov-navy dark:text-saffron-400 hover:underline flex items-center gap-2"
+                    >
+                      ← {t.back || 'Back to List'}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="p-6 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800 flex justify-end">
+              <button 
+                onClick={() => setSelectedProject(null)}
+                className="btn-primary py-2 px-8 rounded-xl shadow-lg"
+              >
+                {t.close}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

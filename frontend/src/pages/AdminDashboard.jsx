@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, FileText, BarChart2, Users, LogOut, ChevronDown,
   CheckCircle, Clock, TrendingUp, XCircle, Download, RefreshCw,
-  Search, Filter, Eye, MessageSquare, AlertTriangle, Loader2, Settings
+  Search, Filter, Eye, MessageSquare, AlertTriangle, Loader2, Settings, Edit,
+  Save, AlertCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
@@ -356,11 +357,20 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const [tab, setTab] = useState('dashboard');
   const [stats, setStats] = useState(null);
+  const [projectSummary, setProjectSummary] = useState({ expenditure: {}, statusCounts: { complete:0, under_process:0, incomplete:0 }, totalBudget: 0, totalProjects: 0 });
   const [complaints, setComplaints] = useState([]);
   const [total, setTotal] = useState(0);
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingComp, setLoadingComp] = useState(true);
   const [filters, setFilters] = useState({ taluka: '', department: '', status: '', mobile: '', complaintId: '', search: '', page: 1 });
+  const [configModal, setConfigModal] = useState(null); // { id: 'ai' | 'map' | 'emergency', title: string }
+
+  const fetchProjectSummary = useCallback(async () => {
+    try {
+      const r = await api.get('/projects/summary');
+      if (r.data.success) setProjectSummary(r.data.data);
+    } catch { console.error("Failed to load project summary"); }
+  }, []);
 
   const fetchStats = useCallback(async () => {
     setLoadingStats(true);
@@ -386,7 +396,7 @@ export default function AdminDashboard() {
     finally { setLoadingComp(false); }
   }, [filters]);
 
-  useEffect(() => { fetchStats(); }, [fetchStats]);
+  useEffect(() => { fetchStats(); fetchProjectSummary(); }, [fetchStats, fetchProjectSummary]);
   useEffect(() => { 
     if (tab === 'complaints') {
       const handler = setTimeout(() => {
@@ -414,6 +424,7 @@ export default function AdminDashboard() {
     { key: 'dashboard', icon: LayoutDashboard, label: t.dashboard },
     { key: 'complaints', icon: FileText, label: t.manageComplaints },
     { key: 'analytics', icon: BarChart2, label: t.analytics },
+    { key: 'projects', icon: TrendingUp, label: t.projects },
     ...(user?.role === 'super_admin' ? [{ key: 'users', icon: Users, label: t.users }] : []),
     { key: 'settings', icon: Settings, label: t.settings },
   ];
@@ -527,6 +538,94 @@ export default function AdminDashboard() {
                 </div>
               )}
 
+              {/* === Extra Features & Fund Tracker (Admin Side) === */}
+              <div className="grid md:grid-cols-2 gap-6 mb-6">
+                {/* Extra Features Status */}
+                <div className="card">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                       <span className="text-xl">🛠️</span> {t.extraFeaturesTitle}
+                    </h3>
+                    <span className="text-[10px] bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest">{t.active}</span>
+                  </div>
+                  <div className="space-y-4">
+                    {[
+                      { icon: '🤖', title: t.aiAssistantTitle, status: 'Online', color: 'text-indigo-500' },
+                      { icon: '🗺️', title: t.liveMapTitle, status: 'Active', color: 'text-green-500' },
+                      { icon: '🚨', title: t.emergencyContactsTitle, status: 'Live', color: 'text-red-500' },
+                    ].map((feature) => (
+                      <div key={feature.title} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-800">
+                        <div className="flex items-center gap-3">
+                          <span className="text-xl">{feature.icon}</span>
+                          <div>
+                            <p className="text-sm font-bold text-gray-800 dark:text-gray-200">{feature.title}</p>
+                            <p className={`text-[10px] font-bold ${feature.color} uppercase tracking-widest`}>● {feature.status}</p>
+                          </div>
+                        </div>
+                        <button 
+                          onClick={() => setConfigModal({ id: feature.title.toLowerCase().includes('ai') ? 'ai' : feature.title.toLowerCase().includes('map') ? 'map' : 'emergency', title: feature.title })}
+                          className="text-[10px] font-bold text-gov-navy dark:text-saffron-400 hover:underline uppercase tracking-widest"
+                        >
+                          Configure
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* MLA Fund Tracker Visual */}
+                <div className="card">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                       <span className="text-xl">📊</span> Expenditure Tracker
+                    </h3>
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gov-navy text-white rounded-lg text-[10px] font-bold">
+                       {t.mlaFundTrackerTitle.split('(')[1]?.replace(')', '') || '2024-25'}
+                    </div>
+                  </div>
+                  <div className="space-y-4 pt-2">
+                    {[
+                      { label: t.roads, value: projectSummary.expenditure?.Road || 0, color: 'bg-gov-navy' },
+                      { label: t.water, value: projectSummary.expenditure?.Water || 0, color: 'bg-blue-500' },
+                      { label: t.education, value: projectSummary.expenditure?.Education || 0, color: 'bg-saffron-500' },
+                      { label: t.health, value: projectSummary.expenditure?.Health || 0, color: 'bg-green-500' },
+                    ].map((item) => (
+                      <div key={item.label}>
+                        <div className="flex justify-between text-[11px] mb-1.5">
+                          <span className="font-bold text-gray-500 uppercase tracking-widest">{item.label}</span>
+                          <span className="font-bold text-gray-900 dark:text-white">₹ {item.value} {t.crore}</span>
+                        </div>
+                        <div className="h-2.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                          <div className={`h-full ${item.color} rounded-full transition-all duration-1000`} 
+                            style={{ width: `${projectSummary.totalBudget > 0 ? (item.value / projectSummary.totalBudget) * 100 : 0}%` }} 
+                          />
+                        </div>
+                      </div>
+                    ))}
+                    <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
+                       <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Total Budget</span>
+                       <span className="text-sm font-extrabold text-gov-navy dark:text-saffron-400">₹ {projectSummary.totalBudget || 0} {t.crore}</span>
+                    </div>
+
+                    {/* Status Overview */}
+                    <div className="mt-4 grid grid-cols-3 gap-2">
+                      <div className="bg-green-50 dark:bg-green-900/20 p-2 rounded-lg text-center">
+                        <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-bold">{t.complete}</p>
+                        <p className="text-lg font-bold text-green-600 dark:text-green-400">{projectSummary.statusCounts?.complete || 0}</p>
+                      </div>
+                      <div className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg text-center">
+                        <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-bold">{t.underProcess}</p>
+                        <p className="text-lg font-bold text-blue-600 dark:text-blue-400">{projectSummary.statusCounts?.under_process || 0}</p>
+                      </div>
+                      <div className="bg-red-50 dark:bg-red-900/20 p-2 rounded-lg text-center">
+                        <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-bold">{t.incomplete}</p>
+                        <p className="text-lg font-bold text-red-600 dark:text-red-400">{projectSummary.statusCounts?.incomplete || 0}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Quick action */}
               <div className="card bg-saffron-50 dark:bg-saffron-900/20 border-saffron-200 dark:border-saffron-800">
                 <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-2">⚡ {t.quickActions}</h3>
@@ -536,6 +635,7 @@ export default function AdminDashboard() {
                     <button onClick={handleExport} className="btn-outline text-sm py-2"><Download size={14} /> {t.exportData}</button>
                   )}
                   <button onClick={() => setTab('analytics')} className="btn-secondary text-sm py-2"><BarChart2 size={14} /> {t.analytics}</button>
+                  <button onClick={() => setTab('projects')} className="btn-secondary text-sm py-2"><TrendingUp size={14} /> {t.projects}</button>
                 </div>
               </div>
             </div>
@@ -617,10 +717,16 @@ export default function AdminDashboard() {
           {/* ============ USERS ============ */}
           {tab === 'users' && user?.role === 'super_admin' && <UsersTab />}
 
+          {/* ============ PROJECTS ============ */}
+          {tab === 'projects' && <ProjectsTab />}
+
           {/* ============ SETTINGS ============ */}
           {tab === 'settings' && <SettingsTab />}
         </div>
       </div>
+      {configModal && (
+        <FeatureConfigModal config={configModal} onClose={() => setConfigModal(null)} />
+      )}
     </div>
   );
 }
@@ -705,6 +811,149 @@ function AnalyticsTab({ stats, loadingStats }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function ProjectsTab() {
+  const { t } = useLang();
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [form, setForm] = useState({ name: '', department: '', budget: '', status: 'under_process', description: '', expectedCompletionDate: '' });
+  const [saving, setSaving] = useState(false);
+  const [editingProject, setEditingProject] = useState(null);
+
+  const fetchProjects = useCallback(async () => {
+    setLoading(true);
+    try {
+      const r = await api.get('/projects');
+      setProjects(r.data.projects);
+    } catch {
+      toast.error('Failed to load projects.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchProjects(); }, [fetchProjects]);
+
+  const handleCreateOrUpdate = async e => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      if (editingProject) {
+        await api.patch(`/projects/${editingProject._id}`, form);
+        toast.success(t.projectUpdated || 'Project updated!');
+        setEditingProject(null);
+      } else {
+        await api.post('/projects', form);
+        toast.success(t.projectCreated || 'Project created!');
+      }
+      setForm({ name: '', department: '', budget: '', status: 'under_process', description: '', expectedCompletionDate: '' });
+      fetchProjects();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEdit = (project) => {
+    setEditingProject(project);
+    setForm({ 
+      name: project.name, 
+      department: project.department, 
+      budget: project.budget, 
+      status: project.status,
+      description: project.description || '',
+      expectedCompletionDate: project.expectedCompletionDate ? project.expectedCompletionDate.split('T')[0] : ''
+    });
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm(t.deleteConfirm || 'Are you sure you want to delete this project?')) return;
+    try {
+      await api.delete(`/projects/${id}`);
+      toast.success(t.projectDeleted || 'Project deleted');
+      fetchProjects();
+    } catch (err) {
+      toast.error('Delete failed');
+    }
+  };
+
+  return (
+    <div className="animate-fade-in space-y-6">
+      <h1 className="text-2xl font-extrabold text-gov-navy dark:text-white">{t.projects}</h1>
+
+      <div className="card">
+        <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-4">{editingProject ? t.editProject : t.createProject}</h3>
+        <form onSubmit={handleCreateOrUpdate} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div><label className="label">{t.projectName}</label><input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="input-field text-sm" placeholder={t.projectName} required /></div>
+          <div><label className="label">{t.department}</label>
+            <select value={form.department} onChange={e => setForm(f => ({ ...f, department: e.target.value }))} className="input-field text-sm" required>
+              <option value="">— {t.select || 'Select'} —</option>
+              {DEPARTMENTS.filter(Boolean).map(d => <option key={d} value={d}>{d}</option>)}
+            </select>
+          </div>
+          <div><label className="label">{t.budget} ({t.crore})</label><input type="number" step="0.1" value={form.budget} onChange={e => setForm(f => ({ ...f, budget: parseFloat(e.target.value) }))} className="input-field text-sm" placeholder="e.g., 5.9" required /></div>
+          <div><label className="label">{t.status}</label>
+            <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))} className="input-field text-sm" required>
+              <option value="under_process">{t.underProcess}</option>
+              <option value="complete">{t.complete}</option>
+              <option value="incomplete">{t.incomplete}</option>
+            </select>
+          </div>
+          <div className="lg:col-span-2"><label className="label">{t.projectDesc}</label>
+            <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className="input-field text-sm h-[38px] py-2" placeholder={t.descriptionPlaceholder} />
+          </div>
+          <div><label className="label">{t.expectedCompletion}</label>
+            <input type="date" value={form.expectedCompletionDate} onChange={e => setForm(f => ({ ...f, expectedCompletionDate: e.target.value }))} className="input-field text-sm" />
+          </div>
+          <div className="flex items-end col-span-full sm:col-span-2 lg:col-span-1">
+            <button type="submit" disabled={saving} className="btn-primary w-full justify-center text-sm py-2.5 disabled:opacity-60">
+              {saving ? <Loader2 size={14} className="animate-spin" /> : (editingProject ? t.updateProject : '+ ' + t.createProject)}
+            </button>
+            {editingProject && (
+              <button type="button" onClick={() => { setEditingProject(null); setForm({ name: '', department: '', budget: '', status: 'under_process' }); }} className="btn-outline ml-2 text-sm py-2.5">
+                {t.cancel}
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
+
+      <div className="card overflow-x-auto">
+        <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-4">{t.allProjects} ({projects.length})</h3>
+        {loading ? <div className="flex justify-center py-8"><Loader2 size={24} className="animate-spin text-saffron-500" /></div> : (
+          <table className="w-full text-sm">
+            <thead><tr className="border-b border-gray-200 dark:border-gray-700 text-left">
+              {[t.projectName, t.department, t.budget, t.status, t.actions].map(h => <th key={h} className="pb-2 text-xs text-gray-500 font-semibold pr-4">{h}</th>)}
+            </tr></thead>
+            <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
+              {projects.map(p => (
+                <tr key={p._id} className="hover:bg-gray-50 dark:hover:bg-gray-750">
+                  <td className="py-2.5 pr-4 font-semibold text-gray-800 dark:text-gray-200">{p.name}</td>
+                  <td className="py-2.5 pr-4 text-gray-600 dark:text-gray-400">{p.department}</td>
+                  <td className="py-2.5 pr-4 text-gray-600 dark:text-gray-400">₹ {p.budget} {t.crore}</td>
+                  <td className="py-2.5 pr-4">
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${p.status === 'complete' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : p.status === 'under_process' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'}`}>
+                      {t[p.status] || p.status}
+                    </span>
+                  </td>
+                  <td className="py-2.5 flex gap-2">
+                    <button onClick={() => handleEdit(p)} className="text-blue-500 hover:text-blue-700 p-1 rounded hover:bg-blue-50 transition-colors">
+                      <Edit size={14} />
+                    </button>
+                    <button onClick={() => handleDelete(p._id)} className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition-colors">
+                      <XCircle size={14} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
 }
@@ -880,6 +1129,80 @@ function SettingsTab() {
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  );
+}
+
+function FeatureConfigModal({ config, onClose }) {
+  const { t } = useLang();
+  
+  return (
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 animate-fade-in" onClick={onClose}>
+      <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-slide-up" onClick={e => e.stopPropagation()}>
+        <div className="bg-gov-navy p-6 text-white flex items-center justify-between">
+          <div className="flex items-center gap-3">
+             <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+                {config.id === 'ai' ? '🤖' : config.id === 'map' ? '🗺️' : '🚨'}
+             </div>
+             <div>
+               <h3 className="font-bold">{config.title}</h3>
+               <p className="text-[10px] text-blue-300 font-bold uppercase tracking-widest">System Configuration</p>
+             </div>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+            <XCircle size={20} />
+          </button>
+        </div>
+        
+        <div className="p-6 space-y-6">
+          <div className="grid grid-cols-2 gap-3">
+             <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
+                <p className="text-[10px] text-gray-400 font-bold uppercase mb-1">Status</p>
+                <div className="flex items-center gap-1.5">
+                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                   <span className="text-sm font-bold text-gray-800 dark:text-gray-200">Active</span>
+                </div>
+             </div>
+             <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
+                <p className="text-[10px] text-gray-400 font-bold uppercase mb-1">Usage Today</p>
+                <span className="text-sm font-bold text-gray-800 dark:text-gray-200">142 hits</span>
+             </div>
+          </div>
+
+          <div className="space-y-3">
+             <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase">Enable Feature</span>
+                <div className="w-10 h-5 bg-saffron-500 rounded-full relative">
+                   <div className="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow" />
+                </div>
+             </div>
+             <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase">Public Access</span>
+                <div className="w-10 h-5 bg-saffron-500 rounded-full relative">
+                   <div className="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow" />
+                </div>
+             </div>
+          </div>
+
+          <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
+            <p className="text-[10px] text-gray-400 font-bold uppercase mb-2">Live URL</p>
+            <div className="flex items-center justify-between p-2.5 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+               <code className="text-[10px] text-gov-navy dark:text-saffron-400 font-bold">/ {config.id === 'ai' ? 'ai-assistant' : config.id === 'map' ? 'live-map' : 'emergency'}</code>
+               <Link to={config.id === 'ai' ? '/ai-assistant' : config.id === 'map' ? '/live-map' : '/emergency'} 
+                     className="text-[10px] font-bold text-blue-500 hover:underline">Preview</Link>
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-2">
+             <button onClick={() => { toast.success(`${config.title} settings updated locally!`); onClose(); }} className="flex-1 bg-gov-navy text-white text-xs font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-gov-navy/90 transition-all">
+                <Save size={14} /> Save Config
+             </button>
+             <button onClick={onClose} className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-500 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-900 transition-all">
+                Cancel
+             </button>
+          </div>
+        </div>
       </div>
     </div>
   );

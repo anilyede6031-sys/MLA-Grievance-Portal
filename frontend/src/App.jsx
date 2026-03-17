@@ -12,6 +12,9 @@ import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import UserLogin from './pages/UserLogin';
 import UserSignup from './pages/UserSignup';
+import EmergencyContacts from './pages/EmergencyContacts';
+import AIAssistant from './pages/AIAssistant';
+import ProjectMap from './pages/ProjectMap';
 
 export default function App() {
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true');
@@ -40,6 +43,9 @@ export default function App() {
             <Route path="/admin/login" element={<Layout darkMode={darkMode} setDarkMode={handleDarkMode}><AdminLogin /></Layout>} />
             <Route path="/login" element={<Layout darkMode={darkMode} setDarkMode={handleDarkMode}><UserLogin /></Layout>} />
             <Route path="/signup" element={<Layout darkMode={darkMode} setDarkMode={handleDarkMode}><UserSignup /></Layout>} />
+            <Route path="/emergency" element={<EmergencyContacts />} />
+            <Route path="/ai-assistant" element={<AIAssistant />} />
+            <Route path="/live-map" element={<ProjectMap />} />
 
             {/* Admin - protected */}
             <Route path="/admin" element={

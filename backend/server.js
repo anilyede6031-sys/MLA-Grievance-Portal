@@ -9,6 +9,7 @@ const fs = require('fs');
 
 const authRoutes = require('./routes/auth');
 const complaintRoutes = require('./routes/complaints');
+const projectRoutes = require('./routes/projects');
 
 const app = express();
 
@@ -70,9 +71,36 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/complaints', complaintRoutes);
+app.use('/api/projects', projectRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ success: true, message: 'MLA Grievance API is running 🇮🇳' }));
+
+// Seeding Route
+app.get('/api/seed', async (req, res) => {
+  try {
+    const Project = require('./models/Project');
+    const Complaint = require('./models/Complaint');
+    const User = require('./models/User');
+
+    // Clear existing (optional, but good for demo)
+    await Project.deleteMany({});
+    
+    // Seed Projects
+    const projects = [
+      { name: 'Daund-Patas Road Expansion', department: 'Road', budget: 12.5, status: 'under_process', description: 'Expanding the main highway connector for better traffic flow.', expectedCompletionDate: new Date('2025-06-30') },
+      { name: 'Kurumb-Kushali Water Pipeline', department: 'Water', budget: 8.2, status: 'complete', description: 'Drinking water pipeline for 5 villages.', expectedCompletionDate: new Date('2024-12-15') },
+      { name: 'Zilla Parishad School Renovation', department: 'Education', budget: 4.5, status: 'under_process', description: 'Modernizing 10 rural schools with digital labs.', expectedCompletionDate: new Date('2025-03-20') },
+      { name: 'Rural Health Center Upgrade', department: 'Health', budget: 6.8, status: 'incomplete', description: 'Adding 20 beds and new medical equipment.', expectedCompletionDate: new Date('2025-09-10') },
+      { name: 'Agriculture Canal Maintenance', department: 'Agriculture', budget: 3.2, status: 'complete', description: 'Cleaning and lining of irrigation canals.', expectedCompletionDate: new Date('2024-10-05') },
+    ];
+    await Project.insertMany(projects);
+
+    res.json({ success: true, message: 'Database seeded with demo projects!' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
 
 // Error handler
 app.use((err, req, res, next) => {
@@ -86,21 +114,21 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
 
 (async () => {
   try {
-    // Use real MongoDB if URI is provided, else fallback to memory (for local tests)
-    const uri = process.env.MONGODB_URI;
+    let uri = process.env.MONGODB_URI;
     
-    if (!uri) {
-      console.error('❌ MONGODB_URI environment variable is missing.');
-      process.exit(1);
+    if (process.env.USE_MEMORY_DB === 'true' || !uri) {
+      console.log('📦 Starting In-Memory MongoDB...');
+      const { MongoMemoryServer } = require('mongodb-memory-server');
+      const mongod = await MongoMemoryServer.create();
+      uri = mongod.getUri();
+      console.log('📦 In-Memory MongoDB URI:', uri);
     }
 
-    // Disable buffering so requests fail immediately if DB is disconnected
+    // Disable buffering
     mongoose.set('bufferCommands', false);
     
-    await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
-    });
-    console.log('✅ MongoDB (In-Memory) connected at', uri);
+    await mongoose.connect(uri);
+    console.log('✅ MongoDB connected');
 
     // Seed default super admin and citizen if not exists
     const User = require('./models/User');
