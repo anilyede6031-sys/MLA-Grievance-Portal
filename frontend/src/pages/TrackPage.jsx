@@ -125,7 +125,6 @@ export default function TrackPage() {
           </button>
         </div>
         <div className="flex justify-between items-center mt-2">
-          <p className="text-xs text-gray-400">💡 {t.searchHint}</p>
         </div>
       </div>
 
