@@ -8,19 +8,29 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 router.get('/config-check', async (req, res) => {
   let ping = 'pending';
+  let authorizedModels = [];
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
-    const result = await model.generateContent("ping");
-    ping = 'Success (2.0-Exp): ' + result.response.text().substring(0, 10);
+    if (!process.env.GEMINI_API_KEY) throw new Error("Key missing");
+    
+    // 1. List Models to see what is actually available
+    const listResponse = await axios.get(`https://generativelanguage.googleapis.com/v1/models?key=${process.env.GEMINI_API_KEY}`);
+    authorizedModels = listResponse.data.models.map(m => m.name.replace('models/', ''));
+    
+    // 2. Try the first one that looks like Flash or Pro
+    const bestModel = authorizedModels.find(m => m.includes('flash')) || authorizedModels[0];
+    const pingResponse = await axios.post(`https://generativelanguage.googleapis.com/v1/models/${bestModel}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+      contents: [{ parts: [{ text: "ping" }] }]
+    });
+    ping = `Success (${bestModel}): ` + pingResponse.data.candidates[0].content.parts[0].text.substring(0, 10);
   } catch (err) {
-    ping = 'Error: ' + (err.message || 'Unknown error');
+    ping = 'Error: ' + (err.response?.data?.error?.message || err.message);
   }
   
   res.json({
     success: true,
-    implementation: "SDK-Gemini-2.0-Exp",
+    implementation: "REST-Discovery-v1",
     hasKey: !!process.env.GEMINI_API_KEY,
-    keyLength: process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.length : 0,
+    authorizedModels,
     ping
   });
 });
