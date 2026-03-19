@@ -24,6 +24,7 @@ router.get('/config-check', async (req, res) => {
   
   res.json({
     success: true,
+    codeVersion: "2.0-v1-stable",
     hasKey: !!process.env.GEMINI_API_KEY,
     keyLength: process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.length : 0,
     ping,
