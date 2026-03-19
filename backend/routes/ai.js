@@ -8,34 +8,26 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 router.get('/config-check', async (req, res) => {
   let ping = 'pending';
-  let models = [];
+  let availableModels = 'none';
   try {
-    // List models
-    // const list = await genAI.listModels(); // This might not be available in all SDK versions
-    // models = list.map(m => m.name);
+    // Try listModels (Note: This might require specific permissions)
+    // const modelList = await genAI.listModels();
+    // availableModels = modelList.map(m => m.name).join(', ');
     
-    // Simplest ping with "gemini-pro"
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    // Test gemini-1.5-flash (Standard)
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent("ping");
-    ping = 'gemini-pro success: ' + result.response.text().substring(0, 10);
+    ping = 'success: ' + result.response.text().substring(0, 10);
   } catch (err) {
-    ping = 'gemini-pro error: ' + (err.message || 'Unknown error');
-    
-    // Try "gemini-1.5-pro"
-    try {
-      const model2 = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-      const result2 = await model2.generateContent("ping");
-      ping += ' | gemini-1.5-pro success: ' + result2.response.text().substring(0, 10);
-    } catch (err2) {
-      ping += ' | gemini-1.5-pro error: ' + (err2.message || 'Unknown error');
-    }
+    ping = 'error: ' + (err.message || 'Unknown error');
   }
   
   res.json({
     success: true,
     hasKey: !!process.env.GEMINI_API_KEY,
     keyLength: process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.length : 0,
-    ping
+    ping,
+    hint: "If 404, check if the key is bound to a specific project or region in Google AI Studio."
   });
 });
 
