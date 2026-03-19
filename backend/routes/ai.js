@@ -9,7 +9,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 router.get('/config-check', async (req, res) => {
   let ping = 'pending';
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
     const result = await model.generateContent("ping");
     ping = 'success: ' + result.response.text().substring(0, 10);
   } catch (err) {
@@ -64,7 +64,7 @@ router.post('/chat', async (req, res) => {
     const complaintStats = stats[0] || { total: 0, pending: 0, resolved: 0 };
     const projectSummary = projects.map(p => `- ${p.name}: Budget ₹${p.budget} Cr, Status: ${p.status}`).join('\n');
 
-    // 2. Construct System Prompt
+    // 3. Construct System Prompt
     const systemPrompt = `
 You are the "Daund MLA Digital Assistant", representing the office of MLA Rahul Kul. 
 Your goal is to provide accurate, transparent, and helpful information to the citizens of Daund constituency.
@@ -87,13 +87,13 @@ INSTRUCTIONS:
 User Message: ${message}
 `;
 
-    // 3. Call Gemini
+    // 4. Call Gemini
     if (!process.env.GEMINI_API_KEY) {
       console.error('CRITICAL: GEMINI_API_KEY is missing from environment variables!');
       return res.status(500).json({ success: false, message: 'AI configuration error. Please check backend environment variables.' });
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
     const result = await model.generateContent(systemPrompt);
     const responseText = result.response.text();
 
