@@ -36,7 +36,7 @@ export default function HomePage() {
     try {
       const res = await api.get('/complaints/public-stats');
       if (res.data.success) {
-        setStats(res.data);
+        setStats(res.data.stats || { total: 0, pending: 0, inProgress: 0, resolved: 0 });
       }
     } catch (error) {
       console.error("Error fetching stats:", error);
