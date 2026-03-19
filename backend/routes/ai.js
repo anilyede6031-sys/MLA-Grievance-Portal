@@ -70,6 +70,11 @@ User Message: ${message}
 `;
 
     // 3. Call Gemini
+    if (!process.env.GEMINI_API_KEY) {
+      console.error('CRITICAL: GEMINI_API_KEY is missing from environment variables!');
+      return res.status(500).json({ success: false, message: 'AI configuration error. Please check backend environment variables.' });
+    }
+
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent(systemPrompt);
     const responseText = result.response.text();
@@ -80,8 +85,8 @@ User Message: ${message}
     });
 
   } catch (err) {
-    console.error('Gemini AI Error:', err);
-    res.status(500).json({ success: false, message: 'AI Assistant is temporarily unavailable. Please try again later.' });
+    console.error('Gemini AI Runtime Error:', err.message || err);
+    res.status(500).json({ success: false, message: 'AI Assistant encountered an error. Please try again later.' });
   }
 });
 
