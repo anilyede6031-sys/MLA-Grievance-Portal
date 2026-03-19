@@ -96,13 +96,16 @@ User Message: ${message || 'Please analyze this image/location.'}`;
       promptParts.push(fileToGenerativePart(file.buffer, file.mimetype));
     }
 
-    // High-Availability Model Fallback Logic
-    const modelsToTry = ["gemini-2.0-flash", "gemini-2.0-flash-exp", "gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-pro"];
+    // High-Availability Model Fallback Logic (Aggressive)
+    const modelsToTry = ["gemini-2.0-flash", "gemini-2.0-flash-exp", "gemini-1.5-flash-latest", "gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-pro"];
     let lastError = null;
     let text = "";
 
     for (const modelName of modelsToTry) {
       try {
+        // Skip text-only models if image is uploaded
+        if (file && (modelName === "gemini-pro" || modelName === "gemini-1.0-pro")) continue;
+
         const model = genAI.getGenerativeModel({ model: modelName, safetySettings });
         const result = await model.generateContent(promptParts);
         const response = await result.response;
@@ -114,9 +117,8 @@ User Message: ${message || 'Please analyze this image/location.'}`;
       } catch (err) {
         console.error(`Model ${modelName} failed:`, err.message);
         lastError = err;
-        // Continue to next model if it's a quota (429) or not found (404)
-        if (err.message?.includes('429') || err.message?.includes('404')) continue;
-        break; // Serious error, stop trying
+        // Keep trying other models until something works
+        continue;
       }
     }
 
@@ -131,10 +133,13 @@ User Message: ${message || 'Please analyze this image/location.'}`;
 
   } catch (err) {
     console.error('Final AI Assistant Error:', err.message || err);
+    const isQuota = err.message?.includes('429') || err.message?.includes('quota');
     res.status(500).json({ 
       success: false, 
       message: 'AI Assistant Error.',
-      hint: 'The AI is currently under high load or daily quota limits. Please try again later.' 
+      hint: isQuota 
+        ? 'Saheb, the daily AI quota (20 messages) has been reached. Please upgrade to the Gemini Paid Plan in Google AI Studio for unlimited access.'
+        : 'The AI is currently under high load. Please try again later.' 
     });
   }
 });
