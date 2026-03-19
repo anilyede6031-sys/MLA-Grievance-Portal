@@ -52,84 +52,28 @@ export default function AIAssistant() {
     setInput('');
     setIsTyping(true);
 
-    const checkTracking = async (id) => {
+    // Real AI Response Logic using Gemini
+    (async () => {
       try {
-        const res = await api.get(`/complaints/track?complaintId=${id}`);
-        if (res.data.success && res.data.complaints.length > 0) {
-          const c = res.data.complaints[0];
-          return /[\u0900-\u097F]/.test(text)
-            ? `तुमच्या तक्रारीची (#${id}) सद्यस्थिती: ${c.status === 'Pending' ? 'प्रलंबित' : c.status === 'Resolved' ? 'सुटली आहे' : 'प्रक्रियेत आहे'}. विभागाचे नाव: ${c.department}.`
-            : `Status for Complaint #${id}: ${c.status}. Department: ${c.department}. Last updated: ${new Date(c.updatedAt).toLocaleDateString('en-IN')}.`;
-        }
-        return null;
-      } catch { return null; }
-    };
-
-    // AI Response Logic
-    setTimeout(async () => {
-      let reply = '';
-      const lowText = text.toLowerCase();
-      const isMarathi = /[\u0900-\u097F]/.test(text);
-
-      // 1. Check for Complaint ID pattern (e.g., GRV-MMV31NZE-845E)
-      const idMatch = text.match(/(GRV-[A-Z0-9-]+)/i);
-      if (idMatch) {
-        const trackReply = await checkTracking(idMatch[1].toUpperCase());
-        if (trackReply) {
-          setMessages(prev => [...prev, { id: Date.now() + 1, type: 'bot', text: trackReply }]);
-          setIsTyping(false);
-          return;
-        }
-      }
-
-      if (lowText.includes('report') || lowText.includes('analysis') || lowText.includes('अहवाल') || lowText.includes('आकडेवारी') || lowText.includes('सर्व माहिती') || lowText.includes('प्रगती')) {
-        reply = isMarathi
-          ? `दौंड विकास अहवाल: एकूण निधी ₹${projSummary.totalBudget} कोटी (${projSummary.totalProjects} प्रकल्प). तक्रारी: एकूण ${stats.total}, त्यापैकी ${stats.resolved} सुटल्या आहेत. सर्वाधिक तक्रारी ${stats.byTaluka[0]?._id || 'दौंड'} तालुक्यातून आहेत.`
-          : `Daund Development Report: Total Fund ₹${projSummary.totalBudget} Cr (${projSummary.totalProjects} Projects). Complaints: ${stats.total} total, ${stats.resolved} resolved. Highest issues reported in ${stats.byTaluka[0]?._id || 'Daund'} Taluka.`;
-      } else if ((lowText.includes('total') || lowText.includes('एकूण')) && (lowText.includes('complaint') || lowText.includes('तक्रार'))) {
-        reply = isMarathi
-          ? `आतापर्यंत एकूण ${stats.total} तक्रारी प्राप्त झाल्या आहेत, त्यापैकी ${stats.resolved} तक्रारींचे यशस्वीरित्या निवारण करण्यात आले आहे.`
-          : `We have received a total of ${stats.total} complaints, and ${stats.resolved} have been successfully resolved.`;
-      } else if (lowText.includes('budget') || lowText.includes('निधी') || lowText.includes('खर्च')) {
-        const topDept = Object.entries(projSummary.expenditure).sort((a,b) => b[1] - a[1])[0];
-        reply = isMarathi
-          ? `दौंडमधील एकूण विकास निधी ₹${projSummary.totalBudget} कोटी आहे. सर्वाधिक खर्च ${topDept ? topDept[0] : 'रस्ते'} विभागावर (₹${topDept ? topDept[1] : 0} कोटी) केला जात आहे.`
-          : `The total development budget for Daund is ₹${projSummary.totalBudget} Cr. The highest allocation is for ${topDept ? topDept[0] : 'Roads'} (₹${topDept ? topDept[1] : 0} Cr).`;
-      } else if (lowText.includes('taluka') || lowText.includes('तालुका') || lowText.includes('विभाग') || lowText.includes('माहिती') || lowText.includes('मदत')) {
-        const topTaluka = stats.byTaluka[0];
-        const topDept = stats.byDepartment[0];
-        reply = isMarathi
-          ? `प्रादेशिक माहिती: सर्वाधिक तक्रारी ${topTaluka ? topTaluka._id : 'दौंड'} तालुक्यातून (${topTaluka ? topTaluka.count : 0}) आहेत. सर्वाधिक तक्रारी ${topDept ? topDept._id : 'रस्ते'} विभागाशी संबंधित आहेत.`
-          : `Regional Data: Most complaints are from ${topTaluka ? topTaluka._id : 'Daund'} (${topTaluka ? topTaluka.count : 0}). The most affected department is ${topDept ? topDept._id : 'Roads'}.`;
-      } else if (lowText.includes('complaint') || lowText.includes('तक्रार')) {
-        reply = isMarathi 
-          ? "तक्रार नोंदवण्यासाठी, मुख्य पृष्ठावरील 'तक्रार नोंदवा' वर क्लिक करा. तुम्हाला तुमची माहिती आणि समस्येचे वर्णन द्यावे लागेल. सबमिट केल्यानंतर, तुम्हाला एक युनिक ट्रॅकिंग आयडी मिळेल."
-          : "To file a complaint, click on 'File a Complaint' on the home page. You'll need to provide your details and a description of the issue. After submission, you will receive a unique Tracking ID.";
-      } else if (lowText.includes('project') || lowText.includes('प्रकल्प') || lowText.includes('काम')) {
-        if (projects.length > 0) {
-          const featured = projects.slice(0, 3);
-          const projectList = featured.map(p => `- ${p.name} (Budget: ₹${p.budget} Cr, Status: ${p.status})`).join('\n');
-          reply = isMarathi
-            ? `दौंडमध्ये सध्या अनेक प्रकल्प सुरू आहेत. काही महत्त्वाचे प्रकल्प:\n${projectList.replace(/Budget/g, 'निधी').replace(/Status/g, 'स्थिती')}\n\nअधिक माहितीसाठी मुख्य पृष्ठावरील 'Live Map' तपासा.`
-            : `There are several ongoing projects in Daund. Some key projects include:\n${projectList}\n\nYou can see the full list on the 'Live Map' on our HomePage.`;
+        const res = await api.post('/ai/chat', { message: text });
+        if (res.data.success) {
+          setMessages(prev => [...prev, { id: Date.now() + 1, type: 'bot', text: res.data.reply }]);
         } else {
-          reply = isMarathi
-            ? "सध्या प्रकल्पांची माहिती उपलब्ध नाही. कृपया थोड्या वेळाने प्रयत्न करा."
-            : "Project information is currently unavailable. Please try again later.";
+          throw new Error("AI failed");
         }
-      } else if (lowText.includes('emergency') || lowText.includes('आपत्कालीन') || lowText.includes('मदत')) {
-        reply = isMarathi
-          ? "तुम्ही आमच्या 'आपत्कालीन संपर्क' पृष्ठावर सर्व महत्वाचे नंबर (पोलीस, रुग्णवाहिका, अग्निशमन दल) शोधू शकता. मी तुम्हाला तिथे घेऊन जाऊ का?"
-          : "You can find all emergency contacts (Police, Ambulance, Fire) on our dedicated 'Emergency Contacts' page. Would you like me to show them?";
-      } else {
-        reply = isMarathi
-          ? "क्षमस्व, मला समजले नाही. तुम्ही 'तक्रार कशी नोंदवायची', 'दौंडमधील प्रकल्प', 'आकडेवारी' किंवा 'आपत्कालीन संपर्क' याबद्दल विचारू शकता."
-          : "I'm sorry, I'm still learning. You can ask me about 'how to file a complaint', 'projects in Daund', 'statistics', or 'emergency contacts'.";
+      } catch (err) {
+        console.error("AI Assistant Error:", err);
+        setMessages(prev => [...prev, { 
+          id: Date.now() + 1, 
+          type: 'bot', 
+          text: /[\u0900-\u097F]/.test(text)
+            ? "क्षमस्व, एआय असिस्टंट सध्या अनुपलब्ध आहे. कृपया थोड्या वेळाने प्रयत्न करा किंवा थेट 'तक्रार नोंदवा' वर जा."
+            : "I'm sorry, the AI Assistant is currently experiencing high load. Please try again in a few moments or use our manual tracking features." 
+        }]);
+      } finally {
+        setIsTyping(false);
       }
-
-      setMessages(prev => [...prev, { id: Date.now() + 1, type: 'bot', text: reply }]);
-      setIsTyping(false);
-    }, 1000);
+    })();
   };
 
   const quickActions = [

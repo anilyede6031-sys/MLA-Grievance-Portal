@@ -10,6 +10,7 @@ const fs = require('fs');
 const authRoutes = require('./routes/auth');
 const complaintRoutes = require('./routes/complaints');
 const projectRoutes = require('./routes/projects');
+const aiRoutes = require('./routes/ai');
 
 const app = express();
 
@@ -72,6 +73,7 @@ app.use((req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/complaints', complaintRoutes);
 app.use('/api/projects', projectRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ success: true, message: 'MLA Grievance API is running 🇮🇳' }));
