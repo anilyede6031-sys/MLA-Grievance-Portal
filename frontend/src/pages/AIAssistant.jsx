@@ -81,7 +81,11 @@ export default function AIAssistant() {
         }
       }
 
-      if ((lowText.includes('total') || lowText.includes('एकूण')) && (lowText.includes('complaint') || lowText.includes('तक्रार'))) {
+      if (lowText.includes('report') || lowText.includes('analysis') || lowText.includes('अहवाल') || lowText.includes('आकडेवारी') || lowText.includes('सर्व माहिती')) {
+        reply = isMarathi
+          ? `दौंड विकास अहवाल: एकूण निधी ₹${projSummary.totalBudget} कोटी (${projSummary.totalProjects} प्रकल्प). तक्रारी: एकूण ${stats.total}, त्यापैकी ${stats.resolved} सुटल्या आहेत. सर्वाधिक तक्रारी ${stats.byTaluka[0]?._id || 'दौंड'} तालुक्यातून आहेत.`
+          : `Daund Development Report: Total Fund ₹${projSummary.totalBudget} Cr (${projSummary.totalProjects} Projects). Complaints: ${stats.total} total, ${stats.resolved} resolved. Highest issues reported in ${stats.byTaluka[0]?._id || 'Daund'} Taluka.`;
+      } else if ((lowText.includes('total') || lowText.includes('एकूण')) && (lowText.includes('complaint') || lowText.includes('तक्रार'))) {
         reply = isMarathi
           ? `आतापर्यंत एकूण ${stats.total} तक्रारी प्राप्त झाल्या आहेत, त्यापैकी ${stats.resolved} तक्रारींचे यशस्वीरित्या निवारण करण्यात आले आहे.`
           : `We have received a total of ${stats.total} complaints, and ${stats.resolved} have been successfully resolved.`;
@@ -90,11 +94,12 @@ export default function AIAssistant() {
         reply = isMarathi
           ? `दौंडमधील एकूण विकास निधी ₹${projSummary.totalBudget} कोटी आहे. सर्वाधिक खर्च ${topDept ? topDept[0] : 'रस्ते'} विभागावर (₹${topDept ? topDept[1] : 0} कोटी) केला जात आहे.`
           : `The total development budget for Daund is ₹${projSummary.totalBudget} Cr. The highest allocation is for ${topDept ? topDept[0] : 'Roads'} (₹${topDept ? topDept[1] : 0} Cr).`;
-      } else if (lowText.includes('taluka') || lowText.includes('तालुका')) {
+      } else if (lowText.includes('taluka') || lowText.includes('तालुका') || lowText.includes('विभाग')) {
         const topTaluka = stats.byTaluka[0];
+        const topDept = stats.byDepartment[0];
         reply = isMarathi
-          ? `तक्रारींच्या आकडेवारीनुसार, सर्वाधिक तक्रारी ${topTaluka ? topTaluka._id : 'दौंड'} तालुक्यातून (${topTaluka ? topTaluka.count : 0}) आल्या आहेत.`
-          : `According to data, ${topTaluka ? topTaluka._id : 'Daund'} has the highest number of complaints (${topTaluka ? topTaluka.count : 0}).`;
+          ? `प्रादेशिक माहिती: सर्वाधिक तक्रारी ${topTaluka ? topTaluka._id : 'दौंड'} तालुक्यातून (${topTaluka ? topTaluka.count : 0}) आहेत. सर्वाधिक तक्रारी ${topDept ? topDept._id : 'रस्ते'} विभागाशी संबंधित आहेत.`
+          : `Regional Data: Most complaints are from ${topTaluka ? topTaluka._id : 'Daund'} (${topTaluka ? topTaluka.count : 0}). The most affected department is ${topDept ? topDept._id : 'Roads'}.`;
       } else if (lowText.includes('complaint') || lowText.includes('तक्रार')) {
         reply = isMarathi 
           ? "तक्रार नोंदवण्यासाठी, मुख्य पृष्ठावरील 'तक्रार नोंदवा' वर क्लिक करा. तुम्हाला तुमची माहिती आणि समस्येचे वर्णन द्यावे लागेल. सबमिट केल्यानंतर, तुम्हाला एक युनिक ट्रॅकिंग आयडी मिळेल."
