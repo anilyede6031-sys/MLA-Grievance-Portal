@@ -88,8 +88,8 @@ Core Instructions:
 
 User Message: ${message || 'Please analyze this image/location.'}`;
 
-    // AI Model Integration (Version: Daund-Vikas-Mitra-Multimodal-Unlocked)
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash", safetySettings });
+    // AI Model Integration (Version: Daund-Vikas-Mitra-Multimodal-Stable)
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySettings });
     
     const promptParts = [systemPrompt];
     if (file) {
@@ -113,8 +113,8 @@ User Message: ${message || 'Please analyze this image/location.'}`;
     console.error('Gemini SDK Error:', err.message || err);
     res.status(500).json({ 
       success: false, 
-      message: 'AI Assistant Error: ' + (err.message || 'Unknown'),
-      hint: 'DEBUG_STACK: ' + (err.stack || 'No stack')
+      message: 'AI Assistant Error.',
+      hint: 'Please check your AI configuration or quota.' 
     });
   }
 });

@@ -284,9 +284,10 @@ export default function AIAssistant() {
             />
             <button 
               onClick={startListening}
-              className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${isListening ? 'bg-red-500 text-white animate-bounce' : 'bg-gov-navy text-white hover:bg-gov-blue shadow-lg shadow-gov-navy/20'}`}
+              className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all relative ${isListening ? 'bg-red-500 text-white shadow-lg shadow-red-500/40' : 'bg-gov-navy text-white hover:bg-gov-blue shadow-lg shadow-gov-navy/20'}`}
             >
-              <Mic size={20} />
+              {isListening && <span className="absolute inset-0 rounded-2xl bg-red-500 animate-ping opacity-75"></span>}
+              <Mic size={20} className={isListening ? 'animate-pulse' : ''} />
             </button>
             <button 
               onClick={() => handleSend()}
