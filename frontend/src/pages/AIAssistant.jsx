@@ -70,7 +70,6 @@ export default function AIAssistant() {
       let reply = '';
       const lowText = text.toLowerCase();
       const isMarathi = /[\u0900-\u097F]/.test(text);
-      console.log("AI Input:", text, "Marathi:", isMarathi, "LowText:", lowText);
 
       // 1. Check for Complaint ID pattern (e.g., GRV-MMV31NZE-845E)
       const idMatch = text.match(/(GRV-[A-Z0-9-]+)/i);
@@ -83,7 +82,7 @@ export default function AIAssistant() {
         }
       }
 
-      if (lowText.includes('report') || lowText.includes('analysis') || lowText.includes('अहवाल') || lowText.includes('आकडेवारी') || lowText.includes('सर्व माहिती')) {
+      if (lowText.includes('report') || lowText.includes('analysis') || lowText.includes('अहवाल') || lowText.includes('आकडेवारी') || lowText.includes('सर्व माहिती') || lowText.includes('प्रगती')) {
         reply = isMarathi
           ? `दौंड विकास अहवाल: एकूण निधी ₹${projSummary.totalBudget} कोटी (${projSummary.totalProjects} प्रकल्प). तक्रारी: एकूण ${stats.total}, त्यापैकी ${stats.resolved} सुटल्या आहेत. सर्वाधिक तक्रारी ${stats.byTaluka[0]?._id || 'दौंड'} तालुक्यातून आहेत.`
           : `Daund Development Report: Total Fund ₹${projSummary.totalBudget} Cr (${projSummary.totalProjects} Projects). Complaints: ${stats.total} total, ${stats.resolved} resolved. Highest issues reported in ${stats.byTaluka[0]?._id || 'Daund'} Taluka.`;
@@ -96,7 +95,7 @@ export default function AIAssistant() {
         reply = isMarathi
           ? `दौंडमधील एकूण विकास निधी ₹${projSummary.totalBudget} कोटी आहे. सर्वाधिक खर्च ${topDept ? topDept[0] : 'रस्ते'} विभागावर (₹${topDept ? topDept[1] : 0} कोटी) केला जात आहे.`
           : `The total development budget for Daund is ₹${projSummary.totalBudget} Cr. The highest allocation is for ${topDept ? topDept[0] : 'Roads'} (₹${topDept ? topDept[1] : 0} Cr).`;
-      } else if (lowText.includes('taluka') || lowText.includes('तालुका') || lowText.includes('विभाग')) {
+      } else if (lowText.includes('taluka') || lowText.includes('तालुका') || lowText.includes('विभाग') || lowText.includes('माहिती') || lowText.includes('मदत')) {
         const topTaluka = stats.byTaluka[0];
         const topDept = stats.byDepartment[0];
         reply = isMarathi
@@ -124,11 +123,10 @@ export default function AIAssistant() {
           : "You can find all emergency contacts (Police, Ambulance, Fire) on our dedicated 'Emergency Contacts' page. Would you like me to show them?";
       } else {
         reply = isMarathi
-          ? "क्षमस्व, मला समजले नाही. अधिक मदतीसाठी खालील बटणे वापरा."
-          : "I'm sorry, I'm still learning. For specific help, you can use the quick actions below.";
+          ? "क्षमस्व, मला समजले नाही. तुम्ही 'तक्रार कशी नोंदवायची', 'दौंडमधील प्रकल्प', 'आकडेवारी' किंवा 'आपत्कालीन संपर्क' याबद्दल विचारू शकता."
+          : "I'm sorry, I'm still learning. You can ask me about 'how to file a complaint', 'projects in Daund', 'statistics', or 'emergency contacts'.";
       }
 
-      console.log("AI Reply Generated:", reply);
       setMessages(prev => [...prev, { id: Date.now() + 1, type: 'bot', text: reply }]);
       setIsTyping(false);
     }, 1000);
