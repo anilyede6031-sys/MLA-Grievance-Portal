@@ -7,29 +7,32 @@ const Complaint = require('../models/Complaint');
 const GEMINI_REST_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent';
 
 router.get('/config-check', async (req, res) => {
-  let ping = 'pending';
-  try {
-    if (!process.env.GEMINI_API_KEY) throw new Error("Key missing in ENV");
-    
-    const response = await axios.post(`${GEMINI_REST_URL}?key=${process.env.GEMINI_API_KEY}`, {
-      contents: [{ parts: [{ text: "ping" }] }]
-    });
-    
-    if (response.data?.candidates?.[0]?.content?.parts?.[0]?.text) {
-      ping = 'REST Success: ' + response.data.candidates[0].content.parts[0].text.substring(0, 10);
-    } else {
-      ping = 'REST Success (No text in response)';
+  let results = {};
+  const endpoints = [
+    { v: 'v1', m: 'gemini-1.5-flash' },
+    { v: 'v1', m: 'gemini-1.5-flash-latest' },
+    { v: 'v1beta', m: 'gemini-1.5-flash' },
+    { v: 'v1', m: 'gemini-pro' }
+  ];
+
+  for (const ep of endpoints) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/${ep.v}/models/${ep.m}:generateContent?key=${process.env.GEMINI_API_KEY}`;
+      const response = await axios.post(url, {
+        contents: [{ parts: [{ text: "ping" }] }]
+      });
+      results[`${ep.v}-${ep.m}`] = 'Success: ' + response.data.candidates[0].content.parts[0].text.substring(0, 10);
+    } catch (err) {
+      results[`${ep.v}-${ep.m}`] = 'Error: ' + (err.response?.status || err.message);
     }
-  } catch (err) {
-    ping = 'REST Error: ' + (err.response?.data?.error?.message || err.message);
   }
   
   res.json({
     success: true,
-    implementation: "REST-v1-Stable-Final",
+    implementation: "Multi-Probe-REST",
     hasKey: !!process.env.GEMINI_API_KEY,
     keyLength: process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.length : 0,
-    ping
+    results
   });
 });
 
