@@ -14,17 +14,21 @@ export default function AIAssistant() {
   const scrollRef = useRef(null);
 
   const [projects, setProjects] = useState([]);
-
+  const [stats, setStats] = useState({ total: 0, resolved: 0, pending: 0 });
   useEffect(() => {
-    const fetchProjects = async () => {
+    const fetchData = async () => {
       try {
-        const res = await api.get('/projects');
-        if (res.data.success) setProjects(res.data.projects);
+        const [projRes, statsRes] = await Promise.all([
+          api.get('/projects'),
+          api.get('/complaints/public-stats')
+        ]);
+        if (projRes.data.success) setProjects(projRes.data.projects);
+        if (statsRes.data.success) setStats(statsRes.data.stats);
       } catch (err) {
-        console.error("Failed to fetch projects for AI:", err);
+        console.error("Failed to fetch AI data:", err);
       }
     };
-    fetchProjects();
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -39,13 +43,41 @@ export default function AIAssistant() {
     setInput('');
     setIsTyping(true);
 
+    const checkTracking = async (id) => {
+      try {
+        const res = await api.get(`/complaints/track?complaintId=${id}`);
+        if (res.data.success && res.data.complaints.length > 0) {
+          const c = res.data.complaints[0];
+          return /[\u0900-\u097F]/.test(text)
+            ? `तुमच्या तक्रारीची (#${id}) सद्यस्थिती: ${c.status === 'Pending' ? 'प्रलंबित' : c.status === 'Resolved' ? 'सुटली आहे' : 'प्रक्रियेत आहे'}. विभागाचे नाव: ${c.department}.`
+            : `Status for Complaint #${id}: ${c.status}. Department: ${c.department}. Last updated: ${new Date(c.updatedAt).toLocaleDateString('en-IN')}.`;
+        }
+        return null;
+      } catch { return null; }
+    };
+
     // AI Response Logic
-    setTimeout(() => {
+    setTimeout(async () => {
       let reply = '';
       const lowText = text.toLowerCase();
       const isMarathi = /[\u0900-\u097F]/.test(text);
 
-      if (lowText.includes('complaint') || lowText.includes('तक्रार')) {
+      // 1. Check for Complaint ID pattern (e.g., GRV-MMV31NZE-845E)
+      const idMatch = text.match(/(GRV-[A-Z0-9-]+)/i);
+      if (idMatch) {
+        const trackReply = await checkTracking(idMatch[1].toUpperCase());
+        if (trackReply) {
+          setMessages(prev => [...prev, { id: Date.now() + 1, type: 'bot', text: trackReply }]);
+          setIsTyping(false);
+          return;
+        }
+      }
+
+      if ((lowText.includes('total') || lowText.includes('एकूण')) && (lowText.includes('complaint') || lowText.includes('तक्रार'))) {
+        reply = isMarathi
+          ? `आतापर्यंत एकूण ${stats.total} तक्रारी प्राप्त झाल्या आहेत, त्यापैकी ${stats.resolved} तक्रारींचे यशस्वीरित्या निवारण करण्यात आले आहे.`
+          : `We have received a total of ${stats.total} complaints, and ${stats.resolved} have been successfully resolved.`;
+      } else if (lowText.includes('complaint') || lowText.includes('तक्रार')) {
         reply = isMarathi 
           ? "तक्रार नोंदवण्यासाठी, मुख्य पृष्ठावरील 'तक्रार नोंदवा' वर क्लिक करा. तुम्हाला तुमची माहिती आणि समस्येचे वर्णन द्यावे लागेल. सबमिट केल्यानंतर, तुम्हाला एक युनिक ट्रॅकिंग आयडी मिळेल."
           : "To file a complaint, click on 'File a Complaint' on the home page. You'll need to provide your details and a description of the issue. After submission, you will receive a unique Tracking ID.";
