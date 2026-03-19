@@ -142,13 +142,16 @@ function Navbar({ darkMode, setDarkMode }) {
   );
 }
 
+import HelpWidget from './HelpWidget';
+
 export default function Layout({ children, darkMode, setDarkMode }) {
   const { user } = useAuth();
   return (
     <div className={darkMode ? 'dark' : ''}>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col relative text-gray-950 dark:text-gray-50">
         <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
         <main className="flex-1 animate-fade-in">{children}</main>
+        <HelpWidget />
         <footer className="bg-gov-navy text-white py-8 mt-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
