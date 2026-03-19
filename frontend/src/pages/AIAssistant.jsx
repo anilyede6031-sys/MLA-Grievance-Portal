@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, User, Bot, ArrowLeft, MessageSquare, List, AlertTriangle, X, Mic, Volume2, VolumeX, Camera, Paperclip } from 'lucide-react';
+import { Send, User, Bot, ArrowLeft, MessageSquare, List, AlertTriangle, X, Mic, Volume2, VolumeX, Camera, Paperclip, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLang } from '../context/LangContext';
 import api from '../utils/api';
@@ -14,8 +14,25 @@ export default function AIAssistant() {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [location, setLocation] = useState(null);
   const scrollRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  // Geolocation
+  const getLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition((pos) => {
+      setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      setMessages(prev => [...prev, { id: Date.now(), type: 'user', text: `📍 Location Shared: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}` }]);
+      handleSend(`My location is shared. What projects are near me?`, null, { lat: pos.coords.latitude, lng: pos.coords.longitude });
+    }, (err) => {
+      console.error(err);
+      alert("Unable to retrieve location.");
+    });
+  };
 
   // Speech Recognition Setup
   const startListening = () => {
@@ -88,8 +105,8 @@ export default function AIAssistant() {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const handleSend = (text = input, image = selectedImage) => {
-    if (!text.trim() && !image) return;
+  const handleSend = (text = input, image = selectedImage, loc = location) => {
+    if (!text.trim() && !image && !loc) return;
 
     const userMsg = { 
       id: Date.now(), 
@@ -97,17 +114,24 @@ export default function AIAssistant() {
       text, 
       image: image ? URL.createObjectURL(image) : null 
     };
-    setMessages(prev => [...prev, userMsg]);
+    if (text !== input) {
+        // Only add message if it's not a duplicate from getLocation
+        setMessages(prev => [...prev, userMsg]);
+    } else {
+        setMessages(prev => [...prev, userMsg]);
+    }
+    
     setInput('');
     setSelectedImage(null);
     setIsTyping(true);
 
-    // Real AI Response Logic using Gemini Multimodal
+    // Real AI Response Logic using Gemini Multimodal + Location
     (async () => {
       try {
         const formData = new FormData();
         formData.append('message', text);
         if (image) formData.append('image', image);
+        if (loc) formData.append('location', JSON.stringify(loc));
 
         const res = await api.post('/ai/chat', formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
@@ -238,6 +262,12 @@ export default function AIAssistant() {
               accept="image/*" 
               onChange={(e) => setSelectedImage(e.target.files[0])} 
             />
+            <button 
+              onClick={getLocation}
+              className={`w-12 h-12 bg-gray-50 dark:bg-gray-800 text-gray-500 rounded-2xl flex items-center justify-center border border-gray-200 dark:border-gray-700 hover:border-saffron-300 transition-all ${location ? 'bg-green-50 text-green-600 border-green-200' : ''}`}
+            >
+              <MapPin size={20} />
+            </button>
             <button 
               onClick={() => fileInputRef.current?.click()}
               className="w-12 h-12 bg-gray-50 dark:bg-gray-800 text-gray-500 rounded-2xl flex items-center justify-center border border-gray-200 dark:border-gray-700 hover:border-saffron-300 transition-all"
