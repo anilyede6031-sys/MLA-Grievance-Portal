@@ -114,12 +114,7 @@ export default function AIAssistant() {
       text, 
       image: image ? URL.createObjectURL(image) : null 
     };
-    if (text !== input) {
-        // Only add message if it's not a duplicate from getLocation
-        setMessages(prev => [...prev, userMsg]);
-    } else {
-        setMessages(prev => [...prev, userMsg]);
-    }
+    setMessages(prev => [...prev, userMsg]);
     
     setInput('');
     setSelectedImage(null);
