@@ -108,16 +108,19 @@ export default function HelpWidget() {
       {/* Toggle Button (Purple Bubble) */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center shadow-[0_10px_30px_rgba(168,85,247,0.4)] transition-all duration-300 transform pointer-events-auto active:scale-95 ${
+        className={`w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center shadow-[0_10px_30px_rgba(168,85,247,0.4)] transition-all duration-300 transform pointer-events-auto active:scale-95 group relative ${
           isOpen 
             ? 'bg-white text-gray-900 rotate-90 scale-90' 
             : 'bg-gradient-to-br from-[#6366f1] to-[#d946ef] text-white hover:scale-110'
         }`}
       >
+        {!isOpen && (
+            <span className="absolute inset-0 rounded-full bg-[#d946ef] animate-ping opacity-20 scale-125" />
+        )}
         {isOpen ? <X size={28} /> : (
           <div className="relative">
             <MessageCircle size={32} />
-            <div className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white" />
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white shadow-lg animate-bounce" />
           </div>
         )}
       </button>

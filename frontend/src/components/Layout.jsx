@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Sun, Moon, Globe, MessageCircle, ChevronDown } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
+import HelpWidget from './HelpWidget';
 
 function Navbar({ darkMode, setDarkMode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -141,8 +142,6 @@ function Navbar({ darkMode, setDarkMode }) {
     </>
   );
 }
-
-import HelpWidget from './HelpWidget';
 
 export default function Layout({ children, darkMode, setDarkMode }) {
   const { user } = useAuth();
