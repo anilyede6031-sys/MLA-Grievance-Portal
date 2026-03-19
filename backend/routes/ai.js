@@ -61,7 +61,7 @@ User: ${message}`;
 
   } catch (err) {
     console.error('Gemini SDK Error:', err.message || err);
-    res.status(500).json({ success: false, message: 'AI Assistant Error.' });
+    res.status(500).json({ success: false, message: 'AI Assistant Error.', error: err.message });
   }
 });
 
