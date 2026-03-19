@@ -15,15 +15,16 @@ router.post('/chat', async (req, res) => {
       return res.status(500).json({ success: false, message: 'AI configuration error.' });
     }
 
-    const [projects, total, pending, inProgress, resolved] = await Promise.all([
+    const [projects, total, pending, inProgress, resolved, rejected] = await Promise.all([
       Project.find().lean(),
       Complaint.countDocuments({}),
       Complaint.countDocuments({ status: 'Pending' }),
       Complaint.countDocuments({ status: 'In Progress' }),
-      Complaint.countDocuments({ status: 'Resolved' })
+      Complaint.countDocuments({ status: 'Resolved' }),
+      Complaint.countDocuments({ status: 'Rejected' })
     ]);
 
-    const complaintStats = { total, pending, inProgress, resolved };
+    const complaintStats = { total, pending, inProgress, resolved, rejected };
 
     let specificComplaint = '';
     const idMatch = message.match(/(GRV-[A-Z0-9-]+)/i);
@@ -38,7 +39,7 @@ router.post('/chat', async (req, res) => {
 
     const systemPrompt = `You are the "Daund MLA Digital Assistant" (Rahul Kul's office). 
 Data Context:
-- Complaints: ${complaintStats.total} total (${complaintStats.pending} pending, ${complaintStats.inProgress} in progress, ${complaintStats.resolved} resolved).
+- Complaints: ${complaintStats.total} total (${complaintStats.pending} pending, ${complaintStats.inProgress} in progress, ${complaintStats.resolved} resolved, ${complaintStats.rejected} rejected).
 - Projects:
 ${projectSummary || 'No projects.'}
 ${specificComplaint}
@@ -50,7 +51,7 @@ Instructions:
 
 User: ${message}`;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent(systemPrompt);
     const reply = result.response.text();
 
@@ -61,7 +62,7 @@ User: ${message}`;
 
   } catch (err) {
     console.error('Gemini SDK Error:', err.message || err);
-    res.status(500).json({ success: false, message: 'AI Assistant Error.', error: err.message });
+    res.status(500).json({ success: false, message: 'AI Assistant Error.' });
   }
 });
 
