@@ -34,7 +34,6 @@ router.post('/chat', async (req, res) => {
       }
     }
 
-    const complaintStats = stats[0] || { total: 0, pending: 0, inProgress: 0, resolved: 0, rejected: 0 };
     const projectSummary = projects.map(p => `- ${p.name}: Budget ₹${p.budget} Cr, Status: ${p.status}, Dept: ${p.department}`).join('\n');
 
     const systemPrompt = `You are the "Daund MLA Digital Assistant" (Rahul Kul's office). 
