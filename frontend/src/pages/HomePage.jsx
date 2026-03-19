@@ -123,6 +123,10 @@ export default function HomePage() {
                   className="group inline-flex items-center gap-2 px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 backdrop-blur-md text-white rounded-2xl font-bold transition-all duration-300 transform hover:-translate-y-1">
                   <Search size={20} className="group-hover:scale-110 transition-transform" /> {t.trackComplaint}
                 </Link>
+                <Link to="/live-map"
+                  className="group inline-flex items-center gap-2 px-8 py-4 bg-white/10 hover:bg-saffron-500/20 border border-saffron-500/30 backdrop-blur-xl text-saffron-400 rounded-2xl font-bold transition-all duration-300 transform hover:-translate-y-1 shadow-[0_0_20px_rgba(249,115,22,0.1)]">
+                  <Globe size={20} className="group-hover:rotate-12 transition-transform" /> {t.liveMapTitle}
+                </Link>
               </div>
 
               <div className="mt-12 flex items-center gap-6">
@@ -310,6 +314,9 @@ export default function HomePage() {
                    </div>
                 </h3>
                 <div className="flex items-center gap-4">
+                  <Link to="/live-map" className="text-xs font-bold text-green-500 hover:text-green-600 underline uppercase tracking-widest flex items-center gap-1.5">
+                    <MapPin size={12} /> View on Map
+                  </Link>
                   <button 
                     onClick={() => setSelectedProject('list')}
                     className="text-xs font-bold text-saffron-600 hover:text-saffron-700 underline uppercase tracking-widest"
