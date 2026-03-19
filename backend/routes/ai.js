@@ -105,5 +105,3 @@ User: ${message}`;
 });
 
 module.exports = router;
-
-module.exports = router;
