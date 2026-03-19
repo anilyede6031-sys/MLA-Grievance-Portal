@@ -23,7 +23,9 @@ router.post('/chat', async (req, res) => {
             _id: null,
             total: { $sum: 1 },
             pending: { $sum: { $cond: [{ $eq: ['$status', 'Pending'] }, 1, 0] } },
-            resolved: { $sum: { $cond: [{ $eq: ['$status', 'Resolved'] }, 1, 0] } }
+            inProgress: { $sum: { $cond: [{ $eq: ['$status', 'In Progress'] }, 1, 0] } },
+            resolved: { $sum: { $cond: [{ $eq: ['$status', 'Resolved'] }, 1, 0] } },
+            rejected: { $sum: { $cond: [{ $eq: ['$status', 'Rejected'] }, 1, 0] } }
           }
         }
       ])
@@ -38,12 +40,12 @@ router.post('/chat', async (req, res) => {
       }
     }
 
-    const complaintStats = stats[0] || { total: 0, pending: 0, resolved: 0 };
-    const projectSummary = projects.map(p => `- ${p.name}: Budget ₹${p.budget} Cr, Status: ${p.status}`).join('\n');
+    const complaintStats = stats[0] || { total: 0, pending: 0, inProgress: 0, resolved: 0, rejected: 0 };
+    const projectSummary = projects.map(p => `- ${p.name}: Budget ₹${p.budget} Cr, Status: ${p.status}, Dept: ${p.department}`).join('\n');
 
     const systemPrompt = `You are the "Daund MLA Digital Assistant" (Rahul Kul's office). 
 Data Context:
-- Complaints: ${complaintStats.total} total, ${complaintStats.resolved} resolved.
+- Complaints: ${complaintStats.total} total (${complaintStats.pending} pending, ${complaintStats.inProgress} in progress, ${complaintStats.resolved} resolved).
 - Projects:
 ${projectSummary || 'No projects.'}
 ${specificComplaint}
