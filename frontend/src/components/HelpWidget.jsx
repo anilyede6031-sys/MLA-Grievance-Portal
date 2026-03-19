@@ -128,8 +128,8 @@ export default function HelpWidget() {
                       <ArrowLeft size={20} />
                     </button>
                     <div className="relative">
-                       <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">B</div>
-                       <div className="absolute bottom-0 right-0 w-3 h-3 bg-yellow-400 border-2 border-white rounded-full" />
+                       <div className="w-10 h-10 rounded-full bg-[#a855f7] flex items-center justify-center text-white font-bold text-lg shadow-sm">R</div>
+                       <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
                     </div>
                     <div>
                       <h3 className="font-extrabold text-sm text-gray-900 dark:text-white leading-tight">Vikas Mitra</h3>
@@ -148,7 +148,7 @@ export default function HelpWidget() {
                      <div key={m.id} className={`flex ${m.type === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
                         <div className={`flex gap-3 max-w-[85%] ${m.type === 'user' ? 'flex-row-reverse' : ''}`}>
                            {!m.type === 'user' && (
-                             <div className="w-6 h-6 rounded-full bg-purple-600 flex-shrink-0 flex items-center justify-center text-[10px] text-white font-bold">B</div>
+                             <div className="w-6 h-6 rounded-full bg-[#a855f7] flex-shrink-0 flex items-center justify-center text-[10px] text-white font-bold">R</div>
                            )}
                            <div className={`p-4 rounded-2xl text-sm leading-relaxed ${
                              m.type === 'user' 
