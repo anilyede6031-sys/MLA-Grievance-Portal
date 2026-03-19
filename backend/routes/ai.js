@@ -6,12 +6,21 @@ const Complaint = require('../models/Complaint');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-router.get('/config-check', (req, res) => {
+router.get('/config-check', async (req, res) => {
+  let ping = 'pending';
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const result = await model.generateContent("ping");
+    ping = 'success: ' + result.response.text().substring(0, 10);
+  } catch (err) {
+    ping = 'error: ' + (err.message || 'Unknown error');
+  }
+  
   res.json({
     success: true,
     hasKey: !!process.env.GEMINI_API_KEY,
     keyLength: process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.length : 0,
-    nodeEnv: process.env.NODE_ENV
+    ping
   });
 });
 
