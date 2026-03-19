@@ -5,6 +5,9 @@ const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require('@googl
 const Project = require('../models/Project');
 const Complaint = require('../models/Complaint');
 
+const multer = require('multer');
+const upload = multer({ limits: { fileSize: 10 * 1024 * 1024 } }); // 10MB limit
+
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const safetySettings = [
@@ -14,9 +17,19 @@ const safetySettings = [
   { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
 ];
 
-router.post('/chat', async (req, res) => {
+function fileToGenerativePart(buffer, mimeType) {
+  return {
+    inlineData: {
+      data: buffer.toString('base64'),
+      mimeType
+    },
+  };
+}
+
+router.post('/chat', upload.single('image'), async (req, res) => {
   try {
     const { message } = req.body;
+    const file = req.file;
     if (!process.env.GEMINI_API_KEY) {
       return res.status(500).json({ success: false, message: 'AI configuration error.' });
     }
@@ -64,14 +77,24 @@ Core Instructions:
    - Request: Provide emergency contacts or procedure details.
    - Suggestion: Welcome the idea and say it will be shared with the "Vision Dashboard."
    - Emotion: Acknowledge feelings with warmth and "Apulki" (closeness).
-4. No Hallucinations: If data is missing, NEVER say "I don't know." Instead say: "या विषयावर माझ्याकडे सध्या पूर्ण माहिती नाही, पण मी साहेबांच्या कानावर हा विषय नक्की घालतो. कृपया आपला संपर्क क्रमांक द्या जेणेकरून आम्ही आपल्याला कळवू शकू."
-5. Professional & Patriotic: Be respectful to all. Use 🇮🇳. End with: "दौंडच्या विकासात आपला सहभाग महत्त्वाचा आहे. धन्यवाद!"
+4. Image Recognition Feature (Proactive Analysis):
+   - If user uploads a photo (e.g. broken road/pothole/water leak): Analyze it. 
+   - Identify the issue and say: "मी या खड्ड्याचा (किंवा समस्येचा) अभ्यास केला आहे. मी ही माहिती 'Project Tracker' मध्ये देखभालीसाठी (Maintenance) नोंदवत आहे."
+   - Give them peace of mind that saheb's team will look at it.
+5. No Hallucinations: If data is missing, NEVER say "I don't know." Instead say: "या विषयावर माझ्याकडे सध्या पूर्ण माहिती नाही, पण मी साहेबांच्या कानावर हा विषय नक्की घालतो. कृपया आपला संपर्क क्रमांक द्या जेणेकरून आम्ही आपल्याला कळवू शकू."
+6. Professional & Patriotic: Be respectful to all. Use 🇮🇳. End with: "दौंडच्या विकासात आपला सहभाग महत्त्वाचा आहे. धन्यवाद!"
 
-User Message: ${message}`;
+User Message: ${message || 'Please analyze this image.'}`;
 
-    // AI Model Integration (Version: Daund-Vikas-Mitra-3.0-Unlocked)
+    // AI Model Integration (Version: Daund-Vikas-Mitra-Multimodal-Unlocked)
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash", safetySettings });
-    const result = await model.generateContent(systemPrompt);
+    
+    const promptParts = [systemPrompt];
+    if (file) {
+      promptParts.push(fileToGenerativePart(file.buffer, file.mimetype));
+    }
+
+    const result = await model.generateContent(promptParts);
     const response = await result.response;
     const text = response.text();
 
