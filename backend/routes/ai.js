@@ -8,12 +8,27 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 router.get('/config-check', async (req, res) => {
   let ping = 'pending';
+  let models = [];
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+    // List models
+    // const list = await genAI.listModels(); // This might not be available in all SDK versions
+    // models = list.map(m => m.name);
+    
+    // Simplest ping with "gemini-pro"
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
     const result = await model.generateContent("ping");
-    ping = 'success: ' + result.response.text().substring(0, 10);
+    ping = 'gemini-pro success: ' + result.response.text().substring(0, 10);
   } catch (err) {
-    ping = 'error: ' + (err.message || 'Unknown error');
+    ping = 'gemini-pro error: ' + (err.message || 'Unknown error');
+    
+    // Try "gemini-1.5-pro"
+    try {
+      const model2 = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+      const result2 = await model2.generateContent("ping");
+      ping += ' | gemini-1.5-pro success: ' + result2.response.text().substring(0, 10);
+    } catch (err2) {
+      ping += ' | gemini-1.5-pro error: ' + (err2.message || 'Unknown error');
+    }
   }
   
   res.json({
