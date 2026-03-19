@@ -1,12 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require('@google/generative-ai');
 const Project = require('../models/Project');
 const Complaint = require('../models/Complaint');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+const safetySettings = [
+  { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+  { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
+  { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+];
 
 router.post('/chat', async (req, res) => {
   try {
@@ -63,8 +69,8 @@ Core Instructions:
 
 User Message: ${message}`;
 
-    // AI Model Integration (Version: Daund-Vikas-Mitra-2.0-Final)
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    // AI Model Integration (Version: Daund-Vikas-Mitra-3.0-Unlocked)
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash", safetySettings });
     const result = await model.generateContent(systemPrompt);
     const response = await result.response;
     const text = response.text();
