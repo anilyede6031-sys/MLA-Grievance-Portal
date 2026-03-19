@@ -113,8 +113,8 @@ User Message: ${message || 'Please analyze this image/location.'}`;
     console.error('Gemini SDK Error:', err.message || err);
     res.status(500).json({ 
       success: false, 
-      message: 'AI Assistant Error.',
-      hint: 'Please check your API quota or safety settings.' 
+      message: 'AI Assistant Error: ' + (err.message || 'Unknown'),
+      hint: 'DEBUG_STACK: ' + (err.stack || 'No stack')
     });
   }
 });
