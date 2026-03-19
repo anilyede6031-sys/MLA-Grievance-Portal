@@ -70,6 +70,7 @@ export default function AIAssistant() {
       let reply = '';
       const lowText = text.toLowerCase();
       const isMarathi = /[\u0900-\u097F]/.test(text);
+      console.log("AI Input:", text, "Marathi:", isMarathi, "LowText:", lowText);
 
       // 1. Check for Complaint ID pattern (e.g., GRV-MMV31NZE-845E)
       const idMatch = text.match(/(GRV-[A-Z0-9-]+)/i);
@@ -127,6 +128,7 @@ export default function AIAssistant() {
           : "I'm sorry, I'm still learning. For specific help, you can use the quick actions below.";
       }
 
+      console.log("AI Reply Generated:", reply);
       setMessages(prev => [...prev, { id: Date.now() + 1, type: 'bot', text: reply }]);
       setIsTyping(false);
     }, 1000);
