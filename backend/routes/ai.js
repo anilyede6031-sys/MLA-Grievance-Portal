@@ -4,8 +4,7 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const Project = require('../models/Project');
 const Complaint = require('../models/Complaint');
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-// Note: The SDK typically handles versioning, but we'll try standard initialization first.
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY, { apiVersion: 'v1' });
 
 router.get('/config-check', async (req, res) => {
   let ping = 'pending';
