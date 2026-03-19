@@ -9,16 +9,16 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 router.get('/config-check', async (req, res) => {
   let ping = 'pending';
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
     const result = await model.generateContent("ping");
-    ping = 'Success: ' + result.response.text().substring(0, 10);
+    ping = 'Success (2.0-Exp): ' + result.response.text().substring(0, 10);
   } catch (err) {
     ping = 'Error: ' + (err.message || 'Unknown error');
   }
   
   res.json({
     success: true,
-    implementation: "SDK-Standard-Flash",
+    implementation: "SDK-Gemini-2.0-Exp",
     hasKey: !!process.env.GEMINI_API_KEY,
     keyLength: process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.length : 0,
     ping
@@ -72,7 +72,7 @@ Instructions:
 
 User: ${message}`;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
     const result = await model.generateContent(systemPrompt);
     const reply = result.response.text();
 
