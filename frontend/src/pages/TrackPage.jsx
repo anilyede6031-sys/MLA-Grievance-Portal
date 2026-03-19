@@ -109,17 +109,6 @@ export default function TrackPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10 animate-fade-in">
-      <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-4 py-1.5 rounded-full text-sm font-semibold mb-3">
-          🔍 {t.trackComplaint}
-        </div>
-        <h1 className="text-3xl font-extrabold text-gov-navy dark:text-white mb-1">
-          {user?.role === 'citizen' ? t.viewMyComplaints : t.trackComplaint}
-        </h1>
-        <p className="font-marathi text-gray-500 dark:text-gray-400">
-          {user?.role === 'citizen' ? t.viewMyComplaints : t.trackComplaint}
-        </p>
-      </div>
 
       {/* Search Card */}
       <div className="card mb-8">
@@ -137,16 +126,6 @@ export default function TrackPage() {
         </div>
         <div className="flex justify-between items-center mt-2">
           <p className="text-xs text-gray-400">💡 {t.searchHint}</p>
-          {user?.role === 'citizen' && (
-            <button onClick={() => { 
-                setQuery(''); 
-                hasAutoFetched.current = false; // allow auto-fetch logic to run again
-                setSearched(false); 
-              }} 
-              className="text-xs font-semibold text-blue-600 hover:underline">
-              {t.viewMyComplaints}
-            </button>
-          )}
         </div>
       </div>
 

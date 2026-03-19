@@ -90,11 +90,61 @@ app.get('/api/seed', async (req, res) => {
     
     // Seed Projects
     const projects = [
-      { name: 'Daund-Patas Road Expansion', department: 'Road', budget: 12.5, status: 'under_process', description: 'Expanding the main highway connector for better traffic flow.', expectedCompletionDate: new Date('2025-06-30'), lat: 18.4641, lng: 74.5872 },
-      { name: 'Kurumb-Kushali Water Pipeline', department: 'Water', budget: 8.2, status: 'complete', description: 'Drinking water pipeline for 5 villages.', expectedCompletionDate: new Date('2024-12-15'), lat: 18.4231, lng: 74.6512 },
-      { name: 'Zilla Parishad School Renovation', department: 'Education', budget: 4.5, status: 'under_process', description: 'Modernizing 10 rural schools with digital labs.', expectedCompletionDate: new Date('2025-03-20'), lat: 18.4812, lng: 74.5521 },
-      { name: 'Rural Health Center Upgrade', department: 'Health', budget: 6.8, status: 'incomplete', description: 'Adding 20 beds and new medical equipment.', expectedCompletionDate: new Date('2025-09-10'), lat: 18.4529, lng: 74.6234 },
-      { name: 'Agriculture Canal Maintenance', department: 'Agriculture', budget: 3.2, status: 'complete', description: 'Cleaning and lining of irrigation canals.', expectedCompletionDate: new Date('2024-10-05'), lat: 18.4012, lng: 74.5921 },
+      {
+        name: "Daund-Patas Highway Concreting",
+        department: "Road",
+        budget: 45.5,
+        status: "under_process",
+        description: "High-grade CC road construction connecting Daund to Patas Industrial Hub. Expected to reduce travel time by 20 minutes.",
+        expectedCompletionDate: "2025-12-30",
+        lat: 18.4715,
+        lng: 74.5910,
+        imageUrl: "https://images.unsplash.com/photo-1544984243-ec57ea16fe25?q=80&w=1000&auto=format&fit=crop"
+      },
+      {
+        name: "Khurawadi Water Storage Reservoir",
+        department: "Water",
+        budget: 12.8,
+        status: "complete",
+        description: "Multi-million liter capacity water tank to provide 24/7 drinking water to 5 nearby villages including Khurawadi.",
+        expectedCompletionDate: "2024-03-15",
+        lat: 18.4550,
+        lng: 74.5750,
+        imageUrl: "https://images.unsplash.com/photo-1541944743827-e04bb645d993?q=80&w=1000&auto=format&fit=crop"
+      },
+      {
+        name: "Daund Multi-Specialty Hospital Expansion",
+        department: "Health",
+        budget: 28.3,
+        status: "under_process",
+        description: "Adding 100 beds and a dedicated Cardiology wing to the existing hospital infrastructure.",
+        expectedCompletionDate: "2026-06-20",
+        lat: 18.4650,
+        lng: 74.5850,
+        imageUrl: "https://images.unsplash.com/photo-1586773860418-d319a39ec55e?q=80&w=1000&auto=format&fit=crop"
+      },
+      {
+        name: "Zilla Parishad Digital School Hub",
+        department: "Education",
+        budget: 5.2,
+        status: "complete",
+        description: "Equipping 10 rural schools with interactive displays, high-speed internet, and tablet-based learning systems.",
+        expectedCompletionDate: "2025-01-10",
+        lat: 18.4750,
+        lng: 74.6000,
+        imageUrl: "https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=1000&auto=format&fit=crop"
+      },
+      {
+        name: "New Police Headquarters & Command Center",
+        department: "Police",
+        budget: 15.0,
+        status: "incomplete",
+        description: "State-of-the-art surveillance and response center for regional monitoring and traffic management.",
+        expectedCompletionDate: "2027-02-14",
+        lat: 18.4600,
+        lng: 74.5800,
+        imageUrl: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1000&auto=format&fit=crop"
+      }
     ];
     await Project.insertMany(projects);
 

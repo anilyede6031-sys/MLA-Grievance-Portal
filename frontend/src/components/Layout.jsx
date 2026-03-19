@@ -24,7 +24,10 @@ function Navbar({ darkMode, setDarkMode }) {
   ];
   if (!user || user.role === 'citizen') {
     navLinks.push({ to: '/complaint', label: t.fileComplaint });
-    navLinks.push({ to: '/track', label: user ? 'My Complaints' : t.trackComplaint });
+    if (user) {
+      navLinks.push({ to: '/track', label: 'My Complaints' });
+    }
+    navLinks.push({ to: '/track', label: t.trackComplaint });
   } else {
     navLinks.push({ to: '/track', label: t.trackComplaint });
   }

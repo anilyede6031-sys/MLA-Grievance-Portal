@@ -40,6 +40,10 @@ const ProjectSchema = new mongoose.Schema({
   lng: {
     type: Number,
     default: 74.5828 // Default Daund Lng
+  },
+  imageUrl: {
+    type: String,
+    default: ''
   }
 }, { timestamps: true });
 
