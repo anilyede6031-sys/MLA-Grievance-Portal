@@ -243,9 +243,23 @@ const getPublicStats = async (req, res) => {
       Complaint.countDocuments({ status: 'Resolved' }),
     ]);
 
+    // Simple department-wise counts for AI
+    const byDepartment = await Complaint.aggregate([
+      { $group: { _id: '$department', count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ]);
+
+    // Simple taluka-wise counts for AI
+    const byTaluka = await Complaint.aggregate([
+      { $group: { _id: '$taluka', count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ]);
+
     res.json({
       success: true,
-      stats: { total, pending, inProgress, resolved }
+      stats: { total, pending, inProgress, resolved },
+      byDepartment,
+      byTaluka
     });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error.', error: err.message });

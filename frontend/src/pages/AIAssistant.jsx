@@ -14,16 +14,24 @@ export default function AIAssistant() {
   const scrollRef = useRef(null);
 
   const [projects, setProjects] = useState([]);
-  const [stats, setStats] = useState({ total: 0, resolved: 0, pending: 0 });
-  useEffect(() => {
+  const [stats, setStats] = useState({ total: 0, resolved: 0, pending: 0, byDepartment: [], byTaluka: [] });
+  const [projSummary, setProjSummary] = useState({ expenditure: {}, totalBudget: 0, totalProjects: 0 });
     const fetchData = async () => {
       try {
-        const [projRes, statsRes] = await Promise.all([
+        const [projRes, statsRes, sumRes] = await Promise.all([
           api.get('/projects'),
-          api.get('/complaints/public-stats')
+          api.get('/complaints/public-stats'),
+          api.get('/projects/summary')
         ]);
         if (projRes.data.success) setProjects(projRes.data.projects);
-        if (statsRes.data.success) setStats(statsRes.data.stats);
+        if (statsRes.data.success) {
+          setStats({
+            ...statsRes.data.stats,
+            byDepartment: statsRes.data.byDepartment || [],
+            byTaluka: statsRes.data.byTaluka || []
+          });
+        }
+        if (sumRes.data.success) setProjSummary(sumRes.data.data);
       } catch (err) {
         console.error("Failed to fetch AI data:", err);
       }
@@ -77,6 +85,16 @@ export default function AIAssistant() {
         reply = isMarathi
           ? `आतापर्यंत एकूण ${stats.total} तक्रारी प्राप्त झाल्या आहेत, त्यापैकी ${stats.resolved} तक्रारींचे यशस्वीरित्या निवारण करण्यात आले आहे.`
           : `We have received a total of ${stats.total} complaints, and ${stats.resolved} have been successfully resolved.`;
+      } else if (lowText.includes('budget') || lowText.includes('निधी') || lowText.includes('खर्च')) {
+        const topDept = Object.entries(projSummary.expenditure).sort((a,b) => b[1] - a[1])[0];
+        reply = isMarathi
+          ? `दौंडमधील एकूण विकास निधी ₹${projSummary.totalBudget} कोटी आहे. सर्वाधिक खर्च ${topDept ? topDept[0] : 'रस्ते'} विभागावर (₹${topDept ? topDept[1] : 0} कोटी) केला जात आहे.`
+          : `The total development budget for Daund is ₹${projSummary.totalBudget} Cr. The highest allocation is for ${topDept ? topDept[0] : 'Roads'} (₹${topDept ? topDept[1] : 0} Cr).`;
+      } else if (lowText.includes('taluka') || lowText.includes('तालुका')) {
+        const topTaluka = stats.byTaluka[0];
+        reply = isMarathi
+          ? `तक्रारींच्या आकडेवारीनुसार, सर्वाधिक तक्रारी ${topTaluka ? topTaluka._id : 'दौंड'} तालुक्यातून (${topTaluka ? topTaluka.count : 0}) आल्या आहेत.`
+          : `According to data, ${topTaluka ? topTaluka._id : 'Daund'} has the highest number of complaints (${topTaluka ? topTaluka.count : 0}).`;
       } else if (lowText.includes('complaint') || lowText.includes('तक्रार')) {
         reply = isMarathi 
           ? "तक्रार नोंदवण्यासाठी, मुख्य पृष्ठावरील 'तक्रार नोंदवा' वर क्लिक करा. तुम्हाला तुमची माहिती आणि समस्येचे वर्णन द्यावे लागेल. सबमिट केल्यानंतर, तुम्हाला एक युनिक ट्रॅकिंग आयडी मिळेल."
