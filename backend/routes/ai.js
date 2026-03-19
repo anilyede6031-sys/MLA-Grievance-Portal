@@ -63,7 +63,7 @@ Core Instructions:
 
 User Message: ${message}`;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     const result = await model.generateContent(systemPrompt);
     const reply = result.response.text();
 
@@ -74,7 +74,7 @@ User Message: ${message}`;
 
   } catch (err) {
     console.error('Gemini SDK Error:', err.message || err);
-    res.status(500).json({ success: false, message: 'AI Assistant Error.', error: err.message });
+    res.status(500).json({ success: false, message: 'AI Assistant Error.' });
   }
 });
 
