@@ -7,23 +7,6 @@ const Complaint = require('../models/Complaint');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-router.get('/config-check', async (req, res) => {
-  let ping = 'pending';
-  try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-    const result = await model.generateContent("ping");
-    ping = 'Success (2.5-Flash): ' + result.response.text().substring(0, 10);
-  } catch (err) {
-    ping = 'Error: ' + (err.message || 'Unknown error');
-  }
-  
-  res.json({
-    success: true,
-    implementation: "SDK-Gemini-2.5-Flash-Final",
-    hasKey: !!process.env.GEMINI_API_KEY,
-    ping
-  });
-});
 
 router.post('/chat', async (req, res) => {
   try {
