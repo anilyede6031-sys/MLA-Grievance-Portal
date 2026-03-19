@@ -16,6 +16,7 @@ export default function AIAssistant() {
   const [projects, setProjects] = useState([]);
   const [stats, setStats] = useState({ total: 0, resolved: 0, pending: 0, byDepartment: [], byTaluka: [] });
   const [projSummary, setProjSummary] = useState({ expenditure: {}, totalBudget: 0, totalProjects: 0 });
+  useEffect(() => {
     const fetchData = async () => {
       try {
         const [projRes, statsRes, sumRes] = await Promise.all([
