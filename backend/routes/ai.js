@@ -15,21 +15,15 @@ router.post('/chat', async (req, res) => {
       return res.status(500).json({ success: false, message: 'AI configuration error.' });
     }
 
-    const [projects, stats] = await Promise.all([
+    const [projects, total, pending, inProgress, resolved] = await Promise.all([
       Project.find().lean(),
-      Complaint.aggregate([
-        {
-          $group: {
-            _id: null,
-            total: { $sum: 1 },
-            pending: { $sum: { $cond: [{ $eq: ['$status', 'Pending'] }, 1, 0] } },
-            inProgress: { $sum: { $cond: [{ $eq: ['$status', 'In Progress'] }, 1, 0] } },
-            resolved: { $sum: { $cond: [{ $eq: ['$status', 'Resolved'] }, 1, 0] } },
-            rejected: { $sum: { $cond: [{ $eq: ['$status', 'Rejected'] }, 1, 0] } }
-          }
-        }
-      ])
+      Complaint.countDocuments({}),
+      Complaint.countDocuments({ status: 'Pending' }),
+      Complaint.countDocuments({ status: 'In Progress' }),
+      Complaint.countDocuments({ status: 'Resolved' })
     ]);
+
+    const complaintStats = { total, pending, inProgress, resolved };
 
     let specificComplaint = '';
     const idMatch = message.match(/(GRV-[A-Z0-9-]+)/i);
