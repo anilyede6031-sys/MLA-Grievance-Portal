@@ -28,7 +28,11 @@ export default function HelpWidget() {
     setIsTyping(true);
 
     try {
-      const res = await api.post('/ai/chat', { message: text });
+      const formData = new FormData();
+      formData.append('message', text);
+      const res = await api.post('/ai/chat', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
       if (res.data.success) {
         setMessages(prev => [...prev, { id: Date.now() + 1, type: 'bot', text: res.data.reply }]);
       }
@@ -232,6 +236,4 @@ export default function HelpWidget() {
       </button>
     </div>
   );
-}
-
 }
