@@ -32,6 +32,14 @@ const ProjectSchema = new mongoose.Schema({
   taluka: {
     type: String,
     required: false
+  },
+  lat: {
+    type: Number,
+    default: 18.4637 // Default Daund Lat
+  },
+  lng: {
+    type: Number,
+    default: 74.5828 // Default Daund Lng
   }
 }, { timestamps: true });
 

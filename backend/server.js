@@ -90,11 +90,11 @@ app.get('/api/seed', async (req, res) => {
     
     // Seed Projects
     const projects = [
-      { name: 'Daund-Patas Road Expansion', department: 'Road', budget: 12.5, status: 'under_process', description: 'Expanding the main highway connector for better traffic flow.', expectedCompletionDate: new Date('2025-06-30') },
-      { name: 'Kurumb-Kushali Water Pipeline', department: 'Water', budget: 8.2, status: 'complete', description: 'Drinking water pipeline for 5 villages.', expectedCompletionDate: new Date('2024-12-15') },
-      { name: 'Zilla Parishad School Renovation', department: 'Education', budget: 4.5, status: 'under_process', description: 'Modernizing 10 rural schools with digital labs.', expectedCompletionDate: new Date('2025-03-20') },
-      { name: 'Rural Health Center Upgrade', department: 'Health', budget: 6.8, status: 'incomplete', description: 'Adding 20 beds and new medical equipment.', expectedCompletionDate: new Date('2025-09-10') },
-      { name: 'Agriculture Canal Maintenance', department: 'Agriculture', budget: 3.2, status: 'complete', description: 'Cleaning and lining of irrigation canals.', expectedCompletionDate: new Date('2024-10-05') },
+      { name: 'Daund-Patas Road Expansion', department: 'Road', budget: 12.5, status: 'under_process', description: 'Expanding the main highway connector for better traffic flow.', expectedCompletionDate: new Date('2025-06-30'), lat: 18.4641, lng: 74.5872 },
+      { name: 'Kurumb-Kushali Water Pipeline', department: 'Water', budget: 8.2, status: 'complete', description: 'Drinking water pipeline for 5 villages.', expectedCompletionDate: new Date('2024-12-15'), lat: 18.4231, lng: 74.6512 },
+      { name: 'Zilla Parishad School Renovation', department: 'Education', budget: 4.5, status: 'under_process', description: 'Modernizing 10 rural schools with digital labs.', expectedCompletionDate: new Date('2025-03-20'), lat: 18.4812, lng: 74.5521 },
+      { name: 'Rural Health Center Upgrade', department: 'Health', budget: 6.8, status: 'incomplete', description: 'Adding 20 beds and new medical equipment.', expectedCompletionDate: new Date('2025-09-10'), lat: 18.4529, lng: 74.6234 },
+      { name: 'Agriculture Canal Maintenance', department: 'Agriculture', budget: 3.2, status: 'complete', description: 'Cleaning and lining of irrigation canals.', expectedCompletionDate: new Date('2024-10-05'), lat: 18.4012, lng: 74.5921 },
     ];
     await Project.insertMany(projects);
 
