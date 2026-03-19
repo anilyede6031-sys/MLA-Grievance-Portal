@@ -245,6 +245,3 @@ export default function ProjectMap() {
     </div>
   );
 }
-iv>
-  );
-}

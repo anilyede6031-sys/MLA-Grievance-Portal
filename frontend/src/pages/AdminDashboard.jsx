@@ -819,7 +819,7 @@ function ProjectsTab() {
   const { t } = useLang();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ name: '', department: '', budget: '', status: 'under_process', description: '', expectedCompletionDate: '' });
+  const [form, setForm] = useState({ name: '', department: '', budget: '', status: 'under_process', description: '', expectedCompletionDate: '', lat: 18.4637, lng: 74.5828 });
   const [saving, setSaving] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
 
@@ -849,7 +849,7 @@ function ProjectsTab() {
         await api.post('/projects', form);
         toast.success(t.projectCreated || 'Project created!');
       }
-      setForm({ name: '', department: '', budget: '', status: 'under_process', description: '', expectedCompletionDate: '' });
+      setForm({ name: '', department: '', budget: '', status: 'under_process', description: '', expectedCompletionDate: '', lat: 18.4637, lng: 74.5828 });
       fetchProjects();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed.');
@@ -866,7 +866,9 @@ function ProjectsTab() {
       budget: project.budget, 
       status: project.status,
       description: project.description || '',
-      expectedCompletionDate: project.expectedCompletionDate ? project.expectedCompletionDate.split('T')[0] : ''
+      expectedCompletionDate: project.expectedCompletionDate ? project.expectedCompletionDate.split('T')[0] : '',
+      lat: project.lat || 18.4637,
+      lng: project.lng || 74.5828
     });
   };
 
@@ -909,6 +911,8 @@ function ProjectsTab() {
           <div><label className="label">{t.expectedCompletion}</label>
             <input type="date" value={form.expectedCompletionDate} onChange={e => setForm(f => ({ ...f, expectedCompletionDate: e.target.value }))} className="input-field text-sm" />
           </div>
+          <div><label className="label">Latitude (N)</label><input type="number" step="0.0001" value={form.lat} onChange={e => setForm(f => ({ ...f, lat: parseFloat(e.target.value) }))} className="input-field text-sm" placeholder="18.4637" /></div>
+          <div><label className="label">Longitude (E)</label><input type="number" step="0.0001" value={form.lng} onChange={e => setForm(f => ({ ...f, lng: parseFloat(e.target.value) }))} className="input-field text-sm" placeholder="74.5828" /></div>
           <div className="flex items-end col-span-full sm:col-span-2 lg:col-span-1">
             <button type="submit" disabled={saving} className="btn-primary w-full justify-center text-sm py-2.5 disabled:opacity-60">
               {saving ? <Loader2 size={14} className="animate-spin" /> : (editingProject ? t.updateProject : '+ ' + t.createProject)}
@@ -927,7 +931,7 @@ function ProjectsTab() {
         {loading ? <div className="flex justify-center py-8"><Loader2 size={24} className="animate-spin text-saffron-500" /></div> : (
           <table className="w-full text-sm">
             <thead><tr className="border-b border-gray-200 dark:border-gray-700 text-left">
-              {[t.projectName, t.department, t.budget, t.status, t.actions].map(h => <th key={h} className="pb-2 text-xs text-gray-500 font-semibold pr-4">{h}</th>)}
+              {[t.projectName, t.department, t.budget, 'Location', t.status, t.actions].map(h => <th key={h} className="pb-2 text-xs text-gray-500 font-semibold pr-4">{h}</th>)}
             </tr></thead>
             <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
               {projects.map(p => (
@@ -935,6 +939,9 @@ function ProjectsTab() {
                   <td className="py-2.5 pr-4 font-semibold text-gray-800 dark:text-gray-200">{p.name}</td>
                   <td className="py-2.5 pr-4 text-gray-600 dark:text-gray-400">{p.department}</td>
                   <td className="py-2.5 pr-4 text-gray-600 dark:text-gray-400">₹ {p.budget} {t.crore}</td>
+                  <td className="py-2.5 pr-4 text-[10px] font-mono text-gray-400">
+                    {p.lat?.toFixed(4)}, {p.lng?.toFixed(4)}
+                  </td>
                   <td className="py-2.5 pr-4">
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${p.status === 'complete' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : p.status === 'under_process' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'}`}>
                       {t[p.status] || p.status}
