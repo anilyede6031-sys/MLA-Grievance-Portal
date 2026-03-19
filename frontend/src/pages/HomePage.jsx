@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { FileText, Search, CheckCircle, Clock, AlertCircle, TrendingUp, ChevronRight, Phone, XCircle } from 'lucide-react';
+import { FileText, Search, CheckCircle, Clock, AlertCircle, TrendingUp, ChevronRight, Phone, XCircle, Globe, MapPin } from 'lucide-react';
 import { useLang } from '../context/LangContext';
 import api from '../utils/api';
 
@@ -122,10 +122,6 @@ export default function HomePage() {
                 <Link to="/track"
                   className="group inline-flex items-center gap-2 px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 backdrop-blur-md text-white rounded-2xl font-bold transition-all duration-300 transform hover:-translate-y-1">
                   <Search size={20} className="group-hover:scale-110 transition-transform" /> {t.trackComplaint}
-                </Link>
-                <Link to="/live-map"
-                  className="group inline-flex items-center gap-2 px-8 py-4 bg-white/10 hover:bg-saffron-500/20 border border-saffron-500/30 backdrop-blur-xl text-saffron-400 rounded-2xl font-bold transition-all duration-300 transform hover:-translate-y-1 shadow-[0_0_20px_rgba(249,115,22,0.1)]">
-                  <Globe size={20} className="group-hover:rotate-12 transition-transform" /> {t.liveMapTitle}
                 </Link>
               </div>
 
@@ -276,7 +272,6 @@ export default function HomePage() {
         <div className="grid md:grid-cols-3 gap-8">
           {[
             { icon: '🤖', title: t.aiAssistantTitle, desc: t.aiAssistantDesc, color: 'text-indigo-600', bg: 'bg-indigo-50 dark:bg-indigo-900/20', link: '/ai-assistant' },
-            { icon: '🗺️', title: t.liveMapTitle, desc: t.liveMapDesc, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20', link: '/live-map' },
             { icon: '🚨', title: t.emergencyContactsTitle, desc: t.emergencyContactsDesc, color: 'text-red-600', bg: 'bg-red-50 dark:bg-red-900/20', link: '/emergency' },
           ].map((feature) => (
             <div key={feature.title} className="card hover:shadow-xl transition-all group border border-gray-100 dark:border-gray-800">
@@ -314,9 +309,6 @@ export default function HomePage() {
                    </div>
                 </h3>
                 <div className="flex items-center gap-4">
-                  <Link to="/live-map" className="text-xs font-bold text-green-500 hover:text-green-600 underline uppercase tracking-widest flex items-center gap-1.5">
-                    <MapPin size={12} /> View on Map
-                  </Link>
                   <button 
                     onClick={() => setSelectedProject('list')}
                     className="text-xs font-bold text-saffron-600 hover:text-saffron-700 underline uppercase tracking-widest"

@@ -1,1 +1,0 @@
-const axios = require('axios'); axios.get('http://localhost:5000/api/complaints').then(console.log).catch(err => console.error(err.response ? err.response.data : err.message));

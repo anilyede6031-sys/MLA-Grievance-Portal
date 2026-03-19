@@ -147,7 +147,7 @@ export default function HelpWidget() {
                    {messages.map((m) => (
                      <div key={m.id} className={`flex ${m.type === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
                         <div className={`flex gap-3 max-w-[85%] ${m.type === 'user' ? 'flex-row-reverse' : ''}`}>
-                           {!m.type === 'user' && (
+                           {m.type !== 'user' && (
                              <div className="w-6 h-6 rounded-full bg-[#a855f7] flex-shrink-0 flex items-center justify-center text-[10px] text-white font-bold">R</div>
                            )}
                            <div className={`p-4 rounded-2xl text-sm leading-relaxed ${

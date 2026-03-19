@@ -21,7 +21,6 @@ function Navbar({ darkMode, setDarkMode }) {
 
   const navLinks = [
     { to: '/', label: t.home },
-    { to: '/live-map', label: t.liveMapTitle }
   ];
   if (!user || user.role === 'citizen') {
     navLinks.push({ to: '/complaint', label: t.fileComplaint });
@@ -146,6 +145,7 @@ function Navbar({ darkMode, setDarkMode }) {
 
 export default function Layout({ children, darkMode, setDarkMode }) {
   const { user } = useAuth();
+  const { t } = useLang();
   return (
     <div className={darkMode ? 'dark' : ''}>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col relative text-gray-950 dark:text-gray-50">
@@ -169,7 +169,6 @@ export default function Layout({ children, darkMode, setDarkMode }) {
                 <h4 className="font-semibold text-saffron-400 mb-3">Quick Links</h4>
                 <ul className="space-y-1 text-sm text-gray-400">
                   <li><Link to="/" className="hover:text-white transition-colors">Home</Link></li>
-                  <li><Link to="/live-map" className="hover:text-white transition-colors">{t.liveMapTitle}</Link></li>
                   <li><Link to="/complaint" className="hover:text-white transition-colors">File Complaint</Link></li>
                   <li><Link to="/track" className="hover:text-white transition-colors">{user?.role === 'citizen' ? 'My Complaints' : 'Track Complaint'}</Link></li>
                 </ul>
