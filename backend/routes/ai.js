@@ -1,38 +1,27 @@
 const express = require('express');
 const router = express.Router();
-const axios = require('axios');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 const Project = require('../models/Project');
 const Complaint = require('../models/Complaint');
 
-const GEMINI_REST_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent';
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 router.get('/config-check', async (req, res) => {
-  let results = {};
-  const endpoints = [
-    { v: 'v1', m: 'gemini-1.5-flash' },
-    { v: 'v1', m: 'gemini-1.5-flash-latest' },
-    { v: 'v1beta', m: 'gemini-1.5-flash' },
-    { v: 'v1', m: 'gemini-pro' }
-  ];
-
-  for (const ep of endpoints) {
-    try {
-      const url = `https://generativelanguage.googleapis.com/${ep.v}/models/${ep.m}:generateContent?key=${process.env.GEMINI_API_KEY}`;
-      const response = await axios.post(url, {
-        contents: [{ parts: [{ text: "ping" }] }]
-      });
-      results[`${ep.v}-${ep.m}`] = 'Success: ' + response.data.candidates[0].content.parts[0].text.substring(0, 10);
-    } catch (err) {
-      results[`${ep.v}-${ep.m}`] = 'Error: ' + (err.response?.status || err.message);
-    }
+  let ping = 'pending';
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const result = await model.generateContent("ping");
+    ping = 'Success: ' + result.response.text().substring(0, 10);
+  } catch (err) {
+    ping = 'Error: ' + (err.message || 'Unknown error');
   }
   
   res.json({
     success: true,
-    implementation: "Multi-Probe-REST",
+    implementation: "SDK-Standard-Flash",
     hasKey: !!process.env.GEMINI_API_KEY,
     keyLength: process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.length : 0,
-    results
+    ping
   });
 });
 
@@ -43,7 +32,6 @@ router.post('/chat', async (req, res) => {
       return res.status(500).json({ success: false, message: 'AI configuration error.' });
     }
 
-    // 1. Fetch General Context
     const [projects, stats] = await Promise.all([
       Project.find().lean(),
       Complaint.aggregate([
@@ -58,7 +46,6 @@ router.post('/chat', async (req, res) => {
       ])
     ]);
 
-    // 2. Deterministic Complaint ID Tracking
     let specificComplaint = '';
     const idMatch = message.match(/(GRV-[A-Z0-9-]+)/i);
     if (idMatch) {
@@ -85,16 +72,9 @@ Instructions:
 
 User: ${message}`;
 
-    // 3. Call Gemini REST
-    const response = await axios.post(`${GEMINI_REST_URL}?key=${process.env.GEMINI_API_KEY}`, {
-      contents: [{ parts: [{ text: systemPrompt }] }],
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 1000,
-      }
-    });
-
-    const reply = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || "I'm sorry, I couldn't generate a response.";
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const result = await model.generateContent(systemPrompt);
+    const reply = result.response.text();
 
     res.json({
       success: true,
@@ -102,7 +82,7 @@ User: ${message}`;
     });
 
   } catch (err) {
-    console.error('Gemini REST Error:', err.response?.data || err.message);
+    console.error('Gemini SDK Error:', err.message || err);
     res.status(500).json({ success: false, message: 'AI Assistant Error.' });
   }
 });
