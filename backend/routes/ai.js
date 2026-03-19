@@ -63,18 +63,28 @@ Core Instructions:
 
 User Message: ${message}`;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    // AI Model Integration (Version: Daund-Vikas-Mitra-2.0-Final)
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     const result = await model.generateContent(systemPrompt);
-    const reply = result.response.text();
+    const response = await result.response;
+    const text = response.text();
+
+    if (!text) {
+      throw new Error('Empty response from AI engine.');
+    }
 
     res.json({
       success: true,
-      reply
+      reply: text
     });
 
   } catch (err) {
     console.error('Gemini SDK Error:', err.message || err);
-    res.status(500).json({ success: false, message: 'AI Assistant Error.' });
+    res.status(500).json({ 
+      success: false, 
+      message: 'AI Assistant Error.',
+      hint: 'Please check your API quota or safety settings.' 
+    });
   }
 });
 
