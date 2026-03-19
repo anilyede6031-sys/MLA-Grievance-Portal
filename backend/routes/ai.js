@@ -4,7 +4,7 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const Project = require('../models/Project');
 const Complaint = require('../models/Complaint');
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY, { apiVersion: 'v1' });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 router.get('/config-check', async (req, res) => {
   let ping = 'pending';
@@ -15,7 +15,7 @@ router.get('/config-check', async (req, res) => {
     // availableModels = modelList.map(m => m.name).join(', ');
     
     // Test gemini-1.5-flash (Standard)
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", apiVersion: 'v1' });
     const result = await model.generateContent("ping");
     ping = 'success: ' + result.response.text().substring(0, 10);
   } catch (err) {
@@ -101,7 +101,7 @@ User Message: ${message}
       return res.status(500).json({ success: false, message: 'AI configuration error. Please check backend environment variables.' });
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest", apiVersion: 'v1' });
     const result = await model.generateContent(systemPrompt);
     const responseText = result.response.text();
 
