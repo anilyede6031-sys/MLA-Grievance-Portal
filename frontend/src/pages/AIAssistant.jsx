@@ -57,7 +57,18 @@ export default function AIAssistant() {
           api.get('/complaints/public-stats'),
           api.get('/projects/summary')
         ]);
-        if (projRes.data.success) setProjects(projRes.data.projects);
+        if (projRes.data.success) {
+          const projs = projRes.data.projects;
+          setProjects(projs);
+          // Proactive Greeting Logic
+          const activeProj = projs.find(p => p.status === 'under_process');
+          if (activeProj) {
+            setMessages(prev => [
+              ...prev,
+              { id: 'proactive', type: 'bot', text: `🇮🇳 अपडेट: ${activeProj.name} प्रकल्पाचे काम सध्या जोरात सुरू आहे! ${activeProj.description}. आम्ही दौंडच्या प्रगतीसाठी कटिबद्ध आहोत.` }
+            ]);
+          }
+        }
         if (statsRes.data.success) {
           setStats({
             ...statsRes.data.stats,
