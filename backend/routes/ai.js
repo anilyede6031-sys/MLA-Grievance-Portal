@@ -6,6 +6,15 @@ const Complaint = require('../models/Complaint');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+router.get('/config-check', (req, res) => {
+  res.json({
+    success: true,
+    hasKey: !!process.env.GEMINI_API_KEY,
+    keyLength: process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.length : 0,
+    nodeEnv: process.env.NODE_ENV
+  });
+});
+
 router.post('/chat', async (req, res) => {
   try {
     const { message, history } = req.body;
