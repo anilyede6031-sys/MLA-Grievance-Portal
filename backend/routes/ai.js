@@ -4,6 +4,7 @@ const axios = require('axios');
 const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require('@google/generative-ai');
 const Project = require('../models/Project');
 const Complaint = require('../models/Complaint');
+const { getKeywordResponse } = require('../utils/keywordAssistant');
 
 const multer = require('multer');
 const upload = multer({ limits: { fileSize: 10 * 1024 * 1024 } }); // 10MB limit
@@ -104,9 +105,9 @@ User Message: ${message || 'Please analyze this image/location.'}`;
     let lastError = null;
     let text = "";
 
+    let modelErrors = {};
     for (const modelName of modelsToTry) {
       try {
-        // Skip text-only models if image is provided
         if (file && (modelName === "gemini-pro" || modelName === "gemini-1.0-pro")) continue;
 
         const model = genAI.getGenerativeModel({ model: modelName, safetySettings });
@@ -114,25 +115,30 @@ User Message: ${message || 'Please analyze this image/location.'}`;
         const response = await result.response;
         text = response.text();
         
-        if (text) {
-          console.log(`Success with ${modelName}`);
-          break;
-        }
+        if (text) break;
       } catch (err) {
-        console.error(`Model ${modelName} failed:`, err.message);
+        modelErrors[modelName] = err.message;
         lastError = err;
-        continue; // Try next model in the hierarchy
+        continue;
       }
     }
 
     if (!text) {
-      throw lastError || new Error('All AI models reached quota.');
+      // LAST RESORT: Try Keyword Fallback before giving up
+      const fallbackReply = getKeywordResponse(message, { projects, stats: complaintStats });
+      if (fallbackReply) {
+        return res.json({ success: true, reply: fallbackReply, isFallback: true });
+      }
+
+      return res.status(500).json({
+        success: false,
+        message: 'AI Assistant Error.',
+        debug: modelErrors, // Detailed errors for each model
+        hint: 'The AI is currently under high load or API key is invalid.'
+      });
     }
 
-    res.json({
-      success: true,
-      reply: text
-    });
+    res.json({ success: true, reply: text });
 
   } catch (err) {
     console.error('Final AI Error:', err.message);

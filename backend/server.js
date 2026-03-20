@@ -78,7 +78,7 @@ app.use('/api/ai', aiRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ success: true, message: 'MLA Grievance API is running 🇮🇳' }));
-app.get('/api/version-ping', (req, res) => res.json({ success: true, version: '2026-03-20-v2-ping' }));
+app.get('/api/version-ping', (req, res) => res.json({ success: true, version: '2026-03-20-v3-model-tracking' }));
 
 // Seeding Route
 app.get('/api/seed', async (req, res) => {
