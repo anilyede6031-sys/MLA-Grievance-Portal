@@ -100,7 +100,7 @@ User Message: ${message || 'Please analyze this image/location.'}`;
     }
 
     // High-Availability Model Fallback Logic (Production Stable)
-    const modelsToTry = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-pro", "gemma-3-27b"];
+    const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-pro"];
     let lastError = null;
     let text = "";
 
