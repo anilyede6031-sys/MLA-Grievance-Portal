@@ -8,7 +8,7 @@ const Complaint = require('../models/Complaint');
 const multer = require('multer');
 const upload = multer({ limits: { fileSize: 10 * 1024 * 1024 } }); // 10MB limit
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// Global initialization removed for per-request reliability
 
 const safetySettings = [
   { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
@@ -88,8 +88,11 @@ Core Instructions:
 
 User Message: ${message || 'Please analyze this image/location.'}`;
 
-    // AI Model Integration (Version: Daund-Vikas-Mitra-Multimodal-Stable-v2)
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash", safetySettings });
+    // AI Model Integration (Simplified for high availability)
+    const geminiKey = process.env.GEMINI_API_KEY;
+    if (!geminiKey) throw new Error("GEMINI_API_KEY is not defined in environment.");
+
+    const genAI = new GoogleGenerativeAI(geminiKey);
     
     const promptParts = [systemPrompt];
     if (file) {
