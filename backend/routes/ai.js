@@ -137,9 +137,10 @@ User Message: ${message || 'Please analyze this image/location.'}`;
     res.status(500).json({ 
       success: false, 
       message: 'AI Assistant Error.',
+      debug: err.message, // Temporarily expose for debugging
       hint: isQuota 
-        ? 'Daily quota (20 messages) reached. Please upgrade in Google AI Studio for unlimited access.' 
-        : 'The AI is currently under high load. Please try again later.'
+        ? 'Daily quota reached. Please try again later.' 
+        : 'The AI is currently experiencing high load or connectivity issues. Please try again in 5 minutes.'
     });
   }
 });
