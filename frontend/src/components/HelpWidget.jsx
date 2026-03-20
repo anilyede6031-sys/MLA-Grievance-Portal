@@ -118,10 +118,9 @@ export default function HelpWidget() {
             <>
               {/* Header Section */}
               <div className="bg-gradient-to-br from-gov-navy via-gov-blue to-saffron-500 p-6 text-white relative flex-shrink-0">
-                <div className="flex justify-between items-start mb-6">
+                <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-black opacity-90 tracking-tighter uppercase whitespace-nowrap">Daund Vikas Mitra</span>
-                    <span className="bg-green-500 text-[8px] px-1.5 py-0.5 rounded-full font-black animate-pulse">24/7</span>
                   </div>
                   <button onClick={() => setIsOpen(false)} className="hover:bg-white/10 p-1.5 rounded-full transition-colors">
                     <X size={18} />
@@ -129,8 +128,18 @@ export default function HelpWidget() {
                 </div>
                 
                 <div className="space-y-1">
-                  <h2 className="text-xl font-bold opacity-90 tracking-tight">{t.aiAssistantTitle}</h2>
-                  <h1 className="text-lg font-extrabold tracking-tight leading-tight">{t.aiAssistantDesc}</h1>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h1 className="text-2xl font-black tracking-tight">{t.aiAssistantTitle}</h1>
+                    <span className="bg-white/20 text-[10px] px-2 py-0.5 rounded-full font-black">24x7</span>
+                  </div>
+                  <p className="text-sm font-bold opacity-90 leading-tight">{t.aiAssistantDesc}</p>
+                  <div className="flex items-center gap-2 mt-3 bg-black/10 w-fit px-3 py-1 rounded-full border border-white/10">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
+                    <span className="text-[10px] font-black uppercase tracking-widest">{t.aiStatus}</span>
+                  </div>
                 </div>
               </div>
 
