@@ -65,6 +65,7 @@ app.use('/uploads', express.static(uploadsPath));
 
 // Request Logger
 app.use((req, res, next) => {
+  res.setHeader('X-Backend-Version', '2026-03-20-v1');
   console.log(`[REQ] ${req.method} ${req.url}`);
   next();
 });
