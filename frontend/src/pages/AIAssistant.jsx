@@ -167,13 +167,22 @@ export default function AIAssistant() {
           <Link to="/" className="p-2 hover:bg-white/10 rounded-full transition-colors text-saffron-400">
             <ArrowLeft size={20} />
           </Link>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-saffron-500 flex items-center justify-center shadow-lg shadow-saffron-500/20">
-              <Bot size={22} className="text-white" />
+          <div className="flex items-center gap-3 relative">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-saffron-500 to-orange-400 flex items-center justify-center shadow-lg shadow-saffron-500/30 relative">
+              <Bot size={24} className="text-white" />
+              <div className="absolute -bottom-1 -right-1 bg-green-500 text-[8px] font-black px-1.5 py-0.5 rounded-full border-2 border-gov-navy animate-bounce">
+                24/7
+              </div>
             </div>
             <div>
-              <h1 className="font-extrabold text-lg leading-tight">{t.aiAssistantTitle}</h1>
-              <p className="text-[10px] text-green-400 font-bold uppercase tracking-wider">● Online & Ready</p>
+              <h1 className="font-extrabold text-lg md:text-xl leading-tight bg-gradient-to-r from-saffron-300 to-white bg-clip-text text-transparent">{t.aiAssistantTitle}</h1>
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                <p className="text-[10px] text-green-400 font-bold uppercase tracking-wider">Online & Active Now</p>
+              </div>
             </div>
           </div>
         </div>
