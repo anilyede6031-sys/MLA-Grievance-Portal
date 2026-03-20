@@ -162,32 +162,50 @@ export default function AIAssistant() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col">
       {/* Header */}
-      <div className="bg-gov-navy text-white p-4 md:p-6 shadow-lg flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link to="/" className="p-2 hover:bg-white/10 rounded-full transition-colors text-saffron-400">
-            <ArrowLeft size={20} />
-          </Link>
-          <div className="flex items-center gap-3 relative">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-saffron-500 to-orange-400 flex items-center justify-center shadow-lg shadow-saffron-500/30 relative">
-              <Bot size={24} className="text-white" />
-              <div className="absolute -bottom-1 -right-1 bg-green-500 text-[8px] font-black px-1.5 py-0.5 rounded-full border-2 border-gov-navy animate-bounce">
-                24/7
+      <div className="bg-gov-navy text-white p-4 md:p-6 shadow-lg">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link to="/" className="p-2 hover:bg-white/10 rounded-full transition-colors text-saffron-400">
+              <ArrowLeft size={20} />
+            </Link>
+            <div className="flex items-center gap-3 relative">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-saffron-500 to-orange-400 flex items-center justify-center shadow-lg shadow-saffron-500/30 relative">
+                <Bot size={24} className="text-white" />
+                <div className="absolute -bottom-1 -right-1 bg-green-500 text-[8px] font-black px-1.5 py-0.5 rounded-full border-2 border-gov-navy animate-bounce">
+                  24/7
+                </div>
               </div>
-            </div>
-            <div>
-              <h1 className="font-extrabold text-lg md:text-xl leading-tight bg-gradient-to-r from-saffron-300 to-white bg-clip-text text-transparent">{t.aiAssistantTitle}</h1>
-              <div className="flex items-center gap-2">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                </span>
-                <p className="text-[10px] text-green-400 font-bold uppercase tracking-wider">Online & Active Now</p>
+              <div>
+                <h1 className="font-extrabold text-lg md:text-xl leading-tight bg-gradient-to-r from-saffron-300 to-white bg-clip-text text-transparent">{t.aiAssistantTitle}</h1>
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                  </span>
+                  <p className="text-[10px] text-green-400 font-bold uppercase tracking-wider">{t.aiStatus}</p>
+                </div>
               </div>
             </div>
           </div>
+          <div className="hidden md:block text-right">
+            <p className="text-[10px] font-black uppercase text-gray-400">Powered by Daund Digital Hub</p>
+            <p className="text-[11px] font-bold text-saffron-300">Daund Vikas Mitra</p>
+          </div>
         </div>
-        <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/5 text-[10px] font-bold uppercase text-gray-400">
-            Powered by Daund Digital Hub
+        
+        {/* Tagline & Update Banner */}
+        <div className="mt-4 pt-4 border-t border-white/10">
+          <p className="text-xs md:text-sm text-gray-400 font-medium mb-3">{t.aiAssistantDesc}</p>
+          <div className="bg-saffron-500/10 border border-saffron-500/20 p-3 rounded-xl flex items-center gap-3 overflow-hidden group">
+            <div className="bg-saffron-500 text-white p-1 rounded-md animate-pulse shrink-0">
+               <span className="text-[9px] font-black px-1 uppercase whitespace-nowrap">Latest Update</span>
+            </div>
+            <div className="overflow-hidden relative flex-1">
+              <p className="text-xs md:text-sm font-bold text-saffron-400 animate-marquee whitespace-nowrap">
+                {t.aiUpdateMsg}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -278,13 +296,18 @@ export default function AIAssistant() {
             >
               <Camera size={20} />
             </button>
-            <input 
-              type="text" 
+            <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-              placeholder={isListening ? "Listening..." : "Type or use Mic..."}
-              className={`flex-1 bg-gray-50 dark:bg-gray-800 border-0 focus:ring-2 focus:ring-saffron-500 rounded-2xl px-5 py-3 text-sm text-gray-900 dark:text-white dark:placeholder-gray-500 ${isListening ? 'animate-pulse bg-saffron-50' : ''}`}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+              placeholder={t.aiPlaceholder}
+              className="flex-1 bg-gray-50 dark:bg-gray-800 border-none focus:ring-0 text-sm md:text-base py-3 px-4 resize-none custom-scrollbar dark:text-gray-200"
+              rows="1"
             />
             <button 
               onClick={startListening}

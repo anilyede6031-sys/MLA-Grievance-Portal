@@ -129,8 +129,8 @@ export default function HelpWidget() {
                 </div>
                 
                 <div className="space-y-1">
-                  <h2 className="text-xl font-bold opacity-90 tracking-tight">Hi There! 👋</h2>
-                  <h1 className="text-3xl font-extrabold tracking-tight leading-tight">How Can We Help?</h1>
+                  <h2 className="text-xl font-bold opacity-90 tracking-tight">{t.aiAssistantTitle}</h2>
+                  <h1 className="text-lg font-extrabold tracking-tight leading-tight">{t.aiAssistantDesc}</h1>
                 </div>
               </div>
 
@@ -144,8 +144,8 @@ export default function HelpWidget() {
                 >
                   <div className="flex justify-between items-center">
                     <div>
-                      <h3 className="font-extrabold text-gray-800 dark:text-gray-100">AI Assistant Chat</h3>
-                      <p className="text-xs text-gray-400 font-medium mt-0.5">Daund Vikas Mitra is active</p>
+                      <h3 className="font-extrabold text-gray-800 dark:text-gray-100">{t.aiAssistantTitle} Chat</h3>
+                      <p className="text-xs text-green-500 font-bold mt-0.5">● {t.aiStatus}</p>
                     </div>
                     <div className="w-10 h-10 rounded-full bg-saffron-500 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
                       <Bot size={20} />
@@ -194,7 +194,7 @@ export default function HelpWidget() {
                       <h3 className="font-extrabold text-sm text-gray-900 dark:text-white leading-tight">Daund Vikas Mitra</h3>
                       <div className="flex items-center gap-1">
                         <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-ping" />
-                        <p className="text-[10px] text-green-500 font-bold uppercase tracking-wider">Active Now</p>
+                        <p className="text-[10px] text-green-500 font-bold uppercase tracking-wider">{t.aiStatus}</p>
                       </div>
                     </div>
                   </div>
@@ -261,7 +261,7 @@ export default function HelpWidget() {
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                        placeholder={isListening ? "Listening..." : "Write a reply..."}
+                        placeholder={isListening ? "Listening..." : t.aiPlaceholder}
                         className={`flex-1 bg-gray-50 dark:bg-gray-800 border-0 focus:ring-0 rounded-xl px-4 py-2 text-sm dark:text-white ${isListening ? 'animate-pulse bg-red-50' : ''}`}
                       />
                       
