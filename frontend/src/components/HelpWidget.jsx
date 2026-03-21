@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { MessageCircle, X, Bot, FileQuestion, Users, Globe, ChevronRight, Search, Instagram, Youtube, Twitter, MessageSquare, HelpCircle, MapPin, ArrowLeft, Send, User, Volume2, Mic, Camera, SendHorizontal, Phone } from 'lucide-react';
+import { MessageCircle, X, Bot, FileQuestion, Users, Globe, ChevronRight, Search, Instagram, Youtube, Twitter, MessageSquare, HelpCircle, MapPin, ArrowLeft, Send, User, Volume2, Mic, Camera, SendHorizontal, Phone, ArrowUp, Paperclip, Smile } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLang } from '../context/LangContext';
 import api from '../utils/api';
@@ -268,34 +268,32 @@ export default function HelpWidget() {
                         </button>
                      </div>
                    )}
-                   <div className="flex gap-2">
-                      <input type="file" ref={fileInputRef} hidden accept="image/*" onChange={(e) => setSelectedImage(e.target.files[0])} />
-                      <button onClick={getLocation} className={`p-2 bg-gray-50 dark:bg-gray-800 text-gray-500 rounded-xl border border-gray-100 dark:border-gray-700 ${location ? 'text-green-500 border-green-200' : ''}`}><MapPin size={18} /></button>
-                      <button onClick={() => fileInputRef.current?.click()} className="p-2 bg-gray-50 dark:bg-gray-800 text-gray-500 rounded-xl border border-gray-100 dark:border-gray-700"><Camera size={18} /></button>
-                      
-                      <input 
-                        type="text"
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                        placeholder={isListening ? "Listening..." : t.aiPlaceholder}
-                        className={`flex-1 bg-gray-50 dark:bg-gray-800 border-0 focus:ring-0 rounded-xl px-4 py-2 text-sm dark:text-white ${isListening ? 'animate-pulse bg-red-50' : ''}`}
-                      />
-                      
-                      <button 
-                        onClick={startListening}
-                        className={`p-2 rounded-xl transition-all ${isListening ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'bg-gray-50 dark:bg-gray-800 text-gray-500 border border-gray-100 dark:border-gray-700'}`}
-                      >
-                        <Mic size={18} />
-                      </button>
-                      
-                      <button 
-                        onClick={() => handleSend()}
-                        className="w-10 h-10 bg-saffron-500 text-white rounded-xl flex items-center justify-center shadow-lg shadow-saffron-500/20 transition-all active:scale-95"
-                      >
-                        <SendHorizontal size={18} />
-                      </button>
-                   </div>
+                   
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-3xl p-1 border border-gray-100 dark:border-gray-700 flex flex-col">
+                       <input 
+                         type="text"
+                         value={input}
+                         onChange={(e) => setInput(e.target.value)}
+                         onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                         placeholder={t.aiPlaceholder}
+                         className="bg-transparent border-0 focus:ring-0 px-4 py-3 text-sm dark:text-white flex-1"
+                       />
+                       <div className="flex items-center justify-between px-3 pb-2">
+                          <div className="flex items-center gap-1 text-gray-400">
+                             <input type="file" ref={fileInputRef} hidden accept="image/*" onChange={(e) => setSelectedImage(e.target.files[0])} />
+                             <button onClick={() => fileInputRef.current?.click()} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"><Paperclip size={18} /></button>
+                             <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"><Smile size={18} /></button>
+                             <button onClick={getLocation} className={`p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors ${location ? 'text-green-500' : ''}`}><MapPin size={18} /></button>
+                             <button onClick={startListening} className={`p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors ${isListening ? 'text-red-500 animate-pulse' : ''}`}><Mic size={18} /></button>
+                          </div>
+                          <button 
+                            onClick={() => handleSend()}
+                            className="bg-gov-navy text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-gov-blue transition-all active:scale-90 shadow-md"
+                          >
+                            <ArrowUp size={20} strokeWidth={3} />
+                          </button>
+                       </div>
+                    </div>
                 </div>
               </div>
             </>
