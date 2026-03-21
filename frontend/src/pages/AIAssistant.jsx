@@ -170,7 +170,7 @@ export default function AIAssistant() {
             </Link>
             <div className="flex items-center gap-3 relative">
               <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-saffron-500 to-orange-400 flex items-center justify-center shadow-lg shadow-saffron-500/30 relative">
-                <Bot size={24} className="text-white" />
+                <Bot size={20} className="text-white" />
                 <div className="absolute -bottom-1 -right-1 bg-green-500 text-[8px] font-black px-1.5 py-0.5 rounded-full border-2 border-gov-navy animate-bounce">
                   24/7
                 </div>
@@ -215,7 +215,7 @@ export default function AIAssistant() {
           <div key={m.id} className={`flex ${m.type === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
             <div className={`flex gap-3 max-w-[85%] md:max-w-[70%] ${m.type === 'user' ? 'flex-row-reverse' : ''}`}>
               <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center shadow-sm ${m.type === 'user' ? 'bg-gov-navy' : 'bg-saffron-500'}`}>
-                {m.type === 'user' ? <User size={14} className="text-white" /> : <Bot size={14} className="text-white" />}
+                {m.type === 'user' ? <User size={20} className="text-white" /> : <Bot size={20} className="text-white" />}
               </div>
               <div 
                 onClick={() => m.type === 'bot' && speak(m.text)}
@@ -228,7 +228,7 @@ export default function AIAssistant() {
                 {m.text}
                 {m.type === 'bot' && (
                   <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Volume2 size={12} className="text-gov-navy/40" />
+                    <Volume2 size={20} className="text-gov-navy/40" />
                   </div>
                 )}
               </div>
@@ -239,7 +239,7 @@ export default function AIAssistant() {
           <div className="flex justify-start animate-fade-in">
             <div className="flex gap-3">
                <div className="w-8 h-8 rounded-full bg-saffron-500 flex items-center justify-center">
-                 <Bot size={14} className="text-white" />
+                 <Bot size={20} className="text-white" />
                </div>
                <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-4 rounded-2xl rounded-tl-none flex gap-1">
                   <div className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" />
@@ -271,7 +271,7 @@ export default function AIAssistant() {
             <div className="relative inline-block">
               <img src={URL.createObjectURL(selectedImage)} className="w-20 h-20 rounded-xl object-cover border-2 border-saffron-500" />
               <button onClick={() => setSelectedImage(null)} className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full shadow-lg">
-                <X size={12} />
+                <X size={20} />
               </button>
             </div>
           )}

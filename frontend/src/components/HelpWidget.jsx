@@ -123,7 +123,7 @@ export default function HelpWidget() {
                     <span className="text-sm font-black opacity-90 tracking-tighter uppercase whitespace-nowrap">Daund Vikas Mitra</span>
                   </div>
                   <button onClick={() => setIsOpen(false)} className="hover:bg-white/10 p-1.5 rounded-full transition-colors">
-                    <X size={18} />
+                    <X size={20} />
                   </button>
                 </div>
                 
@@ -176,10 +176,10 @@ export default function HelpWidget() {
                        className="w-full flex items-center justify-between p-4 text-left border-b last:border-0 border-gray-50 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group"
                      >
                        <div className="flex items-center gap-3">
-                         <item.icon size={16} className="text-gray-400 group-hover:text-saffron-500" />
+                         <item.icon size={20} className="text-gray-400 group-hover:text-saffron-500" />
                          <span className="text-sm font-bold text-gray-600 dark:text-gray-400 group-hover:text-gray-950 dark:group-hover:text-white transition-colors">{item.label}</span>
                        </div>
-                       <ChevronRight size={16} className="text-gray-300 group-hover:text-saffron-500 transition-colors" />
+                       <ChevronRight size={20} className="text-gray-300 group-hover:text-saffron-500 transition-colors" />
                      </button>
                    ))}
                 </div>
@@ -214,9 +214,9 @@ export default function HelpWidget() {
                        rel="noopener noreferrer"
                        className="p-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors shadow-sm"
                      >
-                       <Phone size={16} />
+                       <Phone size={20} />
                      </a>
-                     <button onClick={() => setIsOpen(false)} className="p-2 text-gray-400 hover:text-red-500 transition-colors"><X size={18} /></button>
+                     <button onClick={() => setIsOpen(false)} className="p-2 text-gray-400 hover:text-red-500 transition-colors"><X size={20} /></button>
                   </div>
                 </div>
 
@@ -239,7 +239,7 @@ export default function HelpWidget() {
                              {m.text}
                              {m.type === 'bot' && (
                                <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                 <Volume2 size={10} className="text-gray-400" />
+                                 <Volume2 size={20} className="text-gray-400" />
                                </div>
                              )}
                            </div>
@@ -264,7 +264,7 @@ export default function HelpWidget() {
                      <div className="relative inline-block">
                         <img src={URL.createObjectURL(selectedImage)} className="w-16 h-16 rounded-xl object-cover border-2 border-saffron-500" />
                         <button onClick={() => setSelectedImage(null)} className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full shadow-lg">
-                          <X size={10} />
+                          <X size={20} />
                         </button>
                      </div>
                    )}
@@ -281,10 +281,10 @@ export default function HelpWidget() {
                        <div className="flex items-center justify-between px-3 pb-2">
                           <div className="flex items-center gap-1 text-gray-400">
                              <input type="file" ref={fileInputRef} hidden accept="image/*" onChange={(e) => setSelectedImage(e.target.files[0])} />
-                             <button onClick={() => fileInputRef.current?.click()} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"><Paperclip size={18} /></button>
-                             <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"><Smile size={18} /></button>
-                             <button onClick={getLocation} className={`p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors ${location ? 'text-green-500' : ''}`}><MapPin size={18} /></button>
-                             <button onClick={startListening} className={`p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors ${isListening ? 'text-red-500 animate-pulse' : ''}`}><Mic size={18} /></button>
+                             <button onClick={() => fileInputRef.current?.click()} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"><Paperclip size={20} /></button>
+                             <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"><Smile size={20} /></button>
+                             <button onClick={getLocation} className={`p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors ${location ? 'text-green-500' : ''}`}><MapPin size={20} /></button>
+                             <button onClick={startListening} className={`p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors ${isListening ? 'text-red-500 animate-pulse' : ''}`}><Mic size={20} /></button>
                           </div>
                           <button 
                             onClick={() => handleSend()}
@@ -303,17 +303,17 @@ export default function HelpWidget() {
           <div className="bg-white dark:bg-gray-900 px-6 py-2 grid grid-cols-3 border-t border-gray-100 dark:border-gray-800 flex-shrink-0">
              <button onClick={() => setView('menu')} className={`flex flex-col items-center gap-1 transition-colors ${view === 'menu' ? 'text-saffron-500' : 'text-gray-400'}`}>
                <div className={`w-1.5 h-1.5 rounded-full bg-current mb-0.5 transition-opacity ${view === 'menu' ? 'opacity-100' : 'opacity-0'}`} />
-               <Bot size={18} />
+               <Bot size={20} />
                <span className="text-[8px] font-black uppercase tracking-widest">Assistant</span>
              </button>
              <button onClick={() => setView('chat')} className={`flex flex-col items-center gap-1 transition-colors ${view === 'chat' ? 'text-saffron-500' : 'text-gray-400'}`}>
                <div className={`w-1.5 h-1.5 rounded-full bg-current mb-0.5 transition-opacity ${view === 'chat' ? 'opacity-100' : 'opacity-0'}`} />
-               <MessageSquare size={18} />
+               <MessageSquare size={20} />
                <span className="text-[8px] font-black uppercase tracking-widest">Chat</span>
              </button>
              <Link to="/emergency" className="flex flex-col items-center gap-1 text-gray-400 hover:text-saffron-500 transition-colors">
                <div className="w-1.5 h-1.5 rounded-full bg-current mb-0.5 opacity-0" />
-               <HelpCircle size={18} />
+               <HelpCircle size={20} />
                <span className="text-[8px] font-black uppercase tracking-widest">Contacts</span>
              </Link>
           </div>
