@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { MessageCircle, X, Bot, FileQuestion, Users, Globe, ChevronRight, Search, Instagram, Youtube, Twitter, MessageSquare, HelpCircle, MapPin, ArrowLeft, Send, User, Volume2, Mic, Camera } from 'lucide-react';
+import { MessageCircle, X, Bot, FileQuestion, Users, Globe, ChevronRight, Search, Instagram, Youtube, Twitter, MessageSquare, HelpCircle, MapPin, ArrowLeft, Send, User, Volume2, Mic, Camera, SendHorizontal, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLang } from '../context/LangContext';
 import api from '../utils/api';
@@ -208,6 +208,14 @@ export default function HelpWidget() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
+                     <a 
+                       href={`https://wa.me/${import.meta.env.VITE_WHATSAPP || '911234567890'}`}
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       className="p-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors shadow-sm"
+                     >
+                       <Phone size={16} />
+                     </a>
                      <button onClick={() => setIsOpen(false)} className="p-2 text-gray-400 hover:text-red-500 transition-colors"><X size={18} /></button>
                   </div>
                 </div>
@@ -285,7 +293,7 @@ export default function HelpWidget() {
                         onClick={() => handleSend()}
                         className="w-10 h-10 bg-saffron-500 text-white rounded-xl flex items-center justify-center shadow-lg shadow-saffron-500/20 transition-all active:scale-95"
                       >
-                        <Send size={18} />
+                        <SendHorizontal size={18} />
                       </button>
                    </div>
                 </div>
