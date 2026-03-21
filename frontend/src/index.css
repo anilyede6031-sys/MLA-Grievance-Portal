@@ -1,97 +1,108 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
+/* RBot Premium Styles (v29 Deep Study Match) */
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer base {
-  :root {
-    --gov-orange: #FF9933;
-    --gov-green: #138808;
-    --gov-navy: #0a2d6b;
+@keyframes mbot-slide-up-fade {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
   }
-  html { font-family: 'Inter', 'Noto Sans Devanagari', sans-serif; }
-  body {
-    @apply bg-gray-50 text-gray-900;
-  }
-  .dark body {
-    @apply bg-gray-950 text-gray-100;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-@layer components {
-  /* Government Stripe Header */
-  .tricolor-stripe {
-    background: linear-gradient(to right, #FF9933 33.33%, #FFFFFF 33.33%, #FFFFFF 66.66%, #138808 66.66%);
+@keyframes mbot-widget-entry {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
   }
-
-  .btn-primary {
-    @apply inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-saffron-500 hover:bg-saffron-600 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-200 active:scale-95;
-  }
-  .btn-secondary {
-    @apply inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gov-green hover:bg-green-700 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-200 active:scale-95;
-  }
-  .btn-outline {
-    @apply inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border-2 border-saffron-500 text-saffron-600 hover:bg-saffron-50 font-semibold transition-all duration-200;
-  }
-  .card {
-    @apply bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5;
-  }
-  .input-field {
-    @apply w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-saffron-400 focus:border-transparent transition-all placeholder-gray-400;
-  }
-  .label {
-    @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1;
-  }
-  .status-badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
-  }
-  .badge-pending { @apply status-badge bg-yellow-100 text-yellow-800; }
-  .badge-inprogress { @apply status-badge bg-blue-100 text-blue-800; }
-  .badge-resolved { @apply status-badge bg-green-100 text-green-800; }
-  .badge-rejected { @apply status-badge bg-red-100 text-red-800; }
-
-  .stat-card {
-    @apply card flex flex-col items-center justify-center text-center py-8 hover:shadow-md transition-shadow cursor-default;
-  }
-
-  .section-title {
-    @apply text-2xl font-bold text-gov-navy dark:text-saffron-300 mb-1;
-  }
-  .section-subtitle {
-    @apply text-gray-500 dark:text-gray-400 text-sm;
-  }
-
-  /* Marathi font class */
-  .font-marathi {
-    font-family: 'Noto Sans Devanagari', sans-serif;
-  }
-
-  /* Gov nav active */
-  .nav-active {
-    @apply text-saffron-500 border-b-2 border-saffron-500;
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
-@layer utilities {
-  .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
-  .animate-slide-up { animation: slideUp 0.4s ease-out; }
+@keyframes mbot-dot-bounce {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
 }
 
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes marquee {
-  0% { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
+/* 1:1 MongoDB Shadows & Borders */
+.rbot-container-shadow {
+  box-shadow: 0px 5px 40px rgba(9, 14, 21, 0.16) !important;
 }
 
-.animate-marquee {
-  display: inline-block;
-  animation: marquee 15s linear infinite;
+.rbot-bubble-shadow {
+  box-shadow: rgba(9, 14, 21, 0.06) 0px 4px 28px 0px, rgba(9, 14, 21, 0.06) 0px 1px 4px 0px !important;
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #f1f1f1; }
-::-webkit-scrollbar-thumb { background: #FF9933; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #e07b00; }
+/* Animations */
+.animate-mbot-message {
+  animation: mbot-slide-up-fade 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-mbot-widget {
+  animation: mbot-widget-entry 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.mbot-typing-dot {
+  animation: mbot-dot-bounce 0.8s infinite ease-in-out;
+}
+
+.mbot-typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.mbot-typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* Typography & Transitions */
+.rbot-text {
+  color: #001E2B; /* mongodb deep navy */
+  font-size: 14px;
+  line-height: 20px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  transition: all 0.15s ease-in-out;
+}
+
+.rbot-header-title {
+  color: #001E2B;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.rbot-greeting {
+  font-size: 32px;
+  font-weight: 400;
+  color: #001E2B;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.mbot-bubble-bot {
+  background-color: #FFFFFF;
+  border: 1px solid #E8EDEB;
+}
+
+.mbot-bubble-user {
+  background-color: #00684A;
+  color: #FFFFFF;
+}
+
+.rbot-button-hover:hover {
+  background-color: #F9FBFA;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.rbot-input-focus:focus {
+  border-color: #14161A !important;
+  transition: border-color 0.2s ease;
+}

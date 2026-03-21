@@ -1,321 +1,159 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, User, Bot, ArrowLeft, MessageSquare, List, AlertTriangle, X, Mic, Volume2, VolumeX, Camera, Paperclip, MapPin, Smile, ArrowUp } from 'lucide-react';
+import { Send, User, Bot, ArrowLeft, MessageSquare, List, AlertTriangle, X, Mic, Volume2, VolumeX, Camera, Paperclip, MapPin, Smile, ArrowUp, MoreHorizontal, Info, Shield, Phone, Home, HelpCircle, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLang } from '../context/LangContext';
 import api from '../utils/api';
+import '../index.css'; 
 
 export default function AIAssistant() {
   const { t } = useLang();
   const [messages, setMessages] = useState([
-    { id: 1, type: 'bot', text: t.aiGreeting }
+    { id: 1, type: 'bot', text: '👋 Hi there! How can I help today?' }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [location, setLocation] = useState(null);
   const scrollRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // Geolocation
-  const getLocation = () => {
-    if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser.");
-      return;
-    }
-    navigator.geolocation.getCurrentPosition((pos) => {
-      setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-      setMessages(prev => [...prev, { id: Date.now(), type: 'user', text: `📍 Location Shared: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}` }]);
-      handleSend(`My location is shared. What projects are near me?`, null, { lat: pos.coords.latitude, lng: pos.coords.longitude });
-    }, (err) => {
-      console.error(err);
-      alert("Unable to retrieve location.");
-    });
-  };
-
-  // Speech Recognition Setup
+  // Speech Recognition
   const startListening = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      alert("Speech recognition not supported in this browser.");
-      return;
-    }
+    if (!SpeechRecognition) return;
     const recognition = new SpeechRecognition();
-    recognition.lang = 'mr-IN'; // Multilingual support
+    recognition.lang = 'en-US'; 
     recognition.onstart = () => setIsListening(true);
     recognition.onend = () => setIsListening(false);
     recognition.onresult = (event) => setInput(event.results[0][0].transcript);
     recognition.start();
   };
 
-  // Text to Speech
-  const speak = (text) => {
-    if (isSpeaking) {
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
-      return;
-    }
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'mr-IN'; // Marathi Voice
-    utterance.onend = () => setIsSpeaking(false);
-    setIsSpeaking(true);
-    window.speechSynthesis.speak(utterance);
-  };
-
-  const [projects, setProjects] = useState([]);
-  const [stats, setStats] = useState({ total: 0, resolved: 0, pending: 0, byDepartment: [], byTaluka: [] });
-  const [projSummary, setProjSummary] = useState({ expenditure: {}, totalBudget: 0, totalProjects: 0 });
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [projRes, statsRes, sumRes] = await Promise.all([
-          api.get('/projects'),
-          api.get('/complaints/public-stats'),
-          api.get('/projects/summary')
-        ]);
-        if (projRes.data.success) {
-          const projs = projRes.data.projects;
-          setProjects(projs);
-          // Proactive Greeting Logic
-          const activeProj = projs.find(p => p.status === 'under_process');
-          if (activeProj) {
-            setMessages(prev => [
-              ...prev,
-              { id: 'proactive', type: 'bot', text: `🇮🇳 अपडेट: ${activeProj.name} प्रकल्पाचे काम सध्या जोरात सुरू आहे! ${activeProj.description}. आम्ही दौंडच्या प्रगतीसाठी कटिबद्ध आहोत.` }
-            ]);
-          }
-        }
-        if (statsRes.data.success) {
-          setStats({
-            ...statsRes.data.stats,
-            byDepartment: statsRes.data.byDepartment || [],
-            byTaluka: statsRes.data.byTaluka || []
-          });
-        }
-        if (sumRes.data.success) setProjSummary(sumRes.data.data);
-      } catch (err) {
-        console.error("Failed to fetch AI data:", err);
-      }
-    };
-    fetchData();
-  }, []);
-
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const handleSend = (text = input, image = selectedImage, loc = location) => {
-    if (!text.trim() && !image && !loc) return;
+  const handleSend = async (text = input) => {
+    if (!text.trim()) return;
 
-    const userMsg = { 
-      id: Date.now(), 
-      type: 'user', 
-      text, 
-      image: image ? URL.createObjectURL(image) : null 
-    };
+    const userMsg = { id: Date.now(), type: 'user', text };
     setMessages(prev => [...prev, userMsg]);
-    
     setInput('');
-    setSelectedImage(null);
     setIsTyping(true);
 
-    // Real AI Response Logic using Gemini Multimodal + Location
-    (async () => {
-      try {
-        const formData = new FormData();
-        formData.append('message', text);
-        if (image) formData.append('image', image);
-        if (loc) formData.append('location', JSON.stringify(loc));
-
-        const res = await api.post('/ai/chat', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-
-        if (res.data.success) {
-          const reply = res.data.reply;
-          setMessages(prev => [...prev, { id: Date.now() + 1, type: 'bot', text: reply }]);
-        } else {
-          throw new Error("AI failed");
-        }
-      } catch (err) {
-        console.error("AI Assistant Error:", err);
-        setMessages(prev => [...prev, { 
-          id: Date.now() + 1, 
-          type: 'bot', 
-          text: /[\u0900-\u097F]/.test(text)
-            ? "क्षमस्व, एआय असिस्टंट सध्या अनुपलब्ध आहे. कृपया थोड्या वेळाने प्रयत्न करा किंवा थेट 'तक्रार नोंदवा' वर जा."
-            : "I'm sorry, the AI Assistant is currently experiencing high load. Please try again in a few moments or use our manual tracking features." 
-        }]);
-      } finally {
-        setIsTyping(false);
+    try {
+      const res = await api.post('/ai/chat', { message: text });
+      if (res.data.success) {
+        setMessages(prev => [...prev, { id: Date.now() + 1, type: 'bot', text: res.data.reply }]);
       }
-    })();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
-  const quickActions = [
-    { label: t.aiAskComplaint, text: 'How to file a complaint?' },
-    { label: t.aiAskProjects, text: 'Tell me about projects in Daund' },
-    { label: t.aiAskEmergency, text: 'Show emergency contacts' },
-  ];
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col">
-      {/* Header */}
-      <div className="bg-gov-navy text-white p-4 md:p-6 shadow-lg">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link to="/" className="p-2 hover:bg-white/10 rounded-full transition-colors text-saffron-400">
-              <ArrowLeft size={20} />
-            </Link>
-            <div className="flex items-center gap-3 relative">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-saffron-500 to-orange-400 flex items-center justify-center shadow-lg shadow-saffron-500/30 relative">
-                <Bot size={20} className="text-white" />
-                <div className="absolute -bottom-1 -right-1 bg-green-500 text-[8px] font-black px-1.5 py-0.5 rounded-full border-2 border-gov-navy animate-bounce">
-                  24/7
-                </div>
-              </div>
-              <div>
-                <h1 className="font-extrabold text-lg md:text-xl leading-tight bg-gradient-to-r from-saffron-300 to-white bg-clip-text text-transparent">{t.aiAssistantTitle}</h1>
-                <div className="flex items-center gap-2">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                  </span>
-                  <p className="text-[10px] text-green-400 font-bold uppercase tracking-wider">{t.aiStatus}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="hidden md:block text-right">
-            <p className="text-[10px] font-black uppercase text-gray-400">Powered by Daund Digital Hub</p>
-            <p className="text-[11px] font-bold text-saffron-300">Daund Vikas Mitra</p>
-          </div>
+    <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col font-sans">
+      {/* 1:1 RBOT FULL PAGE HEADER */}
+      <div className="h-[72px] bg-white dark:bg-gray-900 border-b border-[#E8EDEB] px-4 md:px-6 flex-shrink-0 flex items-center justify-between sticky top-0 z-50 rbot-bubble-shadow">
+        <div className="flex items-center gap-4">
+           <Link to="/" className="p-2 hover:bg-gray-50 rounded-full transition-all text-gray-400">
+             <ArrowLeft size={20} strokeWidth={3} />
+           </Link>
+           <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-[#00684A] border border-[#00684A]/10 shadow-sm relative">
+              <Bot size={24} strokeWidth={1.5} />
+              <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 rounded-full border-2 border-white shadow-sm" />
+           </div>
+           <div>
+             <h1 className="rbot-header-title text-xl leading-tight">RBot</h1>
+             <p className="text-[11px] text-[#8392A5] font-bold leading-tight">The team can also help</p>
+           </div>
         </div>
-        
-        {/* Tagline & Update Banner */}
-        <div className="mt-4 pt-4 border-t border-white/10">
-          <p className="text-xs md:text-sm text-gray-400 font-medium mb-3">{t.aiAssistantDesc}</p>
-          <div className="bg-saffron-500/10 border border-saffron-500/20 p-3 rounded-xl flex items-center gap-3 overflow-hidden group">
-            <div className="bg-saffron-500 text-white p-1 rounded-md animate-pulse shrink-0">
-               <span className="text-[9px] font-black px-1 uppercase whitespace-nowrap">Latest Update</span>
-            </div>
-            <div className="overflow-hidden relative flex-1">
-              <p className="text-xs md:text-sm font-bold text-saffron-400 animate-marquee whitespace-nowrap">
-                {t.aiUpdateMsg}
-              </p>
-            </div>
-          </div>
+        <div className="flex items-center gap-4">
+           <div className="hidden md:flex items-center gap-2 bg-green-50 px-3 py-1 rounded-full border border-green-100">
+              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              <span className="text-[10px] font-black text-green-700 uppercase tracking-widest">Online & Ready</span>
+           </div>
+           <button className="p-2 text-gray-400 hover:text-[#001E2B] transition-colors"><MoreHorizontal size={24} /></button>
         </div>
       </div>
 
-      {/* Chat Area */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 custom-scrollbar">
-        {messages.map((m) => (
-          <div key={m.id} className={`flex ${m.type === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
-            <div className={`flex gap-3 max-w-[85%] md:max-w-[70%] ${m.type === 'user' ? 'flex-row-reverse' : ''}`}>
-              <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center shadow-sm ${m.type === 'user' ? 'bg-gov-navy' : 'bg-saffron-500'}`}>
-                {m.type === 'user' ? <User size={20} className="text-white" /> : <Bot size={20} className="text-white" />}
+      {/* Main Messaging Area */}
+      <div className="flex-1 overflow-y-auto bg-[#F9FBFA] dark:bg-gray-950 custom-scrollbar">
+        <div className="max-w-4xl mx-auto p-4 md:p-12 space-y-8">
+           
+           <div className="bg-white dark:bg-gray-900 border border-[#E8EDEB] p-5 rounded-3xl flex gap-4 text-xs md:text-sm text-gray-500 italic leading-relaxed rbot-bubble-shadow items-start animate-mbot-message">
+              <Info size={20} className="text-[#00684A] shrink-0 mt-0.5" />
+              <p>This chat session is recorded to ensure service quality.</p>
+           </div>
+
+           {messages.map((m) => (
+              <div key={m.id} className={`flex flex-col ${m.type === 'user' ? 'items-end' : 'items-start'} animate-mbot-message mb-6`}>
+                 <div className={`p-4 md:p-6 rounded-[20px] max-w-[90%] md:max-w-[75%] rbot-bubble-shadow rbot-text leading-relaxed ${
+                     m.type === 'user' 
+                       ? 'mbot-bubble-user rounded-tr-none' 
+                       : 'mbot-bubble-bot rounded-tl-none font-medium'
+                   }`}>
+                   {m.text}
+                 </div>
+                 <p className={`text-[10px] text-[#8392A5] mt-3 font-black tracking-widest uppercase ${m.type === 'user' ? 'mr-2' : 'ml-2'}`}>
+                   {m.type === 'bot' ? 'RBot • AI Agent • Now' : 'Citizen • Now'}
+                 </p>
               </div>
-              <div 
-                onClick={() => m.type === 'bot' && speak(m.text)}
-                className={`p-4 rounded-2xl shadow-sm text-sm leading-relaxed cursor-pointer group relative ${
-                m.type === 'user' 
-                  ? 'bg-gov-navy text-white rounded-tr-none' 
-                  : 'bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-100 dark:border-gray-800 rounded-tl-none'
-              }`}>
-                {m.image && <img src={m.image} alt="uploaded" className="mb-2 rounded-lg max-h-48 object-cover" />}
-                {m.text}
-                {m.type === 'bot' && (
-                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Volume2 size={20} className="text-gov-navy/40" />
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-        {isTyping && (
-          <div className="flex justify-start animate-fade-in">
-            <div className="flex gap-3">
-               <div className="w-8 h-8 rounded-full bg-saffron-500 flex items-center justify-center">
-                 <Bot size={20} className="text-white" />
-               </div>
-               <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-4 rounded-2xl rounded-tl-none flex gap-1">
-                  <div className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" />
-                  <div className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce delay-75" />
-                  <div className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce delay-150" />
-               </div>
-            </div>
-          </div>
-        )}
-        <div ref={scrollRef} />
-      </div>
+           ))}
 
-      {/* Input Area */}
-      <div className="p-4 md:p-6 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
-        <div className="max-w-4xl mx-auto space-y-4">
-          <div className="flex flex-wrap gap-2">
-            {quickActions.map((action) => (
-              <button 
-                key={action.label}
-                onClick={() => handleSend(action.text)}
-                className="px-4 py-1.5 bg-gray-50 dark:bg-gray-800 hover:bg-saffron-50 dark:hover:bg-saffron-900/20 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 rounded-full text-xs font-bold transition-all hover:border-saffron-300 active:scale-95"
-              >
-                {action.label}
-              </button>
-            ))}
-          </div>
+           <div className="flex flex-col items-start gap-4 pb-8 animate-mbot-message delay-150">
+              <button onClick={() => handleSend("That helped 👍")} className="px-6 py-3 bg-white border border-[#E8EDEB] rounded-full text-sm font-bold rbot-bubble-shadow hover:border-[#00684A] hover:text-[#00684A] transition-all flex items-center gap-2 text-[#001E2B]">That helped 👍</button>
+              <button onClick={() => handleSend("Show me more 👀")} className="px-6 py-3 bg-white border border-[#E8EDEB] rounded-full text-sm font-bold rbot-bubble-shadow hover:border-[#00684A] hover:text-[#00684A] transition-all flex items-center gap-2 text-[#001E2B]">Show me more 👀</button>
+              <button onClick={() => handleSend("Talk to a person 👤")} className="px-6 py-3 bg-white border border-[#E8EDEB] rounded-full text-sm font-bold rbot-bubble-shadow hover:border-[#00684A] hover:text-[#00684A] transition-all flex items-center gap-2 text-[#001E2B]">Talk to a person 👤</button>
+           </div>
 
-          {selectedImage && (
-            <div className="relative inline-block">
-              <img src={URL.createObjectURL(selectedImage)} className="w-20 h-20 rounded-xl object-cover border-2 border-saffron-500" />
-              <button onClick={() => setSelectedImage(null)} className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full shadow-lg">
-                <X size={20} />
-              </button>
-            </div>
-          )}
-
-          <div className="bg-white dark:bg-gray-800 rounded-[2rem] p-2 border border-gray-100 dark:border-gray-700 flex flex-col shadow-sm">
-             <textarea
-               value={input}
-               onChange={(e) => setInput(e.target.value)}
-               onKeyDown={(e) => {
-                 if (e.key === 'Enter' && !e.shiftKey) {
-                   e.preventDefault();
-                   handleSend();
-                 }
-               }}
-               placeholder={t.aiPlaceholder}
-               className="flex-1 bg-transparent border-none focus:ring-0 text-gray-700 dark:text-gray-200 text-base md:text-lg py-4 px-6 resize-none custom-scrollbar"
-               rows="2"
-             />
-             <div className="flex items-center justify-between px-6 pb-4">
-                <div className="flex items-center gap-2 text-gray-400">
-                   <input 
-                     type="file" 
-                     ref={fileInputRef} 
-                     hidden 
-                     accept="image/*" 
-                     onChange={(e) => setSelectedImage(e.target.files[0])} 
-                   />
-                   <button onClick={() => fileInputRef.current?.click()} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"><Paperclip size={20} /></button>
-                   <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"><Smile size={20} /></button>
-                   <button onClick={getLocation} className={`p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors ${location ? 'text-green-500' : ''}`}><MapPin size={20} /></button>
-                   <button onClick={startListening} className={`p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors ${isListening ? 'text-red-500 animate-pulse' : ''}`}><Mic size={20} /></button>
+           {isTyping && (
+             <div className="flex justify-start animate-mbot-message mb-6">
+                <div className="bg-white p-5 rounded-2xl rbot-bubble-shadow border border-[#E8EDEB] flex gap-2 items-center">
+                   <div className="w-2 h-2 bg-gray-400 rounded-full mbot-typing-dot" />
+                   <div className="w-2 h-2 bg-gray-400 rounded-full mbot-typing-dot" />
+                   <div className="w-2 h-2 bg-gray-400 rounded-full mbot-typing-dot" />
                 </div>
-                <button 
-                  onClick={() => handleSend()}
-                  className="w-14 h-14 bg-green-600 text-white rounded-full flex items-center justify-center hover:bg-green-700 transition-all active:scale-95 shadow-lg shadow-green-600/20 disabled:opacity-50"
-                  disabled={!input.trim() && !selectedImage}
-                >
-                  <ArrowUp size={28} strokeWidth={3} />
-                </button>
              </div>
-          </div>
-          <p className="text-[10px] text-center text-gray-400 uppercase tracking-[0.2em] font-bold">
-            Automated Assistant · Final responses handled by MLA Office
-          </p>
+           )}
+           <div ref={scrollRef} />
+        </div>
+      </div>
+
+      {/* Modern Static Input Bar */}
+      <div className="bg-white dark:bg-gray-900 border-t border-[#E8EDEB] p-4 md:p-8 flex-shrink-0">
+        <div className="max-w-4xl mx-auto space-y-6">
+           <div className="bg-white dark:bg-gray-800 rounded-[2rem] p-5 border border-[#E8EDEB] shadow-sm relative focus-within:border-[#14161A] transition-all">
+              <textarea 
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
+                placeholder="Message..."
+                className="bg-transparent border-0 focus:ring-0 p-2 rbot-text md:text-xl w-full resize-none min-h-[120px] font-medium placeholder:text-gray-300"
+                rows="3"
+              />
+              <div className="flex items-center justify-between mt-4 pt-4 border-t border-[#F9FBFA]">
+                 <div className="flex items-center gap-6 text-gray-300">
+                    <button onClick={() => fileInputRef.current?.click()} className="hover:text-[#00684A] transition-colors"><Paperclip size={24} /></button>
+                    <button onClick={startListening} className={`hover:text-[#00684A] transition-colors ${isListening ? 'text-red-500 animate-pulse' : ''}`}><Mic size={24} /></button>
+                    <button className="hover:text-[#00684A] transition-colors"><Smile size={24} /></button>
+                 </div>
+                 <button 
+                   onClick={() => handleSend()}
+                   className={`w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-lg ${
+                     input.trim() 
+                       ? 'bg-[#00684A] text-white' 
+                       : 'bg-[#F0F2F5] text-gray-300'
+                   }`}
+                 >
+                   <ArrowUp size={28} strokeWidth={3} />
+                 </button>
+              </div>
+           </div>
+           <p className="text-[10px] text-center text-gray-300 uppercase tracking-[0.3em] font-black pb-4">
+              Daund Digital Empowerment Center • 24/7 Official AI Assistant
+           </p>
         </div>
       </div>
     </div>

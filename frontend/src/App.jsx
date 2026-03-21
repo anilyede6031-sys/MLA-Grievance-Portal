@@ -43,7 +43,7 @@ export default function App() {
             <Route path="/login" element={<Layout darkMode={darkMode} setDarkMode={handleDarkMode}><UserLogin /></Layout>} />
             <Route path="/signup" element={<Layout darkMode={darkMode} setDarkMode={handleDarkMode}><UserSignup /></Layout>} />
             <Route path="/emergency" element={<EmergencyContacts />} />
-            <Route path="/ai-assistant" element={<AIAssistant />} />
+            <Route path="/ai" element={<AIAssistant />} />
 
             {/* Admin - protected */}
             <Route path="/admin" element={

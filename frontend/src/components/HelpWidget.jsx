@@ -1,343 +1,226 @@
 import { useState, useEffect, useRef } from 'react';
-import { MessageCircle, X, Bot, FileQuestion, Users, Globe, ChevronRight, Search, Instagram, Youtube, Twitter, MessageSquare, HelpCircle, MapPin, ArrowLeft, Send, User, Volume2, Mic, Camera, SendHorizontal, Phone, ArrowUp, Paperclip, Smile } from 'lucide-react';
+import { MessageCircle, X, Bot, FileQuestion, Users, Globe, ChevronRight, Search, Instagram, Youtube, Twitter, MessageSquare, HelpCircle, MapPin, ArrowLeft, Send, User, Volume2, Mic, Camera, SendHorizontal, Phone, ArrowUp, Paperclip, Smile, MoreHorizontal, Info, Shield, Home, ChevronDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLang } from '../context/LangContext';
 import api from '../utils/api';
+import './index.css'; 
 
 export default function HelpWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const [view, setView] = useState('menu'); // 'menu' or 'chat'
+  const [view, setView] = useState('menu'); // 'menu', 'chat', 'help'
   const { t } = useLang();
   const [messages, setMessages] = useState([
-    { id: 1, type: 'bot', text: t.aiGreeting || 'Hello! I am Daund Vikas Mitra, your 24/7 Digital Assistant. How can I help you today?' }
+    { id: 1, type: 'bot', text: '👋 Hi there! How can I help today?' }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [location, setLocation] = useState(null);
   const scrollRef = useRef(null);
   const fileInputRef = useRef(null);
-
-  // Geolocation
-  const getLocation = () => {
-    if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser.");
-      return;
-    }
-    navigator.geolocation.getCurrentPosition((pos) => {
-      setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-      setMessages(prev => [...prev, { id: Date.now(), type: 'user', text: `📍 Location Shared: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}` }]);
-      handleSend(`My location is shared. What projects are near me?`, null, { lat: pos.coords.latitude, lng: pos.coords.longitude });
-    }, (err) => {
-      console.error(err);
-      alert("Unable to retrieve location.");
-    });
-  };
-
-  // Speech Recognition
-  const startListening = () => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      alert("Speech recognition not supported.");
-      return;
-    }
-    const recognition = new SpeechRecognition();
-    recognition.lang = t.language === 'English' ? 'mr-IN' : 'en-US';
-    recognition.onstart = () => setIsListening(true);
-    recognition.onend = () => setIsListening(false);
-    recognition.onresult = (event) => setInput(event.results[0][0].transcript);
-    recognition.start();
-  };
-
-  // Text to Speech
-  const speak = (text) => {
-    if (isSpeaking) {
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
-      return;
-    }
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = t.language === 'English' ? 'mr-IN' : 'en-US';
-    utterance.onend = () => setIsSpeaking(false);
-    setIsSpeaking(true);
-    window.speechSynthesis.speak(utterance);
-  };
 
   // Scroll to bottom
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const handleSend = async (text = input, image = selectedImage, loc = location) => {
-    if (!text.trim() && !image && !loc) return;
-    
-    // Switch to chat view if sending from menu
-    if (view === 'menu') setView('chat');
+  const handleSend = async (text = input) => {
+    if (!text.trim()) return;
+    if (view !== 'chat') setView('chat');
 
-    const userMsg = { 
-      id: Date.now(), 
-      type: 'user', 
-      text,
-      image: image ? URL.createObjectURL(image) : null
-    };
+    const userMsg = { id: Date.now(), type: 'user', text };
     setMessages(prev => [...prev, userMsg]);
     setInput('');
-    setSelectedImage(null);
     setIsTyping(true);
 
     try {
-      const formData = new FormData();
-      formData.append('message', text);
-      if (image) formData.append('image', image);
-      if (loc) formData.append('location', JSON.stringify(loc));
-
-      const res = await api.post('/ai/chat', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const res = await api.post('/ai/chat', { message: text });
       if (res.data.success) {
         setMessages(prev => [...prev, { id: Date.now() + 1, type: 'bot', text: res.data.reply }]);
       }
     } catch (err) {
-      console.error("Widget Chat Error:", err);
-      setMessages(prev => [...prev, { id: Date.now() + 1, type: 'bot', text: "Error connecting. Please try again." }]);
+      console.error(err);
     } finally {
       setIsTyping(false);
     }
   };
 
+  const startListening = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
+    const recognition = new SpeechRecognition();
+    recognition.lang = t.language === 'English' ? 'en-US' : 'mr-IN';
+    recognition.onstart = () => setIsListening(true);
+    recognition.onend = () => setIsListening(false);
+    recognition.onresult = (event) => setInput(event.results[0][0].transcript);
+    recognition.start();
+  };
+
   return (
     <div className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end gap-3 pointer-events-none">
-      {/* Premium Widget Card */}
       {isOpen && (
-        <div className="w-[340px] md:w-[380px] bg-white dark:bg-gray-900 rounded-[2rem] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden animate-slide-up pointer-events-auto origin-bottom-right border border-gray-100 dark:border-gray-800 flex flex-col h-[600px] max-h-[80vh]">
+        <div className="w-[400px] h-[704px] bg-white dark:bg-gray-900 rounded-[24px] rbot-container-shadow overflow-hidden animate-mbot-widget pointer-events-auto origin-bottom-right border border-[#E8EDEB] flex flex-col">
           
-          {/* VIEW: MENU */}
-          {view === 'menu' ? (
+          {/* VIEW: HOME (MENU) */}
+          {view === 'menu' && (
             <>
-              {/* Header Section */}
-              <div className="bg-gradient-to-br from-gov-navy via-gov-blue to-saffron-500 p-6 text-white relative flex-shrink-0">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-black opacity-90 tracking-tighter uppercase whitespace-nowrap">Daund Vikas Mitra</span>
-                  </div>
-                  <button onClick={() => setIsOpen(false)} className="hover:bg-white/10 p-1.5 rounded-full transition-colors">
-                    <X size={20} />
+              <div className="bg-gradient-to-br from-[#00684A] to-[#014130] p-8 text-white relative flex-shrink-0">
+                <div className="flex justify-between items-start mb-6">
+                  <span className="text-[10px] font-black opacity-70 tracking-[0.2em] uppercase">Daund Vikas Mitra</span>
+                  <button onClick={() => setIsOpen(false)} className="hover:bg-white/10 p-1.5 rounded-full transition-all text-white">
+                    <ChevronDown size={24} strokeWidth={3} />
                   </button>
                 </div>
-                
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h1 className="text-2xl font-black tracking-tight">{t.aiAssistantTitle}</h1>
-                    <span className="bg-white/20 text-[10px] px-2 py-0.5 rounded-full font-black">24x7</span>
-                  </div>
-                  <p className="text-sm font-bold opacity-90 leading-tight">{t.aiAssistantDesc}</p>
-                  <div className="flex items-center gap-2 mt-3 bg-black/10 w-fit px-3 py-1 rounded-full border border-white/10">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                    </span>
-                    <span className="text-[10px] font-black uppercase tracking-widest">{t.aiStatus}</span>
-                  </div>
+                <h1 className="rbot-greeting text-white mb-2 leading-[1.1]">Hello There!<br/>How can we help?</h1>
+                <div className="flex items-center gap-2 mt-6 bg-black/10 w-fit px-3 py-1.5 rounded-full border border-white/10 text-green-400">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                  </span>
+                  <span className="text-[11px] font-black uppercase tracking-widest">Online & Ready</span>
                 </div>
               </div>
-
-              {/* Body Content */}
               <div className="flex-1 p-4 bg-gray-50 dark:bg-gray-950 space-y-4 overflow-y-auto custom-scrollbar">
-                
-                {/* Primary Action */}
-                <button 
-                  onClick={() => setView('chat')}
-                  className="w-full text-left bg-white dark:bg-gray-900 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-md transition-all group"
-                >
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="font-extrabold text-gray-800 dark:text-gray-100">{t.aiAssistantTitle} Chat</h3>
-                      <p className="text-xs text-green-500 font-bold mt-0.5">● {t.aiStatus}</p>
-                    </div>
-                    <div className="w-10 h-10 rounded-full bg-saffron-500 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
-                      <Bot size={20} />
-                    </div>
-                  </div>
-                </button>
-
-                {/* Quick Actions List */}
-                <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
-                   {[
-                     { label: t.aiAskComplaint, text: 'How to file a complaint?', icon: MessageSquare },
-                     { label: t.aiAskProjects, text: 'Tell me about projects in Daund', icon: MapPin },
-                     { label: t.aiAskEmergency, text: 'Show emergency contacts', icon: Users },
-                     { label: "Search Help Center", text: 'Search help', icon: Search },
-                   ].map((item, idx) => (
-                     <button 
-                       key={idx} 
-                       onClick={() => handleSend(item.text)}
-                       className="w-full flex items-center justify-between p-4 text-left border-b last:border-0 border-gray-50 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group"
-                     >
-                       <div className="flex items-center gap-3">
-                         <item.icon size={20} className="text-gray-400 group-hover:text-saffron-500" />
-                         <span className="text-sm font-bold text-gray-600 dark:text-gray-400 group-hover:text-gray-950 dark:group-hover:text-white transition-colors">{item.label}</span>
-                       </div>
-                       <ChevronRight size={20} className="text-gray-300 group-hover:text-saffron-500 transition-colors" />
-                     </button>
-                   ))}
-                </div>
-              </div>
-            </>
-          ) : (
-            <>
-              {/* VIEW: CHAT */}
-              <div className="flex flex-col h-full bg-white dark:bg-gray-950">
-                {/* Chat Header */}
-                <div className="p-4 border-b dark:border-gray-800 flex items-center justify-between bg-white dark:bg-gray-900 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <button onClick={() => setView('menu')} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors text-gray-500">
-                      <ArrowLeft size={20} />
-                    </button>
-                    <div className="relative">
-                       <div className="w-10 h-10 rounded-full bg-saffron-500 flex items-center justify-center text-white font-black text-lg shadow-sm">V</div>
-                       <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full animate-pulse" />
-                    </div>
-                    <div>
-                      <h3 className="font-extrabold text-sm text-gray-900 dark:text-white leading-tight">Daund Vikas Mitra</h3>
-                      <div className="flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-ping" />
-                        <p className="text-[10px] text-green-500 font-bold uppercase tracking-wider">{t.aiStatus}</p>
+                <div className="bg-white dark:bg-gray-900 p-6 rounded-3xl rbot-bubble-shadow border border-gray-100 dark:border-gray-800">
+                  <h2 className="text-xl font-black rbot-text mb-1">24/7 AI Assistant</h2>
+                  <p className="text-sm text-gray-500 font-bold mb-4">Register complaints and get project information instantly.</p>
+                  <button onClick={() => setView('chat')} className="w-full flex items-center justify-between p-4 bg-[#00684A] text-white rounded-2xl hover:bg-[#004D37] transition-all group shadow-lg rbot-button-hover">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"><MessageSquare size={20} /></div>
+                      <div className="text-left font-sans">
+                        <p className="text-xs font-black uppercase opacity-70">Send us a message</p>
+                        <p className="font-bold">Chat with RBot Support</p>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                     <a 
-                       href={`https://wa.me/${import.meta.env.VITE_WHATSAPP || '911234567890'}`}
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       className="p-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors shadow-sm"
-                     >
-                       <Phone size={20} />
-                     </a>
-                     <button onClick={() => setIsOpen(false)} className="p-2 text-gray-400 hover:text-red-500 transition-colors"><X size={20} /></button>
-                  </div>
-                </div>
-
-                {/* Messages Area */}
-                <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar bg-gray-50/50 dark:bg-gray-950/50">
-                   {messages.map((m) => (
-                     <div key={m.id} className={`flex ${m.type === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
-                        <div className={`flex gap-3 max-w-[85%] ${m.type === 'user' ? 'flex-row-reverse' : ''}`}>
-                           {m.type !== 'user' && (
-                             <div className="w-6 h-6 rounded-full bg-saffron-500 flex-shrink-0 flex items-center justify-center text-[10px] text-white font-bold">V</div>
-                           )}
-                           <div 
-                             onClick={() => m.type === 'bot' && speak(m.text)}
-                             className={`p-4 rounded-2xl text-sm leading-relaxed cursor-pointer relative group ${
-                             m.type === 'user' 
-                               ? 'bg-gov-navy text-white rounded-tr-none shadow-md shadow-gov-navy/20' 
-                               : 'bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-100 dark:border-gray-800 rounded-tl-none font-medium'
-                           }`}>
-                             {m.image && <img src={m.image} alt="uploaded" className="mb-2 rounded-lg max-h-32 object-cover" />}
-                             {m.text}
-                             {m.type === 'bot' && (
-                               <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                 <Volume2 size={20} className="text-gray-400" />
-                               </div>
-                             )}
-                           </div>
-                        </div>
-                     </div>
-                   ))}
-                   {isTyping && (
-                     <div className="flex justify-start animate-fade-in">
-                        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-3 rounded-2xl rounded-tl-none flex gap-1 items-center">
-                           <div className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" />
-                           <div className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce delay-75" />
-                           <div className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce delay-150" />
-                        </div>
-                     </div>
-                   )}
-                   <div ref={scrollRef} />
-                </div>
-
-                {/* Input Bar */}
-                <div className="p-4 border-t dark:border-gray-800 bg-white dark:bg-gray-900 space-y-3">
-                   {selectedImage && (
-                     <div className="relative inline-block">
-                        <img src={URL.createObjectURL(selectedImage)} className="w-16 h-16 rounded-xl object-cover border-2 border-saffron-500" />
-                        <button onClick={() => setSelectedImage(null)} className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full shadow-lg">
-                          <X size={20} />
-                        </button>
-                     </div>
-                   )}
-                   
-                    <div className="bg-white dark:bg-gray-800 rounded-[2rem] p-1 border border-gray-100 dark:border-gray-700 flex flex-col shadow-sm">
-                       <input 
-                         type="text"
-                         value={input}
-                         onChange={(e) => setInput(e.target.value)}
-                         onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                         placeholder={t.aiPlaceholder}
-                         className="bg-transparent border-0 focus:ring-0 px-4 py-3 text-sm dark:text-white flex-1"
-                       />
-                       <div className="flex items-center justify-between px-3 pb-2">
-                          <div className="flex items-center gap-1 text-gray-400">
-                             <input type="file" ref={fileInputRef} hidden accept="image/*" onChange={(e) => setSelectedImage(e.target.files[0])} />
-                             <button onClick={() => fileInputRef.current?.click()} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"><Paperclip size={20} /></button>
-                             <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"><Smile size={20} /></button>
-                             <button onClick={getLocation} className={`p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors ${location ? 'text-green-500' : ''}`}><MapPin size={20} /></button>
-                             <button onClick={startListening} className={`p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors ${isListening ? 'text-red-500 animate-pulse' : ''}`}><Mic size={20} /></button>
-                          </div>
-                          <button 
-                            onClick={() => handleSend()}
-                            className="bg-green-600 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-green-700 transition-all active:scale-90 shadow-md"
-                          >
-                            <ArrowUp size={20} strokeWidth={3} />
-                          </button>
-                       </div>
-                    </div>
+                    <ChevronRight size={20} strokeWidth={3} />
+                  </button>
                 </div>
               </div>
             </>
           )}
 
-          {/* Footer Navigation Bar */}
-          <div className="bg-white dark:bg-gray-900 px-6 py-2 grid grid-cols-3 border-t border-gray-100 dark:border-gray-800 flex-shrink-0">
-             <button onClick={() => setView('menu')} className={`flex flex-col items-center gap-1 transition-colors ${view === 'menu' ? 'text-saffron-500' : 'text-gray-400'}`}>
-               <div className={`w-1.5 h-1.5 rounded-full bg-current mb-0.5 transition-opacity ${view === 'menu' ? 'opacity-100' : 'opacity-0'}`} />
-               <Bot size={20} />
-               <span className="text-[8px] font-black uppercase tracking-widest">Assistant</span>
+          {/* VIEW: CHAT (MESSAGES) */}
+          {view === 'chat' && (
+            <div className="flex flex-col h-full bg-white dark:bg-gray-950">
+              <div className="h-[72px] border-b border-[#E8EDEB] px-4 flex items-center justify-between bg-white dark:bg-gray-900 rbot-bubble-shadow flex-shrink-0 z-10">
+                <div className="flex items-center gap-3">
+                  <button onClick={() => setView('menu')} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 transition-colors">
+                    <ArrowLeft size={18} strokeWidth={3} />
+                  </button>
+                  <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#00684A] border border-[#00684A]/10 shadow-sm relative flex-shrink-0">
+                      <Bot size={22} strokeWidth={1.5} className="animate-pulse" />
+                      <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
+                  </div>
+                  <div>
+                    <h3 className="rbot-header-title">RBot</h3>
+                    <p className="text-[11px] text-[#8392A5] font-bold leading-tight">The team can also help</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                   <button className="p-2 text-gray-400 hover:text-gray-800 transition-colors"><MoreHorizontal size={20} /></button>
+                   <button onClick={() => setIsOpen(false)} className="p-2 text-gray-400 hover:text-red-500 transition-colors"><X size={20} strokeWidth={3} /></button>
+                </div>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar bg-[#F9FBFA] dark:bg-gray-950">
+                 {messages.map((m) => (
+                    <div key={m.id} className={`flex flex-col ${m.type === 'user' ? 'items-end' : 'items-start'} animate-mbot-message`}>
+                       <div className={`p-4 rounded-[20px] max-w-[85%] rbot-text leading-relaxed rbot-bubble-shadow ${
+                           m.type === 'user' ? 'mbot-bubble-user rounded-tr-none' : 'mbot-bubble-bot rounded-tl-none font-medium text-[#001E2B]'
+                         }`}>
+                         {m.text}
+                       </div>
+                    </div>
+                 ))}
+                 <div className="flex flex-col items-start gap-2 pt-2 animate-mbot-message delay-150">
+                    <button onClick={() => handleSend("That helped 👍")} className="px-5 py-2.5 bg-white border border-[#E8EDEB] rounded-full text-sm font-bold rbot-bubble-shadow hover:border-[#00684A] hover:text-[#00684A] text-[#001E2B] transition-all">That helped 👍</button>
+                    <button onClick={() => handleSend("Show me more 👀")} className="px-5 py-2.5 bg-white border border-[#E8EDEB] rounded-full text-sm font-bold rbot-bubble-shadow hover:border-[#00684A] hover:text-[#00684A] text-[#001E2B] transition-all">Show me more 👀</button>
+                    <button onClick={() => handleSend("Talk to a person 👤")} className="px-5 py-2.5 bg-white border border-[#E8EDEB] rounded-full text-sm font-bold rbot-bubble-shadow hover:border-[#00684A] hover:text-[#00684A] text-[#001E2B] transition-all">Talk to a person 👤</button>
+                 </div>
+                 {isTyping && (
+                   <div className="flex justify-start animate-mbot-message">
+                      <div className="bg-[#FFFFFF] p-4 rounded-xl rbot-bubble-shadow border border-[#E8EDEB] flex gap-1.5 items-center">
+                         <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mbot-typing-dot" />
+                         <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mbot-typing-dot" />
+                         <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mbot-typing-dot" />
+                      </div>
+                   </div>
+                 )}
+                 <div ref={scrollRef} />
+              </div>
+              <div className="p-4 bg-white dark:bg-gray-900 border-t border-[#E8EDEB] flex-shrink-0">
+                  <div className="bg-white dark:bg-gray-800 rounded-[1.5rem] p-4 border border-[#E8EDEB] flex flex-col shadow-sm min-h-[140px] focus-within:border-[#14161A] transition-all">
+                     <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())} placeholder="Message..." className="bg-transparent border-0 focus:ring-0 p-0 text-sm rbot-text flex-1 resize-none font-sans" rows="3" />
+                     <div className="flex items-center justify-between mt-2 pt-3 border-t border-gray-50">
+                        <div className="flex items-center gap-5 text-gray-400">
+                           <button onClick={() => fileInputRef.current?.click()} className="hover:text-[#00684A] transition-colors"><Paperclip size={20} /></button>
+                           <button className="hover:text-[#00684A] transition-colors"><Smile size={20} /></button>
+                           <button onClick={startListening} className={`hover:text-[#00684A] transition-colors ${isListening ? 'text-red-500 animate-pulse' : ''}`}><Mic size={20} /></button>
+                        </div>
+                        <button onClick={() => handleSend()} className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${input.trim() ? 'bg-[#00684A] text-white shadow-md' : 'bg-[#F0F2F5] text-gray-300'}`}><ArrowUp size={20} strokeWidth={3} /></button>
+                     </div>
+                  </div>
+              </div>
+            </div>
+          )}
+
+          {/* VIEW: HELP */}
+          {view === 'help' && (
+            <div className="flex flex-col h-full bg-white dark:bg-gray-950">
+              <div className="bg-[#00684A] p-8 text-white relative flex-shrink-0 shadow-lg">
+                <div className="flex justify-between items-start mb-4">
+                  <h1 className="text-2xl font-black tracking-tight">Help</h1>
+                  <button onClick={() => setIsOpen(false)} className="hover:bg-white/10 p-1 rounded-full transition-all text-white"><X size={24} strokeWidth={3} /></button>
+                </div>
+                <div className="relative mt-2">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#00684A]" size={18} />
+                  <input 
+                    type="text" 
+                    placeholder="Search for help" 
+                    className="w-full bg-white text-[#001E2B] font-bold text-sm py-3.5 pl-12 pr-4 rounded-xl border-0 rbot-input-focus shadow-lg"
+                  />
+                </div>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-[#F9FBFA] dark:bg-gray-950 custom-scrollbar">
+                <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-2 mb-2">Suggested Articles</p>
+                {[
+                  "How to track a complaint?",
+                  "Contacting the Taluka Coordinator",
+                  "Information about upcoming projects",
+                  "Language settings and accessibility",
+                  "Submitting photos of grievances"
+                ].map((item, idx) => (
+                  <button key={idx} className="w-full text-left p-4 bg-white border border-[#E8EDEB] rounded-2xl rbot-bubble-shadow hover:border-[#00684A] hover:text-[#00684A] transition-all flex items-center justify-between group">
+                    <span className="text-sm font-bold text-[#001E2B] group-hover:text-[#00684A] tracking-tight">{item}</span>
+                    <ChevronRight size={18} className="text-gray-300 group-hover:text-[#00684A]" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Calibrated Footer */}
+          <div className="bg-white dark:bg-gray-900 h-[81px] grid grid-cols-3 border-t border-[#EDEDED] flex-shrink-0">
+             <button onClick={() => setView('menu')} className={`flex flex-col items-center pt-[18px] pb-[10px] transition-all ${view === 'menu' ? 'text-[#00684A]' : 'text-[#6C6F74] rbot-button-hover'}`}>
+               <Home size={24} className={view === 'menu' ? 'fill-[#00684A]/10' : ''} />
+               <span className={`text-[14px] leading-[20px] mt-2 ${view === 'menu' ? 'font-bold' : 'font-medium'}`}>Home</span>
              </button>
-             <button onClick={() => setView('chat')} className={`flex flex-col items-center gap-1 transition-colors ${view === 'chat' ? 'text-saffron-500' : 'text-gray-400'}`}>
-               <div className={`w-1.5 h-1.5 rounded-full bg-current mb-0.5 transition-opacity ${view === 'chat' ? 'opacity-100' : 'opacity-0'}`} />
-               <MessageSquare size={20} />
-               <span className="text-[8px] font-black uppercase tracking-widest">Chat</span>
+             <button onClick={() => setView('chat')} className={`flex flex-col items-center pt-[18px] pb-[10px] transition-all ${view === 'chat' ? 'text-[#00684A]' : 'text-[#6C6F74] rbot-button-hover'}`}>
+               <div className="relative">
+                  <MessageSquare size={24} className={view === 'chat' ? 'fill-[#00684A]/10' : ''} />
+                  <div className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white" />
+               </div>
+               <span className={`text-[14px] leading-[20px] mt-2 ${view === 'chat' ? 'font-bold' : 'font-medium'}`}>Messages</span>
              </button>
-             <Link to="/emergency" className="flex flex-col items-center gap-1 text-gray-400 hover:text-saffron-500 transition-colors">
-               <div className="w-1.5 h-1.5 rounded-full bg-current mb-0.5 opacity-0" />
-               <HelpCircle size={20} />
-               <span className="text-[8px] font-black uppercase tracking-widest">Contacts</span>
-             </Link>
+             <button onClick={() => setView('help')} className={`flex flex-col items-center pt-[18px] pb-[10px] transition-all ${view === 'help' ? 'text-[#00684A]' : 'text-[#6C6F74] rbot-button-hover'}`}>
+               <HelpCircle size={24} className={view === 'help' ? 'fill-[#00684A]/10' : ''} />
+               <span className={`text-[14px] leading-[20px] mt-2 ${view === 'help' ? 'font-bold' : 'font-medium'}`}>Help</span>
+             </button>
           </div>
         </div>
       )}
 
-      {/* Floating Toggle Button */}
-      <button 
-        onClick={() => setIsOpen(!isOpen)}
-        className={`w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center shadow-xl shadow-saffron-500/20 transition-all duration-300 transform pointer-events-auto active:scale-95 group relative ${
-          isOpen 
-            ? 'bg-white text-gray-900 rotate-90 scale-90' 
-            : 'bg-gradient-to-br from-gov-navy to-saffron-500 text-white hover:scale-110'
-        }`}
-      >
-        {!isOpen && (
-            <span className="absolute inset-0 rounded-full bg-saffron-500 animate-ping opacity-20 scale-125" />
-        )}
-        {isOpen ? <X size={28} /> : (
-          <div className="relative">
-            <MessageCircle size={32} />
-            <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white dark:border-gray-900 shadow-lg animate-bounce" />
-          </div>
-        )}
+      {/* Launcher */}
+      <button onClick={() => setIsOpen(!isOpen)} className={`w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 transform pointer-events-auto active:scale-95 border-2 ${isOpen ? 'bg-white text-[#001E2B] border-[#E8EDEB]' : 'bg-[#00684A] text-white border-transparent'}`}>
+        {isOpen ? <ChevronDown size={28} strokeWidth={3} /> : <div className="relative"><MessageSquare size={32} strokeWidth={1.5} /><div className="absolute top-0 right-0 w-3.5 h-3.5 bg-red-500 rounded-full border border-white shadow-lg" /></div>}
       </button>
     </div>
   );

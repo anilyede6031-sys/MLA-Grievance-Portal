@@ -128,7 +128,7 @@ export const translations = {
     extraFeaturesSub: 'Smart services for digital empowerment',
     aiAssistantTitle: '24/7 AI Assistant',
     aiAssistantDesc: 'Register complaints and get project information instantly.',
-    aiStatus: 'Online & Ready',
+    aiStatus: 'ONLINE & READY',
     aiGreeting: 'Hello! I am your Daund Digital Assistant. How can I help you today?',
     aiUpdateMsg: '🇮🇳 अपडेट: Zilla Parishad School Renovation प्रकल्पाचे काम सध्या जोरात सुरू आहे! Modernizing 10 rural schools with digital labs.. आम्ही दौंडच्या प्रगतीसाठी कटिबद्ध आहोत.',
     aiPlaceholder: 'Type or use Mic...',
