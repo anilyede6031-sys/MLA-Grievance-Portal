@@ -269,7 +269,7 @@ export default function HelpWidget() {
                      </div>
                    )}
                    
-                    <div className="bg-gray-50 dark:bg-gray-800 rounded-3xl p-1 border border-gray-100 dark:border-gray-700 flex flex-col">
+                    <div className="bg-white dark:bg-gray-800 rounded-[2rem] p-1 border border-gray-100 dark:border-gray-700 flex flex-col shadow-sm">
                        <input 
                          type="text"
                          value={input}
@@ -281,14 +281,14 @@ export default function HelpWidget() {
                        <div className="flex items-center justify-between px-3 pb-2">
                           <div className="flex items-center gap-1 text-gray-400">
                              <input type="file" ref={fileInputRef} hidden accept="image/*" onChange={(e) => setSelectedImage(e.target.files[0])} />
-                             <button onClick={() => fileInputRef.current?.click()} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"><Paperclip size={20} /></button>
-                             <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"><Smile size={20} /></button>
-                             <button onClick={getLocation} className={`p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors ${location ? 'text-green-500' : ''}`}><MapPin size={20} /></button>
-                             <button onClick={startListening} className={`p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors ${isListening ? 'text-red-500 animate-pulse' : ''}`}><Mic size={20} /></button>
+                             <button onClick={() => fileInputRef.current?.click()} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"><Paperclip size={20} /></button>
+                             <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"><Smile size={20} /></button>
+                             <button onClick={getLocation} className={`p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors ${location ? 'text-green-500' : ''}`}><MapPin size={20} /></button>
+                             <button onClick={startListening} className={`p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors ${isListening ? 'text-red-500 animate-pulse' : ''}`}><Mic size={20} /></button>
                           </div>
                           <button 
                             onClick={() => handleSend()}
-                            className="bg-gov-navy text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-gov-blue transition-all active:scale-90 shadow-md"
+                            className="bg-green-600 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-green-700 transition-all active:scale-90 shadow-md"
                           >
                             <ArrowUp size={20} strokeWidth={3} />
                           </button>

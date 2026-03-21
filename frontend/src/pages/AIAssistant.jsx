@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, User, Bot, ArrowLeft, MessageSquare, List, AlertTriangle, X, Mic, Volume2, VolumeX, Camera, Paperclip, MapPin } from 'lucide-react';
+import { Send, User, Bot, ArrowLeft, MessageSquare, List, AlertTriangle, X, Mic, Volume2, VolumeX, Camera, Paperclip, MapPin, Smile, ArrowUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLang } from '../context/LangContext';
 import api from '../utils/api';
@@ -276,52 +276,42 @@ export default function AIAssistant() {
             </div>
           )}
 
-          <div className="flex gap-3">
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              hidden 
-              accept="image/*" 
-              onChange={(e) => setSelectedImage(e.target.files[0])} 
-            />
-            <button 
-              onClick={getLocation}
-              className={`w-12 h-12 bg-gray-50 dark:bg-gray-800 text-gray-500 rounded-2xl flex items-center justify-center border border-gray-200 dark:border-gray-700 hover:border-saffron-300 transition-all ${location ? 'bg-green-50 text-green-600 border-green-200' : ''}`}
-            >
-              <MapPin size={20} />
-            </button>
-            <button 
-              onClick={() => fileInputRef.current?.click()}
-              className="w-12 h-12 bg-gray-50 dark:bg-gray-800 text-gray-500 rounded-2xl flex items-center justify-center border border-gray-200 dark:border-gray-700 hover:border-saffron-300 transition-all"
-            >
-              <Camera size={20} />
-            </button>
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend();
-                }
-              }}
-              placeholder={t.aiPlaceholder}
-              className="flex-1 bg-gray-50 dark:bg-gray-800 border-none focus:ring-0 text-sm md:text-base py-3 px-4 resize-none custom-scrollbar dark:text-gray-200"
-              rows="1"
-            />
-            <button 
-              onClick={startListening}
-              className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all relative ${isListening ? 'bg-red-500 text-white shadow-lg shadow-red-500/40' : 'bg-gov-navy text-white hover:bg-gov-blue shadow-lg shadow-gov-navy/20'}`}
-            >
-              {isListening && <span className="absolute inset-0 rounded-2xl bg-red-500 animate-ping opacity-75"></span>}
-              <Mic size={20} className={isListening ? 'animate-pulse' : ''} />
-            </button>
-            <button 
-              onClick={() => handleSend()}
-              className="w-12 h-12 bg-saffron-500 hover:bg-saffron-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-saffron-500/20 transition-all hover:scale-105 active:scale-95"
-            >
-              <Send size={20} />
-            </button>
+          <div className="bg-white dark:bg-gray-800 rounded-[2rem] p-2 border border-gray-100 dark:border-gray-700 flex flex-col shadow-sm">
+             <textarea
+               value={input}
+               onChange={(e) => setInput(e.target.value)}
+               onKeyDown={(e) => {
+                 if (e.key === 'Enter' && !e.shiftKey) {
+                   e.preventDefault();
+                   handleSend();
+                 }
+               }}
+               placeholder={t.aiPlaceholder}
+               className="flex-1 bg-transparent border-none focus:ring-0 text-gray-700 dark:text-gray-200 text-base md:text-lg py-4 px-6 resize-none custom-scrollbar"
+               rows="2"
+             />
+             <div className="flex items-center justify-between px-6 pb-4">
+                <div className="flex items-center gap-2 text-gray-400">
+                   <input 
+                     type="file" 
+                     ref={fileInputRef} 
+                     hidden 
+                     accept="image/*" 
+                     onChange={(e) => setSelectedImage(e.target.files[0])} 
+                   />
+                   <button onClick={() => fileInputRef.current?.click()} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"><Paperclip size={20} /></button>
+                   <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"><Smile size={20} /></button>
+                   <button onClick={getLocation} className={`p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors ${location ? 'text-green-500' : ''}`}><MapPin size={20} /></button>
+                   <button onClick={startListening} className={`p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors ${isListening ? 'text-red-500 animate-pulse' : ''}`}><Mic size={20} /></button>
+                </div>
+                <button 
+                  onClick={() => handleSend()}
+                  className="w-14 h-14 bg-green-600 text-white rounded-full flex items-center justify-center hover:bg-green-700 transition-all active:scale-95 shadow-lg shadow-green-600/20 disabled:opacity-50"
+                  disabled={!input.trim() && !selectedImage}
+                >
+                  <ArrowUp size={28} strokeWidth={3} />
+                </button>
+             </div>
           </div>
           <p className="text-[10px] text-center text-gray-400 uppercase tracking-[0.2em] font-bold">
             Automated Assistant · Final responses handled by MLA Office
