@@ -3,7 +3,7 @@ import { MessageCircle, X, Bot, FileQuestion, Users, Globe, ChevronRight, Search
 import { Link } from 'react-router-dom';
 import { useLang } from '../context/LangContext';
 import api from '../utils/api';
-import './index.css'; 
+import '../index.css'; 
 
 export default function HelpWidget() {
   const [isOpen, setIsOpen] = useState(false);
