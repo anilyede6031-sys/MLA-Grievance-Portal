@@ -5,7 +5,7 @@ import { useLang } from '../context/LangContext';
 import api from '../utils/api';
 
 export default function AIAssistant() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [messages, setMessages] = useState([
     { id: 1, type: 'bot', text: t.aiGreeting }
   ]);

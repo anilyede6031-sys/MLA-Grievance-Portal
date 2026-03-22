@@ -102,7 +102,6 @@ Goal: Make every user feel Understood, Supported, Guided, and Confident. ðŸ‡®ðŸ‡
 
 User's Input: ${message || 'Please analyze this.'}`;
 
-User Message: ${message || 'Please analyze this image/location.'}`;
 
     // AI Model Integration (Simplified for high availability)
     const geminiKey = process.env.GEMINI_API_KEY;

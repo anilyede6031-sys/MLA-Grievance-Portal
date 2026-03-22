@@ -214,7 +214,7 @@ export const translations = {
     quickLinks: 'Quick Links',
     contact: 'Contact',
     followUs: 'Follow Us',
-    rbotGreeting: 'Hello there! 👋',
+    rbotGreeting: 'Hello! I am your Digital Seva Assistant. How can I help you today? 🙏',
     chatWithSupport: 'Chat with RBot Support',
     rbotHome: 'Home',
     rbotMessages: 'Messages',

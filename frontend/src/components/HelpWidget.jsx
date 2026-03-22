@@ -7,7 +7,7 @@ import api from '../utils/api';
 export default function HelpWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [view, setView] = useState('chat'); // Simplified to Chat-only
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [messages, setMessages] = useState([
     { id: 1, type: 'bot', text: '👋 ' + (t.rbotGreeting || 'नमस्कार! आम्ही तुम्हाला कशी मदत करू शकतो?') }
   ]);
