@@ -116,7 +116,7 @@ export default function AIAssistant() {
 
            {isTyping && (
              <div className="flex justify-start animate-mbot-message mb-6">
-                <div className="bg-white p-5 rounded-2xl rbot-bubble-shadow border border-[#E8EDEB] flex gap-2 items-center">
+                <div className="bg-white p-5 rounded-2xl rbot-bubble-shadow flex gap-2 items-center">
                    <div className="w-2 h-2 bg-gray-400 rounded-full mbot-typing-dot" />
                    <div className="w-2 h-2 bg-gray-400 rounded-full mbot-typing-dot" />
                    <div className="w-2 h-2 bg-gray-400 rounded-full mbot-typing-dot" />
