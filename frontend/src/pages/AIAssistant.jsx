@@ -10,6 +10,7 @@ export default function AIAssistant() {
     { id: 1, type: 'bot', text: t.aiGreeting }
   ]);
   const [input, setInput] = useState('');
+  const [attachments, setAttachments] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const scrollRef = useRef(null);
@@ -40,16 +41,29 @@ export default function AIAssistant() {
     }
   }, [input]);
 
-  const handleSend = async (text = input) => {
-    if (!text.trim()) return;
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    setAttachments(prev => [...prev, ...files]);
+  };
 
-    const userMsg = { id: Date.now(), type: 'user', text };
+  const handleSend = async (text = input) => {
+    if (!text.trim() && attachments.length === 0) return;
+
+    const userMsg = { id: Date.now(), type: 'user', text, hasImages: attachments.length > 0 };
     setMessages(prev => [...prev, userMsg]);
     setInput('');
+    const currentAttachments = [...attachments];
+    setAttachments([]);
     setIsTyping(true);
 
     try {
-      const res = await api.post('/ai/chat', { message: text });
+      const formData = new FormData();
+      formData.append('message', text);
+      currentAttachments.forEach(file => formData.append('images', file));
+
+      const res = await api.post('/ai/chat', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
       if (res.data.success) {
         setMessages(prev => [...prev, { id: Date.now() + 1, type: 'bot', text: res.data.reply }]);
       }
@@ -117,7 +131,19 @@ export default function AIAssistant() {
               </div>
            ))}
 
-            {/* Suggestion buttons removed as per user request */}
+            {attachments.length > 0 && (
+              <div className="flex gap-4 p-4 bg-gray-50/50 rounded-2xl mb-4 overflow-x-auto custom-scrollbar border border-dashed border-gray-200">
+                {attachments.map((file, i) => (
+                  <div key={i} className="relative shrink-0">
+                    <img src={URL.createObjectURL(file)} className="w-20 h-20 rounded-xl object-cover border shadow-sm" />
+                    <button onClick={() => setAttachments(prev => prev.filter((_, idx) => idx !== i))} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors">
+                      <X size={14} />
+                    </button>
+                    <p className="text-[10px] text-gray-500 mt-1 truncate w-20 text-center font-medium">{file.name}</p>
+                  </div>
+                ))}
+              </div>
+            )}
 
            {isTyping && (
              <div className="flex justify-start animate-mbot-message mb-6">
@@ -145,13 +171,29 @@ export default function AIAssistant() {
                 className="bg-transparent border-none outline-none focus:ring-0 focus:outline-none active:outline-none p-1 rbot-text md:text-lg w-full resize-none min-h-[40px] font-medium placeholder:text-gray-400 shadow-none appearance-none overflow-y-auto custom-scrollbar"
                 rows="1"
               />
-              <div className="flex items-center justify-end mt-3">
+              <div className="flex items-center justify-between mt-3">
+                 <div className="flex items-center gap-5 md:gap-7 text-gray-500">
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      onChange={handleFileChange} 
+                      multiple 
+                      accept="image/*" 
+                      className="hidden" 
+                    />
+                    <button onClick={() => fileInputRef.current?.click()} className="hover:text-[#4285F4] transition-colors p-1">
+                      <Paperclip size={24} />
+                    </button>
+                    <button onClick={startListening} className={`hover:text-[#4285F4] transition-colors p-1 ${isListening ? 'text-red-500 animate-pulse' : ''}`}>
+                      <Mic size={24} />
+                    </button>
+                    <button className="hover:text-[#4285F4] transition-colors p-1"><Smile size={24} /></button>
+                 </div>
                  <button 
                    onClick={() => handleSend()}
+                   disabled={isTyping}
                    className={`w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-sm ${
-                     input.trim() 
-                       ? 'bg-[#001E2B] text-white hover:bg-black' 
-                       : 'bg-gray-50 text-gray-300'
+                     (input.trim() || attachments.length > 0) && !isTyping ? 'bg-[#00684A] text-white' : 'bg-gray-100 text-gray-300'
                    }`}
                  >
                    <ArrowUp size={24} strokeWidth={3} />
