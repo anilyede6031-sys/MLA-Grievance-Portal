@@ -54,7 +54,7 @@ export default function AIAssistant() {
   return (
     <div className="min-h-screen gemini-bg flex flex-col font-sans">
       {/* 1:1 RBOT FULL PAGE HEADER */}
-      <div className="h-[72px] bg-white dark:bg-gray-900 border-b border-[#E8EDEB] px-4 md:px-6 flex-shrink-0 flex items-center justify-between sticky top-0 z-50 rbot-bubble-shadow">
+      <div className="h-[72px] bg-white dark:bg-gray-900 px-4 md:px-6 flex-shrink-0 flex items-center justify-between sticky top-0 z-50 rbot-bubble-shadow">
         <div className="flex items-center gap-4">
            <Link to="/" className="p-2 hover:bg-gray-50 rounded-full transition-all text-gray-400">
              <ArrowLeft size={20} strokeWidth={3} />
@@ -81,7 +81,7 @@ export default function AIAssistant() {
       <div className="flex-1 overflow-y-auto bg-[#F9FBFA] dark:bg-gray-950 custom-scrollbar">
         <div className="max-w-4xl mx-auto p-4 md:p-12 space-y-8">
            
-           <div className="bg-white dark:bg-gray-900 border border-[#E8EDEB] p-5 rounded-3xl flex gap-4 text-xs md:text-sm text-gray-500 italic leading-relaxed rbot-bubble-shadow items-start animate-mbot-message">
+           <div className="bg-white dark:bg-gray-900 p-5 rounded-3xl flex gap-4 text-xs md:text-sm text-gray-500 italic leading-relaxed rbot-bubble-shadow items-start animate-mbot-message">
               <Info size={20} className="text-[#00684A] shrink-0 mt-0.5" />
               <p>This chat session is recorded to ensure service quality.</p>
            </div>
@@ -90,7 +90,7 @@ export default function AIAssistant() {
               <div key={m.id} className={`flex flex-col ${m.type === 'user' ? 'items-end' : 'items-start'} animate-mbot-message mb-10`}>
                  <div className="flex gap-4 items-start max-w-[90%] md:max-w-[80%]">
                     {m.type === 'bot' && (
-                      <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm border border-gray-100">
+                      <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm transition-all hover:scale-110">
                         <Stars size={18} className="gemini-star-gradient" />
                       </div>
                     )}
@@ -108,11 +108,11 @@ export default function AIAssistant() {
               </div>
            ))}
 
-           <div className="flex flex-col items-start gap-4 pb-8 animate-mbot-message delay-150">
-              <button onClick={() => handleSend("That helped 👍")} className="px-6 py-3 bg-white border border-[#E8EDEB] rounded-full text-sm font-bold rbot-bubble-shadow hover:border-[#00684A] hover:text-[#00684A] transition-all flex items-center gap-2 text-[#001E2B]">That helped 👍</button>
-              <button onClick={() => handleSend("Show me more 👀")} className="px-6 py-3 bg-white border border-[#E8EDEB] rounded-full text-sm font-bold rbot-bubble-shadow hover:border-[#00684A] hover:text-[#00684A] transition-all flex items-center gap-2 text-[#001E2B]">Show me more 👀</button>
-              <button onClick={() => handleSend("Talk to a person 👤")} className="px-6 py-3 bg-white border border-[#E8EDEB] rounded-full text-sm font-bold rbot-bubble-shadow hover:border-[#00684A] hover:text-[#00684A] transition-all flex items-center gap-2 text-[#001E2B]">Talk to a person 👤</button>
-           </div>
+            <div className="flex flex-col items-start gap-4 pb-8 animate-mbot-message delay-150">
+               <button onClick={() => handleSend("That helped 👍")} className="px-6 py-3 bg-white rounded-full text-sm font-bold rbot-bubble-shadow hover:bg-gray-50 transition-all flex items-center gap-2 text-[#001E2B]">That helped 👍</button>
+               <button onClick={() => handleSend("Show me more 👀")} className="px-6 py-3 bg-white rounded-full text-sm font-bold rbot-bubble-shadow hover:bg-gray-50 transition-all flex items-center gap-2 text-[#001E2B]">Show me more 👀</button>
+               <button onClick={() => handleSend("Talk to a person 👤")} className="px-6 py-3 bg-white rounded-full text-sm font-bold rbot-bubble-shadow hover:bg-gray-50 transition-all flex items-center gap-2 text-[#001E2B]">Talk to a person 👤</button>
+            </div>
 
            {isTyping && (
              <div className="flex justify-start animate-mbot-message mb-6">
@@ -130,7 +130,7 @@ export default function AIAssistant() {
       {/* Floating Gemini Pill Input Bar */}
       <div className="gemini-bg p-4 md:pb-12 flex-shrink-0">
         <div className="max-w-3xl mx-auto space-y-4">
-           <div className="bg-white rounded-[2.5rem] p-4 md:p-6 border border-[#E1E3E1] gemini-pill-shadow relative focus-within:ring-1 focus-within:ring-[#4285F4]/20 transition-all">
+           <div className="bg-white rounded-[2.5rem] p-4 md:p-6 gemini-pill-shadow relative focus-within:ring-1 focus-within:ring-[#4285F4]/20 transition-all">
               <textarea 
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
