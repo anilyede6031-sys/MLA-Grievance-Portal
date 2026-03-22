@@ -218,6 +218,8 @@ export const translations = {
     rbotHome: 'Home',
     rbotMessages: 'Messages',
     rbotHelp: 'Help',
+    adminLogoutNotice: 'You were logged out. Admins cannot use the Citizen portal.',
+    citizenLogoutNotice: 'You were logged out. This portal is for admin staff only.',
   },
   mr: {
     siteName: 'आमदार सार्वजनिक तक्रार निवारण पोर्टल',
@@ -438,11 +440,13 @@ export const translations = {
     rbotHome: 'होम',
     rbotMessages: 'संदेश',
     rbotHelp: 'मदत',
+    adminLogoutNotice: 'आपल्याला लॉग आउट केले गेले आहे. प्रशासक नागरिक पोर्टल वापरू शकत नाहीत.',
+    citizenLogoutNotice: 'हे पोर्टल फक्त प्रशासकीय कर्मचाऱ्यांसाठी आहे.',
   },
 };
 
 export function LangProvider({ children }) {
-  const [lang, setLang] = useState(() => localStorage.getItem('lang') || 'en');
+  const [lang, setLang] = useState(() => localStorage.getItem('lang') || 'mr');
   const t = translations[lang];
   const toggle = () => setLang(l => {
     const next = l === 'en' ? 'mr' : 'en';

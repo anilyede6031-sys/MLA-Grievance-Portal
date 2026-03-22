@@ -18,7 +18,7 @@ export default function AdminLogin() {
   if (user) {
     if (user.role === 'citizen') {
       logout();
-      toast.error('You were logged out. This portal is for admin staff only.');
+      toast.error(t.citizenLogoutNotice || 'You were logged out. This portal is for admin staff only.');
     } else {
       return <Navigate to="/admin" replace />;
     }
@@ -70,7 +70,7 @@ export default function AdminLogin() {
               <div className="relative">
                 <input type={show ? 'text' : 'password'} value={form.password}
                   onChange={e => setForm(f => ({...f, password: e.target.value}))}
-                  className="input-field pr-10" placeholder="Enter password" required />
+                  className="input-field pr-10" placeholder={t.passwordPlaceholder} required />
                 <button type="button" onClick={() => setShow(!show)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                   {show ? <EyeOff size={16} /> : <Eye size={16} />}
