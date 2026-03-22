@@ -145,12 +145,7 @@ export default function AIAssistant() {
                 className="bg-transparent border-none outline-none focus:ring-0 focus:outline-none active:outline-none p-1 rbot-text md:text-lg w-full resize-none min-h-[40px] font-medium placeholder:text-gray-400 shadow-none appearance-none overflow-y-auto custom-scrollbar"
                 rows="1"
               />
-              <div className="flex items-center justify-between mt-3">
-                 <div className="flex items-center gap-5 md:gap-7 text-gray-500">
-                    <button onClick={() => toast.error('File attachment coming soon!')} className="hover:text-[#4285F4] transition-colors p-1"><Paperclip size={24} /></button>
-                    <button onClick={() => toast.error('Voice input coming soon!')} className={`hover:text-[#4285F4] transition-colors p-1 ${isListening ? 'text-red-500 animate-pulse' : ''}`}><Mic size={24} /></button>
-                    <button onClick={() => toast.error('Stickers coming soon!')} className="hover:text-[#4285F4] transition-colors p-1"><Smile size={24} /></button>
-                 </div>
+              <div className="flex items-center justify-end mt-3">
                  <button 
                    onClick={() => handleSend()}
                    className={`w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-sm ${

@@ -122,12 +122,7 @@ export default function HelpWidget() {
                          className="bg-transparent border-none outline-none focus:outline-none focus:ring-0 active:outline-none appearance-none p-0 text-sm rbot-text flex-1 resize-none font-sans overflow-hidden" 
                          rows="1" 
                        />
-                      <div className="flex items-center justify-between mt-0.5 pt-1 border-t border-gray-50/50">
-                        <div className="flex items-center gap-5 text-gray-400">
-                           <button onClick={() => fileInputRef.current?.click()} className="hover:text-[#00684A] transition-colors"><Paperclip size={20} /></button>
-                           <button className="hover:text-[#00684A] transition-colors"><Smile size={20} /></button>
-                           <button onClick={startListening} className={`hover:text-[#00684A] transition-colors ${isListening ? 'text-red-500 animate-pulse' : ''}`}><Mic size={20} /></button>
-                        </div>
+                      <div className="flex items-center justify-end mt-0.5 pt-1 border-t border-gray-50/50">
                         <button onClick={() => handleSend()} className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${input.trim() ? 'bg-[#00684A] text-white shadow-md' : 'bg-[#F0F2F5] text-gray-300'}`}><ArrowUp size={20} strokeWidth={3} /></button>
                      </div>
                   </div>
