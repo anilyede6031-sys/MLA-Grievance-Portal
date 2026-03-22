@@ -168,7 +168,7 @@ export default function ComplaintForm() {
                 </span>
               )}
             </div>
-            {mobileReadOnly && <p className="text-xs text-green-600 dark:text-green-400 mt-1">🔒 {t.mobileLocked}</p>}
+            {/* Mobile locked text hidden as per user request */}
             {errors.mobile && <p className="text-red-500 text-xs mt-1">{errors.mobile}</p>}
           </div>
         </div>
