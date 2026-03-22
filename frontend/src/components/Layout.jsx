@@ -160,22 +160,22 @@ export default function Layout({ children, darkMode, setDarkMode }) {
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-2xl">🇮🇳</span>
                   <div>
-                    <p className="font-bold text-saffron-400">MLA Rahul Subhash Kul</p>
-                    <p className="text-xs text-gray-400">Daund, Maharashtra</p>
+                    <p className="font-bold text-saffron-400">{t.mlaName}</p>
+                    <p className="text-xs text-gray-400">{t.constituency}</p>
                   </div>
                 </div>
                 <p className="text-gray-400 text-sm">Committed to resolving public grievances swiftly and transparently.</p>
               </div>
               <div>
-                <h4 className="font-semibold text-saffron-400 mb-3">Quick Links</h4>
+                <h4 className="font-semibold text-saffron-400 mb-3">{t.quickLinks}</h4>
                 <ul className="space-y-1 text-sm text-gray-400">
-                  <li><Link to="/" className="hover:text-white transition-colors">Home</Link></li>
-                  <li><Link to="/complaint" className="hover:text-white transition-colors">File Complaint</Link></li>
-                  <li><Link to="/track" className="hover:text-white transition-colors">{user?.role === 'citizen' ? 'My Complaints' : 'Track Complaint'}</Link></li>
+                  <li><Link to="/" className="hover:text-white transition-colors">{t.home}</Link></li>
+                  <li><Link to="/complaint" className="hover:text-white transition-colors">{t.fileComplaint}</Link></li>
+                  <li><Link to="/track" className="hover:text-white transition-colors">{user?.role === 'citizen' ? t.myComplaints || 'My Complaints' : t.trackComplaint}</Link></li>
                 </ul>
               </div>
               <div>
-                <h4 className="font-semibold text-saffron-400 mb-3">Contact</h4>
+                <h4 className="font-semibold text-saffron-400 mb-3">{t.contact}</h4>
                 <p className="text-gray-400 text-sm">Maharashtra Legislative Assembly</p>
                 <p className="text-gray-400 text-sm">Daund Assembly</p>
                 <p className="text-gray-400 text-sm mt-2">This is an official portal of MLA Rahul Subhash Kul office.</p>

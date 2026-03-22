@@ -121,7 +121,7 @@ export default function TrackPage() {
           <button onClick={handleSearch} disabled={loading}
             className="btn-primary px-6 py-2.5 disabled:opacity-60">
             <Search size={18} />
-            {loading ? t.searching || 'Searching...' : t.search}
+            {loading ? t.searching : t.search}
           </button>
         </div>
         <div className="flex justify-between items-center mt-2">
@@ -155,8 +155,7 @@ export default function TrackPage() {
                         <h3 className="font-bold text-gray-900 dark:text-white text-lg">{c.name}</h3>
                       </div>
                       <span className={`${cfg.class} flex items-center gap-1.5 text-sm px-3 py-1`}>
-                        <StatusIcon size={14} /> {cfg.label}
-                        <span className="font-marathi text-xs opacity-80">({cfg.mr})</span>
+                        <StatusIcon size={14} /> {lang === 'en' ? cfg.label : cfg.mr}
                       </span>
                     </div>
 

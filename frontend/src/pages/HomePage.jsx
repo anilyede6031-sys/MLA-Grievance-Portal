@@ -153,7 +153,7 @@ export default function HomePage() {
                     
                     {/* Badge on photo */}
                     <div className="absolute bottom-4 left-4 right-4 bg-black/40 backdrop-blur-md border border-white/10 p-3 rounded-2xl flex items-center justify-between">
-                       <span className="text-[10px] uppercase tracking-widest font-bold text-saffron-400">Official Portal</span>
+                       <span className="text-[10px] uppercase tracking-widest font-bold text-saffron-400">{t.officialPortal}</span>
                        <div className="flex h-1.5 w-1.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]" />
                     </div>
                   </div>
@@ -171,7 +171,7 @@ export default function HomePage() {
                     </div>
                     <div className="bg-white/5 rounded-2xl p-4 border border-white/5 text-center">
                       <p className="text-xl font-bold text-white">24/7</p>
-                      <p className="text-[10px] text-blue-300/40 uppercase font-bold tracking-wider mt-1">Online Support</p>
+                      <p className="text-[10px] text-blue-300/40 uppercase font-bold tracking-wider mt-1">{t.onlineSupportBadge}</p>
                     </div>
                   </div>
                 </div>
@@ -181,8 +181,8 @@ export default function HomePage() {
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-2xl bg-saffron-100 dark:bg-saffron-900/30 flex items-center justify-center text-xl">🇮🇳</div>
                     <div>
-                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Digital India</p>
-                      <p className="text-sm font-extrabold">E-Governance</p>
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{t.digitalIndia}</p>
+                      <p className="text-sm font-extrabold">{t.eGovernance || 'E-Governance'}</p>
                     </div>
                   </div>
                 </div>
@@ -212,8 +212,8 @@ export default function HomePage() {
       {/* Steps */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-10">
-          <h2 className="section-title text-3xl">How It Works</h2>
-          <p className="section-subtitle">Simple 3-step process to resolve your grievance</p>
+          <h2 className="section-title text-3xl">{t.howItWorksTitle || 'How It Works'}</h2>
+          <p className="section-subtitle">{t.howItWorksSub || 'Simple 3-step process to resolve your grievance'}</p>
         </div>
         <div className="grid md:grid-cols-3 gap-6">
           {[
@@ -227,7 +227,7 @@ export default function HomePage() {
                   {icon}
                 </div>
                 <div>
-                  <span className="text-xs font-mono text-saffron-500 font-bold">STEP {step}</span>
+                  <span className="text-xs font-mono text-saffron-500 font-bold">{t.stepText} {step}</span>
                   <h3 className="font-bold text-gray-900 dark:text-white text-lg">{title}</h3>
                   <p className="text-gray-500 dark:text-gray-400 font-marathi text-sm">{mr}</p>
                   <p className="text-gray-600 dark:text-gray-300 text-sm mt-2">{desc}</p>

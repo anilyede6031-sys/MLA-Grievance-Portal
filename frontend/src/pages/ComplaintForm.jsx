@@ -197,19 +197,33 @@ export default function ComplaintForm() {
         <div>
           <label className="label">{t.department} *</label>
           <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
-            {DEPARTMENTS.map(dep => (
-              <button type="button" key={dep} onClick={() => { setForm(f => ({ ...f, department: dep })); if (errors.department) setErrors(er => ({...er, department: null})); }}
-                className={`py-2 px-1 text-xs rounded-lg border-2 font-semibold transition-all ${form.department === dep ? 'border-saffron-500 bg-saffron-50 dark:bg-saffron-900/30 text-saffron-700 dark:text-saffron-400' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-saffron-300'}`}>
-                {{Road:'🛣️',Water:'💧',Electricity:'⚡',Revenue:'📋',Police:'👮',Health:'🏥',Education:'🎓',Agriculture:'🌾',Other:'📁'}[dep]} {dep}
-              </button>
-            ))}
+            {DEPARTMENTS.map(dep => {
+              const labelMap = {
+                Road: t.road,
+                Water: t.waterDept,
+                Electricity: t.electricityDept,
+                Revenue: t.revenue,
+                Police: t.police,
+                Health: t.health,
+                Education: t.education,
+                Agriculture: t.agri,
+                Other: t.other
+              };
+              const iconMap = { Road:'🛣️',Water:'💧',Electricity:'⚡',Revenue:'📋',Police:'👮',Health:'🏥',Education:'🎓',Agriculture:'🌾',Other:'📁' };
+              return (
+                <button type="button" key={dep} onClick={() => { setForm(f => ({ ...f, department: dep })); if (errors.department) setErrors(er => ({...er, department: null})); }}
+                  className={`py-2 px-1 text-xs rounded-lg border-2 font-semibold transition-all ${form.department === dep ? 'border-saffron-500 bg-saffron-50 dark:bg-saffron-900/30 text-saffron-700 dark:text-saffron-400' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-saffron-300'}`}>
+                  {iconMap[dep]} {labelMap[dep] || dep}
+                </button>
+              );
+            })}
           </div>
           {errors.department && <p className="text-red-500 text-xs mt-1">{errors.department}</p>}
         </div>
 
         {/* Description */}
         <div>
-          <label className="label">{t.description} * <span className="text-gray-400 text-xs">(max 500 chars)</span></label>
+          <label className="label">{t.description} * <span className="text-gray-400 text-xs">({t.maxChars})</span></label>
           <textarea name="description" value={form.description} onChange={handleChange} rows={4}
             className={`input-field resize-none ${errors.description ? 'border-red-400' : ''}`}
             placeholder={t.descriptionPlaceholder} />
@@ -221,7 +235,7 @@ export default function ComplaintForm() {
 
         {/* Photo Upload */}
         <div>
-          <label className="label">{t.photo} <span className="text-gray-400 text-xs">({t.optional || 'Optional'})</span></label>
+          <label className="label">{t.photo} <span className="text-gray-400 text-xs">({t.photoOptional})</span></label>
           <div {...getRootProps()} className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all
             ${isDragActive ? 'border-saffron-400 bg-saffron-50 dark:bg-saffron-900/20' : 'border-gray-300 dark:border-gray-600 hover:border-saffron-300'}`}>
             <input {...getInputProps()} />

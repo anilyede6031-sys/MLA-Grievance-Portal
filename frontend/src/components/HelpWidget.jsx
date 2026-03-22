@@ -9,7 +9,7 @@ export default function HelpWidget() {
   const [view, setView] = useState('menu'); // 'menu', 'chat', 'help'
   const { t } = useLang();
   const [messages, setMessages] = useState([
-    { id: 1, type: 'bot', text: '👋 Hi there! How can I help today?' }
+    { id: 1, type: 'bot', text: '👋 ' + (t.rbotGreeting || 'Hi there! How can I help today?') }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -69,25 +69,25 @@ export default function HelpWidget() {
                     <ChevronDown size={24} strokeWidth={3} />
                   </button>
                 </div>
-                <h1 className="rbot-greeting text-white mb-2 leading-[1.1]">Hello There!<br/>How can we help?</h1>
+                <h1 className="rbot-greeting text-white mb-2 leading-[1.1]">{t.rbotGreeting || 'Hello There!'}<br/>How can we help?</h1>
                 <div className="flex items-center gap-2 mt-6 bg-black/10 w-fit px-3 py-1.5 rounded-full border border-white/10 text-green-400">
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                   </span>
-                  <span className="text-[11px] font-black uppercase tracking-widest">Online & Ready</span>
+                  <span className="text-[11px] font-black uppercase tracking-widest">{t.aiOnlineReady || 'Online & Ready'}</span>
                 </div>
               </div>
               <div className="flex-1 p-4 bg-gray-50 dark:bg-gray-950 space-y-4 overflow-y-auto custom-scrollbar">
                 <div className="bg-white dark:bg-gray-900 p-6 rounded-3xl rbot-bubble-shadow border border-gray-100 dark:border-gray-800">
-                  <h2 className="text-xl font-black rbot-text mb-1">24/7 AI Assistant</h2>
-                  <p className="text-sm text-gray-500 font-bold mb-4">Register complaints and get project information instantly.</p>
-                  <button onClick={() => setView('chat')} className="w-full flex items-center justify-between p-4 bg-[#00684A] text-white rounded-2xl hover:bg-[#004D37] transition-all group shadow-lg rbot-button-hover">
+                  <h2 className="text-xl font-black rbot-text mb-1">{t.aiAssistantTitle || '24/7 AI Assistant'}</h2>
+                  <p className="text-sm text-gray-500 font-bold mb-4">{t.aiAssistantDesc || 'Register complaints and get project information instantly.'}</p>
+<button onClick={() => setView('chat')} className="w-full flex items-center justify-between p-4 bg-[#00684A] text-white rounded-2xl hover:bg-[#004D37] transition-all group shadow-lg rbot-button-hover">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"><MessageSquare size={20} /></div>
                       <div className="text-left font-sans">
-                        <p className="text-xs font-black uppercase opacity-70">Send us a message</p>
-                        <p className="font-bold">Chat with RBot Support</p>
+                        <p className="text-xs font-black uppercase opacity-70">{t.contact || 'Send us a message'}</p>
+                        <p className="font-bold">{t.chatWithSupport || 'Chat with RBot Support'}</p>
                       </div>
                     </div>
                     <ChevronRight size={20} strokeWidth={3} />
@@ -111,7 +111,7 @@ export default function HelpWidget() {
                   </div>
                   <div>
                     <h3 className="rbot-header-title">RBot</h3>
-                    <p className="text-[11px] text-[#8392A5] font-bold leading-tight">The team can also help</p>
+                    <p className="text-[11px] text-[#8392A5] font-bold leading-tight">{t.aiTeamHelp || 'The team can also help'}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
@@ -200,18 +200,18 @@ export default function HelpWidget() {
           <div className="bg-white dark:bg-gray-900 h-[81px] grid grid-cols-3 border-t border-[#EDEDED] flex-shrink-0">
              <button onClick={() => setView('menu')} className={`flex flex-col items-center pt-[18px] pb-[10px] transition-all ${view === 'menu' ? 'text-[#00684A]' : 'text-[#6C6F74] rbot-button-hover'}`}>
                <Home size={24} className={view === 'menu' ? 'fill-[#00684A]/10' : ''} />
-               <span className={`text-[14px] leading-[20px] mt-2 ${view === 'menu' ? 'font-bold' : 'font-medium'}`}>Home</span>
+               <span className={`text-[14px] leading-[20px] mt-2 ${view === 'menu' ? 'font-bold' : 'font-medium'}`}>{t.rbotHome || 'Home'}</span>
              </button>
              <button onClick={() => setView('chat')} className={`flex flex-col items-center pt-[18px] pb-[10px] transition-all ${view === 'chat' ? 'text-[#00684A]' : 'text-[#6C6F74] rbot-button-hover'}`}>
                <div className="relative">
                   <MessageSquare size={24} className={view === 'chat' ? 'fill-[#00684A]/10' : ''} />
                   <div className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white" />
                </div>
-               <span className={`text-[14px] leading-[20px] mt-2 ${view === 'chat' ? 'font-bold' : 'font-medium'}`}>Messages</span>
+               <span className={`text-[14px] leading-[20px] mt-2 ${view === 'chat' ? 'font-bold' : 'font-medium'}`}>{t.rbotMessages || 'Messages'}</span>
              </button>
              <button onClick={() => setView('help')} className={`flex flex-col items-center pt-[18px] pb-[10px] transition-all ${view === 'help' ? 'text-[#00684A]' : 'text-[#6C6F74] rbot-button-hover'}`}>
                <HelpCircle size={24} className={view === 'help' ? 'fill-[#00684A]/10' : ''} />
-               <span className={`text-[14px] leading-[20px] mt-2 ${view === 'help' ? 'font-bold' : 'font-medium'}`}>Help</span>
+               <span className={`text-[14px] leading-[20px] mt-2 ${view === 'help' ? 'font-bold' : 'font-medium'}`}>{t.rbotHelp || 'Help'}</span>
              </button>
           </div>
         </div>
