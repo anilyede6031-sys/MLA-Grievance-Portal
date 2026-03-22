@@ -14,6 +14,7 @@ import UserLogin from './pages/UserLogin';
 import UserSignup from './pages/UserSignup';
 import EmergencyContacts from './pages/EmergencyContacts';
 import AIAssistant from './pages/AIAssistant';
+import PermissionHub from './components/PermissionHub';
 
 export default function App() {
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true');
@@ -34,6 +35,7 @@ export default function App() {
               style: { background: darkMode ? '#1f2937' : '#fff', color: darkMode ? '#f9fafb' : '#111827', border: '1px solid #e5e7eb', fontSize: '14px' },
             }}
           />
+          <PermissionHub />
           <Routes>
             {/* Public routes with Layout */}
             <Route path="/" element={<Layout darkMode={darkMode} setDarkMode={handleDarkMode}><HomePage /></Layout>} />
