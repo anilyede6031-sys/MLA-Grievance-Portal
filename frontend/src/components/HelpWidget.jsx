@@ -152,7 +152,7 @@ export default function HelpWidget() {
                  )}
                  <div ref={scrollRef} />
               </div>
-               <div className="p-3 bg-white dark:bg-gray-900 border-t border-[#E8EDEB] flex-shrink-0">
+               <div className="p-3 bg-transparent border-t border-[#E8EDEB] flex-shrink-0">
                    <div className="bg-transparent rounded-none p-3 border-0 flex flex-col min-h-[70px] transition-all">
                        <textarea 
                          ref={textareaRef}
