@@ -27,11 +27,11 @@ function fileToGenerativePart(buffer, mimeType) {
   };
 }
 
-router.post('/chat', upload.single('image'), async (req, res) => {
+router.post('/chat', upload.array('images', 5), async (req, res) => {
   try {
     const { message, location: locationStr } = req.body;
     const location = locationStr ? JSON.parse(locationStr) : null;
-    const file = req.file;
+    const files = req.files || []; // Multiple files
     if (!process.env.GEMINI_API_KEY) {
       return res.status(500).json({ success: false, message: 'AI configuration error.' });
     }
@@ -96,8 +96,10 @@ User Message: ${message || 'Please analyze this image/location.'}`;
     const genAI = new GoogleGenerativeAI(geminiKey);
     
     const promptParts = [systemPrompt];
-    if (file) {
-      promptParts.push(fileToGenerativePart(file.buffer, file.mimetype));
+    if (files.length > 0) {
+      files.forEach(file => {
+        promptParts.push(fileToGenerativePart(file.buffer, file.mimetype));
+      });
     }
 
     // High-Availability Model Fallback Logic (Production Stable)
@@ -108,7 +110,7 @@ User Message: ${message || 'Please analyze this image/location.'}`;
     let modelErrors = {};
     for (const modelName of modelsToTry) {
       try {
-        if (file && (modelName === "gemini-pro" || modelName === "gemini-1.0-pro")) continue;
+        if (files.length > 0 && (modelName === "gemini-pro" || modelName === "gemini-1.0-pro")) continue;
 
         const model = genAI.getGenerativeModel({ model: modelName, safetySettings });
         const result = await model.generateContent(promptParts);

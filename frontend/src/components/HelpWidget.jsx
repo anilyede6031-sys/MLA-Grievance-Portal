@@ -17,6 +17,7 @@ export default function HelpWidget() {
   const scrollRef = useRef(null);
   const fileInputRef = useRef(null);
   const textareaRef = useRef(null);
+  const [attachments, setAttachments] = useState([]);
 
   // Scroll to bottom
   useEffect(() => {
@@ -31,17 +32,30 @@ export default function HelpWidget() {
     }
   }, [input]);
 
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    setAttachments(prev => [...prev, ...files]);
+  };
+
   const handleSend = async (text = input) => {
     if (!text.trim()) return;
     if (view !== 'chat') setView('chat');
 
-    const userMsg = { id: Date.now(), type: 'user', text };
+    const userMsg = { id: Date.now(), type: 'user', text, hasImages: attachments.length > 0 };
     setMessages(prev => [...prev, userMsg]);
     setInput('');
+    const currentAttachments = [...attachments];
+    setAttachments([]);
     setIsTyping(true);
 
     try {
-      const res = await api.post('/ai/chat', { message: text });
+      const formData = new FormData();
+      formData.append('message', text);
+      currentAttachments.forEach(file => formData.append('images', file));
+
+      const res = await api.post('/ai/chat', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
       if (res.data.success) {
         setMessages(prev => [...prev, { id: Date.now() + 1, type: 'bot', text: res.data.reply }]);
       }
@@ -109,6 +123,18 @@ export default function HelpWidget() {
                       </div>
                    </div>
                  )}
+                  {attachments.length > 0 && (
+                    <div className="flex gap-2 p-2 bg-gray-50 border-b overflow-x-auto custom-scrollbar">
+                      {attachments.map((file, i) => (
+                        <div key={i} className="relative shrink-0">
+                           <img src={URL.createObjectURL(file)} className="w-12 h-12 rounded-lg object-cover border shadow-sm" />
+                           <button onClick={() => setAttachments(prev => prev.filter((_, idx) => idx !== i))} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 shadow-md">
+                             <X size={10} />
+                           </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                  <div ref={scrollRef} />
               </div>
                <div className="p-2 bg-transparent border-t border-[#E8EDEB] flex-shrink-0">
@@ -122,8 +148,25 @@ export default function HelpWidget() {
                          className="bg-transparent border-none outline-none focus:outline-none focus:ring-0 active:outline-none appearance-none p-0 text-sm rbot-text flex-1 resize-none font-sans overflow-hidden" 
                          rows="1" 
                        />
-                      <div className="flex items-center justify-end mt-0.5 pt-1 border-t border-gray-50/50">
-                        <button onClick={() => handleSend()} className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${input.trim() ? 'bg-[#00684A] text-white shadow-md' : 'bg-[#F0F2F5] text-gray-300'}`}><ArrowUp size={20} strokeWidth={3} /></button>
+                       <div className="flex items-center justify-between mt-0.5 pt-1 border-t border-gray-50/50">
+                        <div className="flex items-center gap-2 text-gray-400">
+                           <input 
+                             type="file" 
+                             ref={fileInputRef} 
+                             onChange={handleFileChange} 
+                             multiple 
+                             accept="image/*" 
+                             className="hidden" 
+                           />
+                           <button onClick={() => fileInputRef.current?.click()} className="hover:text-[#00684A] transition-all text-gray-400 p-1">
+                             <Paperclip size={20} />
+                           </button>
+                           <button className="hover:text-[#00684A] transition-all text-gray-400 p-1"><Smile size={20} /></button>
+                           <button onClick={startListening} className={`hover:text-[#00684A] transition-all text-gray-400 p-1 ${isListening ? 'text-red-500 animate-pulse' : ''}`}>
+                             <Mic size={20} />
+                           </button>
+                        </div>
+                        <button onClick={() => handleSend()} className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${input.trim() || attachments.length > 0 ? 'bg-[#00684A] text-white shadow-md' : 'bg-[#F0F2F5] text-gray-300'}`}><ArrowUp size={20} strokeWidth={3} /></button>
                      </div>
                   </div>
               </div>
