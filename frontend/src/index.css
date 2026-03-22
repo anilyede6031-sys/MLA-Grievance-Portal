@@ -110,3 +110,34 @@
   border-color: #14161A !important;
   transition: border-color 0.2s ease;
 }
+
+/* Google Gemini UI Sync (v34) */
+.gemini-bg {
+  background-color: #F0F4F8 !important;
+}
+
+.gemini-user-bubble {
+  background-color: #EBEFF5 !important;
+  color: #1F1F1F !important;
+  border-radius: 20px !important;
+}
+
+.gemini-pill-shadow {
+  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.16) !important;
+}
+
+.gemini-star-gradient {
+  background: linear-gradient(135deg, #4285F4, #9B72CB, #D96570, #F4AF5F);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes gemini-streaming {
+  from { opacity: 0; transform: translateX(-4px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-gemini-stream {
+  animation: gemini-streaming 0.2s ease-out forwards;
+}
