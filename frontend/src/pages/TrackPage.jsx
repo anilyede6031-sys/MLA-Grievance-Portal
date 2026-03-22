@@ -16,39 +16,45 @@ const statusConfig = {
 export default function TrackPage() {
   const { t, lang } = useLang();
   const { user } = useAuth();
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(user?.role === 'citizen' ? user?.mobile || '' : '');
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [replyFiles, setReplyFiles] = useState({});
   const [replying, setReplying] = useState({});
   const hasAutoFetched = useRef(false);
+  const debounceRef = useRef(null);
 
   // Auto-fetch complaints for logged-in citizen exactly once on mount
   useEffect(() => {
     if (user?.role === 'citizen' && user?.mobile && !hasAutoFetched.current) {
       hasAutoFetched.current = true;
-      const fetchCitizenComplaints = async () => {
-        setLoading(true);
-        try {
-          const res = await api.get('/complaints/track', { params: { mobile: user.mobile } });
-          setComplaints(res.data.complaints);
-          setSearched(true);
-        } catch (err) {
-          if (err.response?.status === 404) { setComplaints([]); setSearched(true); }
-          // Don't toast error on auto-fetch to avoid spamming
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchCitizenComplaints();
+      handleSearch(user.mobile);
     }
   }, [user]);
 
-  const handleSearch = async () => {
-    if (!query.trim()) { toast.error(t.searchHint || 'Enter Complaint ID or Mobile Number'); return; }
+  // Debounced Live Search
+  useEffect(() => {
+    if (!query) return;
     
-    const isId = query.startsWith('GRV-');
+    // Auto-search if it looks like a full mobile number (10 digits) or a valid GRV ID
+    const isFullMobile = /^[6-9]\d{9}$/.test(query);
+    const isFullId = query.startsWith('GRV-') && query.length >= 8;
+
+    if (isFullMobile || isFullId) {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        handleSearch(query);
+      }, 600);
+    }
+    
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [query]);
+
+  const handleSearch = async (searchQuery = query) => {
+    if (!searchQuery.trim()) { toast.error(t.searchHint || 'Enter Complaint ID or Mobile Number'); return; }
+    
+    const isId = searchQuery.startsWith('GRV-');
 
     // Privacy frontend validation
     if (!isId) {
@@ -56,23 +62,31 @@ export default function TrackPage() {
         toast.error(t.mobileOwnershipError || 'You must be logged in to search by mobile number.');
         return;
       }
-      if (user.role === 'citizen' && query !== user.mobile) {
+      if (user.role === 'citizen' && searchQuery !== user.mobile) {
         toast.error(t.privacyError || 'Privacy restricted: You can only search your own mobile number.');
         return;
       }
     }
 
     setLoading(true);
-    setSearched(false);
+    // Don't reset searched immediately to avoid flickering while auto-searching
     try {
-      const params = isId ? { complaintId: query } : { mobile: query };
+      const params = isId ? { complaintId: searchQuery } : { mobile: searchQuery };
       const res = await api.get('/complaints/track', { params });
       setComplaints(res.data.complaints);
       setSearched(true);
     } catch (err) {
-      if (err.response?.status === 404) { setComplaints([]); setSearched(true); }
-      else if (err.response?.status === 403) { toast.error(err.response.data.message); }
-      else toast.error(t.updateError || 'Error fetching data. Please try again.');
+      if (err.response?.status === 404) { 
+        setComplaints([]); 
+        setSearched(true); 
+      }
+      else if (err.response?.status === 403) { 
+        toast.error(err.response.data.message); 
+      }
+      else {
+        // Only toast error if it was a manual search or a significant failure
+        if (!debounceRef.current) toast.error(t.updateError || 'Error fetching data.');
+      }
     } finally {
       setLoading(false);
     }
