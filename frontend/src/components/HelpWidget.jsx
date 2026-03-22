@@ -18,6 +18,7 @@ export default function HelpWidget() {
   const fileInputRef = useRef(null);
   const textareaRef = useRef(null);
   const [attachments, setAttachments] = useState([]);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   // Scroll to bottom
   useEffect(() => {
@@ -68,14 +69,29 @@ export default function HelpWidget() {
 
   const startListening = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return;
+    if (!SpeechRecognition) {
+      alert("Speech recognition is not supported in this browser. Please use Chrome.");
+      return;
+    }
     const recognition = new SpeechRecognition();
-    recognition.lang = t.language === 'English' ? 'en-US' : 'mr-IN';
+    recognition.lang = lang === 'mr' ? 'mr-IN' : 'en-IN';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    
     recognition.onstart = () => setIsListening(true);
     recognition.onend = () => setIsListening(false);
-    recognition.onresult = (event) => setInput(event.results[0][0].transcript);
+    recognition.onerror = (event) => {
+      console.error("Speech Error:", event.error);
+      setIsListening(false);
+    };
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setInput(prev => prev + (prev ? ' ' : '') + transcript);
+    };
     recognition.start();
   };
+
+  const commonEmojis = ['😊', '🙏', '👍', '📍', '✅', '🏗️', '🚜', '🇮🇳', '❤️', '🙌', '💧', '⚡', '💊', '🎓', '🏥'];
 
   return (
     <div className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end gap-3 pointer-events-none">
@@ -161,8 +177,17 @@ export default function HelpWidget() {
                            <button onClick={() => fileInputRef.current?.click()} className="hover:text-[#00684A] transition-all text-gray-400 p-1">
                              <Paperclip size={20} />
                            </button>
-                           <button className="hover:text-[#00684A] transition-all text-gray-400 p-1"><Smile size={20} /></button>
-                           <button onClick={startListening} className={`hover:text-[#00684A] transition-all text-gray-400 p-1 ${isListening ? 'text-red-500 animate-pulse' : ''}`}>
+                           <div className="relative">
+                              <button onClick={() => setShowEmojiPicker(!showEmojiPicker)} className={`hover:text-[#00684A] transition-all p-1 ${showEmojiPicker ? 'text-[#00684A]' : 'text-gray-400'}`}><Smile size={20} /></button>
+                              {showEmojiPicker && (
+                                <div className="absolute bottom-full left-0 mb-2 p-2 bg-white border rounded-xl shadow-xl z-50 grid grid-cols-5 gap-1 w-[160px] animate-in fade-in slide-in-from-bottom-2">
+                                  {commonEmojis.map(emoji => (
+                                    <button key={emoji} onClick={() => { setInput(prev => prev + emoji); setShowEmojiPicker(false); }} className="p-1.5 hover:bg-gray-50 rounded text-lg transition-all active:scale-90">{emoji}</button>
+                                  ))}
+                                </div>
+                              )}
+                           </div>
+                           <button onClick={startListening} className={`hover:text-[#00684A] transition-all text-gray-400 p-1 ${isListening ? 'text-red-500 animate-pulse bg-red-50 rounded-full' : ''}`}>
                              <Mic size={20} />
                            </button>
                         </div>
