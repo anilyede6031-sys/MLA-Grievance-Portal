@@ -12,16 +12,13 @@ async function seed() {
     await User.deleteMany({});
     console.log('Cleared all past users from the database.');
 
-    // Passwords
-    const salt = await bcrypt.genSalt(10);
-    const citizenPassword = await bcrypt.hash('user123', salt);
-    const adminPassword = await bcrypt.hash('admin123', salt);
+    // Passwords will be automatically hashed by the User model hook
 
     // Create a citizen
     await User.create({
       name: 'Test Citizen',
       mobile: '1234567890',
-      password: citizenPassword,
+      password: 'user123',
       role: 'citizen',
       taluka: 'Daund'
     });
@@ -31,7 +28,7 @@ async function seed() {
     await User.create({
       name: 'MLA Admin Hub',
       mobile: '9876543210',
-      password: adminPassword,
+      password: 'admin123',
       role: 'super_admin'
     });
     console.log('Created new Admin user -> Mobile: 9876543210 | Password: admin123');

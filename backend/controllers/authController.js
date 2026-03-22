@@ -26,7 +26,7 @@ const login = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Admins cannot log in via the Citizen portal.' });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await user.comparePassword(password);
     if (!isMatch) return res.status(401).json({ success: false, message: 'Invalid credentials.' });
     const token = generateToken(user._id);
     res.json({
@@ -49,8 +49,7 @@ const register = async (req, res) => {
   try {
     const existing = await User.findOne({ mobile });
     if (existing) return res.status(400).json({ success: false, message: 'Mobile already registered.' });
-    const hashed = await bcrypt.hash(password, 12);
-    const user = await User.create({ name, mobile, password: hashed, role, taluka, email });
+    const user = await User.create({ name, mobile, password, role, taluka, email });
     res.status(201).json({ success: true, message: 'User created.', user: { id: user._id, name, mobile, role } });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error.' });
@@ -81,8 +80,7 @@ const citizenRegister = async (req, res) => {
   try {
     const existing = await User.findOne({ mobile });
     if (existing) return res.status(400).json({ success: false, message: 'Mobile already registered.' });
-    const hashed = await bcrypt.hash(password, 12);
-    const user = await User.create({ name, mobile, password: hashed, role: 'citizen', taluka });
+    const user = await User.create({ name, mobile, password, role: 'citizen', taluka });
     const token = generateToken(user._id);
     res.status(201).json({ success: true, message: 'Registration successful.', token, user: { id: user._id, name, mobile, role: 'citizen' } });
   } catch (err) {
@@ -100,9 +98,7 @@ const updateProfile = async (req, res) => {
     
     if (name) user.name = name;
     if (password && newPassword) {
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) return res.status(400).json({ success: false, message: 'Current password incorrect' });
-      user.password = await bcrypt.hash(newPassword, 12);
+      user.password = newPassword;
     }
     
     await user.save();
