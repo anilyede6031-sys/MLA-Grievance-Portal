@@ -14,6 +14,7 @@ export default function AIAssistant() {
   const [isListening, setIsListening] = useState(false);
   const scrollRef = useRef(null);
   const fileInputRef = useRef(null);
+  const textareaRef = useRef(null);
 
   // Speech Recognition
   const startListening = () => {
@@ -30,6 +31,13 @@ export default function AIAssistant() {
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
+    }
+  }, [input]);
 
   const handleSend = async (text = input) => {
     if (!text.trim()) return;
@@ -132,11 +140,12 @@ export default function AIAssistant() {
         <div className="max-w-3xl mx-auto space-y-4">
            <div className="bg-white rounded-[2.5rem] p-4 md:p-6 gemini-pill-shadow relative focus-within:ring-1 focus-within:ring-[#4285F4]/20 transition-all">
               <textarea 
+                ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
                 placeholder={t.aiMessageRBot}
-                className="bg-transparent border-none outline-none focus:ring-0 focus:outline-none active:outline-none p-1 rbot-text md:text-lg w-full resize-none min-h-[50px] font-medium placeholder:text-gray-400 shadow-none appearance-none"
+                className="bg-transparent border-none outline-none focus:ring-0 focus:outline-none active:outline-none p-1 rbot-text md:text-lg w-full resize-none min-h-[40px] font-medium placeholder:text-gray-400 shadow-none appearance-none overflow-y-auto custom-scrollbar"
                 rows="1"
               />
               <div className="flex items-center justify-between mt-3">

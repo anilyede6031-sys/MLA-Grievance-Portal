@@ -16,11 +16,19 @@ export default function HelpWidget() {
   const [isListening, setIsListening] = useState(false);
   const scrollRef = useRef(null);
   const fileInputRef = useRef(null);
+  const textareaRef = useRef(null);
 
   // Scroll to bottom
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+    }
+  }, [input]);
 
   const handleSend = async (text = input) => {
     if (!text.trim()) return;
@@ -145,7 +153,15 @@ export default function HelpWidget() {
               </div>
                <div className="p-3 bg-white dark:bg-gray-900 border-t border-[#E8EDEB] flex-shrink-0">
                    <div className="bg-white dark:bg-gray-800 rounded-[1.5rem] p-3 border border-[#E8EDEB] flex flex-col shadow-sm min-h-[70px] focus-within:border-[#14161A] transition-all">
-                      <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())} placeholder="Message..." className="bg-transparent border-0 focus:ring-0 p-0 text-sm rbot-text flex-1 resize-none font-sans" rows="1" />
+                       <textarea 
+                         ref={textareaRef}
+                         value={input} 
+                         onChange={(e) => setInput(e.target.value)} 
+                         onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())} 
+                         placeholder="Message..." 
+                         className="bg-transparent border-0 focus:ring-0 p-0 text-sm rbot-text flex-1 resize-none font-sans overflow-y-auto custom-scrollbar" 
+                         rows="1" 
+                       />
                       <div className="flex items-center justify-between mt-1 pt-2 border-t border-gray-50">
                         <div className="flex items-center gap-5 text-gray-400">
                            <button onClick={() => fileInputRef.current?.click()} className="hover:text-[#00684A] transition-colors"><Paperclip size={20} /></button>
