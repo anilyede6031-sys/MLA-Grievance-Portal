@@ -136,7 +136,7 @@ export default function AIAssistant() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
                 placeholder={t.aiMessageRBot}
-                className="bg-transparent border-0 focus:ring-0 focus:outline-none p-1 rbot-text md:text-lg w-full resize-none min-h-[50px] font-medium placeholder:text-gray-400"
+                className="bg-transparent border-none outline-none focus:ring-0 focus:outline-none active:outline-none p-1 rbot-text md:text-lg w-full resize-none min-h-[50px] font-medium placeholder:text-gray-400 shadow-none appearance-none"
                 rows="1"
               />
               <div className="flex items-center justify-between mt-3">
