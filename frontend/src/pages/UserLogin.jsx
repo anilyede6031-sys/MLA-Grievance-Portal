@@ -66,7 +66,7 @@ export default function UserLogin() {
               <div className="relative">
                 <input type={show ? 'text' : 'password'} value={form.password}
                   onChange={e => setForm(f => ({...f, password: e.target.value}))}
-                  className="input-field pr-10" placeholder={t.passwordPlaceholder || "Enter password"} required />
+                  className="input-field pr-10" placeholder={t.enterPassword} required />
                 <button type="button" onClick={() => setShow(!show)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                   {show ? <EyeOff size={16} /> : <Eye size={16} />}

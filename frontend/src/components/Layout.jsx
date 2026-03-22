@@ -92,8 +92,8 @@ function Navbar({ darkMode, setDarkMode }) {
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <Link to="/login" className="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-saffron-600 transition-colors">Login</Link>
-                  <Link to="/signup" className="btn-primary text-sm py-1.5 px-4 hidden sm:block">Sign Up</Link>
+                  <Link to="/login" className="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-saffron-600 transition-colors">{t.loginBtn}</Link>
+                  <Link to="/signup" className="btn-primary text-sm py-1.5 px-4 hidden sm:block">{t.signupBtn}</Link>
                 </div>
               )}
             </div>
@@ -132,8 +132,8 @@ function Navbar({ darkMode, setDarkMode }) {
                   className="w-full py-2 text-center text-sm text-red-500 font-semibold">{t.logout}</button>
               ) : (
                 <div className="flex flex-col gap-2">
-                  <Link to="/login" onClick={() => setMobileOpen(false)} className="block text-center w-full py-2 border rounded-lg text-sm font-medium">Login</Link>
-                  <Link to="/signup" onClick={() => setMobileOpen(false)} className="block text-center btn-primary w-full justify-center">Sign Up</Link>
+                  <Link to="/login" onClick={() => setMobileOpen(false)} className="block text-center w-full py-2 border rounded-lg text-sm font-medium">{t.loginBtn}</Link>
+                  <Link to="/signup" onClick={() => setMobileOpen(false)} className="block text-center btn-primary w-full justify-center">{t.signupBtn}</Link>
                 </div>
               )}
             </div>
@@ -164,7 +164,7 @@ export default function Layout({ children, darkMode, setDarkMode }) {
                     <p className="text-xs text-gray-400">{t.constituency}</p>
                   </div>
                 </div>
-                <p className="text-gray-400 text-sm">Committed to resolving public grievances swiftly and transparently.</p>
+                <p className="text-gray-400 text-sm">{t.committedToResolving}</p>
               </div>
               <div>
                 <h4 className="font-semibold text-saffron-400 mb-3">{t.quickLinks}</h4>
@@ -176,13 +176,13 @@ export default function Layout({ children, darkMode, setDarkMode }) {
               </div>
               <div>
                 <h4 className="font-semibold text-saffron-400 mb-3">{t.contact}</h4>
-                <p className="text-gray-400 text-sm">Maharashtra Legislative Assembly</p>
-                <p className="text-gray-400 text-sm">Daund Assembly</p>
-                <p className="text-gray-400 text-sm mt-2">This is an official portal of MLA Rahul Subhash Kul office.</p>
+                <p className="text-gray-400 text-sm">{t.assemblyName}</p>
+                <p className="text-gray-400 text-sm">{t.mlaTitle}</p>
+                <p className="text-gray-400 text-sm mt-2">{t.officialOfficePortal || `This is an official portal of ${t.mlaName} office.`}</p>
               </div>
             </div>
             <div className="border-t border-gray-700 mt-6 pt-4 text-center text-xs text-gray-500">
-              © {new Date().getFullYear()} MLA Rahul Subhash Kul. Government of Maharashtra. All Rights Reserved.
+              © {new Date().getFullYear()} {t.mlaName}. {t.assemblyName}. {t.allRightsReserved}
             </div>
           </div>
         </footer>

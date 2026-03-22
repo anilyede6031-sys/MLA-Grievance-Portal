@@ -9,7 +9,7 @@ export default function HelpWidget() {
   const [view, setView] = useState('menu'); // 'menu', 'chat', 'help'
   const { t } = useLang();
   const [messages, setMessages] = useState([
-    { id: 1, type: 'bot', text: '👋 ' + (t.rbotGreeting || 'Hi there! How can I help today?') }
+    { id: 1, type: 'bot', text: '👋 ' + (t.rbotGreeting || 'नमस्कार! आम्ही तुम्हाला कशी मदत करू शकतो?') }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -64,12 +64,12 @@ export default function HelpWidget() {
             <>
               <div className="bg-gradient-to-br from-[#00684A] to-[#014130] p-8 text-white relative flex-shrink-0">
                 <div className="flex justify-between items-start mb-6">
-                  <span className="text-[10px] font-black opacity-70 tracking-[0.2em] uppercase">Daund Vikas Mitra</span>
+                  <span className="text-[10px] font-black opacity-70 tracking-[0.2em] uppercase">{t.daundVikasMitra}</span>
                   <button onClick={() => setIsOpen(false)} className="hover:bg-white/10 p-1.5 rounded-full transition-all text-white">
                     <ChevronDown size={24} strokeWidth={3} />
                   </button>
                 </div>
-                <h1 className="rbot-greeting text-white mb-2 leading-[1.1]">{t.rbotGreeting || 'Hello There!'}<br/>How can we help?</h1>
+                <h1 className="rbot-greeting text-white mb-2 leading-[1.1]">{t.helloHowHelp}</h1>
                 <div className="flex items-center gap-2 mt-6 bg-black/10 w-fit px-3 py-1.5 rounded-full border border-white/10 text-green-400">
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -80,14 +80,14 @@ export default function HelpWidget() {
               </div>
               <div className="flex-1 p-4 bg-gray-50 dark:bg-gray-950 space-y-4 overflow-y-auto custom-scrollbar">
                 <div className="bg-white dark:bg-gray-900 p-6 rounded-3xl rbot-bubble-shadow border border-gray-100 dark:border-gray-800">
-                  <h2 className="text-xl font-black rbot-text mb-1">{t.aiAssistantTitle || '24/7 AI Assistant'}</h2>
-                  <p className="text-sm text-gray-500 font-bold mb-4">{t.aiAssistantDesc || 'Register complaints and get project information instantly.'}</p>
-<button onClick={() => setView('chat')} className="w-full flex items-center justify-between p-4 bg-[#00684A] text-white rounded-2xl hover:bg-[#004D37] transition-all group shadow-lg rbot-button-hover">
+                  <h2 className="text-xl font-black rbot-text mb-1">{t.aiAssistantTitle}</h2>
+                  <p className="text-sm text-gray-500 font-bold mb-4">{t.aiAssistantDesc}</p>
+                  <button onClick={() => setView('chat')} className="w-full flex items-center justify-between p-4 bg-[#00684A] text-white rounded-2xl hover:bg-[#004D37] transition-all group shadow-lg rbot-button-hover">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"><MessageSquare size={20} /></div>
                       <div className="text-left font-sans">
-                        <p className="text-xs font-black uppercase opacity-70">{t.contact || 'Send us a message'}</p>
-                        <p className="font-bold">{t.chatWithSupport || 'Chat with RBot Support'}</p>
+                        <p className="text-xs font-black uppercase opacity-70">{t.sendMessageSub}</p>
+                        <p className="font-bold">{t.chatSupportSub}</p>
                       </div>
                     </div>
                     <ChevronRight size={20} strokeWidth={3} />
@@ -129,11 +129,9 @@ export default function HelpWidget() {
                        </div>
                     </div>
                  ))}
-                 <div className="flex flex-col items-start gap-2 pt-2 animate-mbot-message delay-150">
-                    <button onClick={() => handleSend("That helped 👍")} className="px-5 py-2.5 bg-white border border-[#E8EDEB] rounded-full text-sm font-bold rbot-bubble-shadow hover:border-[#00684A] hover:text-[#00684A] text-[#001E2B] transition-all">That helped 👍</button>
-                    <button onClick={() => handleSend("Show me more 👀")} className="px-5 py-2.5 bg-white border border-[#E8EDEB] rounded-full text-sm font-bold rbot-bubble-shadow hover:border-[#00684A] hover:text-[#00684A] text-[#001E2B] transition-all">Show me more 👀</button>
-                    <button onClick={() => handleSend("Talk to a person 👤")} className="px-5 py-2.5 bg-white border border-[#E8EDEB] rounded-full text-sm font-bold rbot-bubble-shadow hover:border-[#00684A] hover:text-[#00684A] text-[#001E2B] transition-all">Talk to a person 👤</button>
-                 </div>
+                  <div className="flex flex-col items-start gap-2 pt-2 animate-mbot-message delay-150">
+                    <button onClick={() => handleSend(t.talkPerson || "Talk to a person 👤")} className="px-5 py-2.5 bg-white border border-[#E8EDEB] rounded-full text-sm font-bold rbot-bubble-shadow hover:border-[#00684A] hover:text-[#00684A] text-[#001E2B] transition-all">{t.talkPerson || "Talk to a person 👤"}</button>
+                  </div>
                  {isTyping && (
                    <div className="flex justify-start animate-mbot-message">
                       <div className="bg-[#FFFFFF] p-4 rounded-xl rbot-bubble-shadow border border-[#E8EDEB] flex gap-1.5 items-center">
@@ -166,20 +164,20 @@ export default function HelpWidget() {
             <div className="flex flex-col h-full bg-white dark:bg-gray-950">
               <div className="bg-[#00684A] p-8 text-white relative flex-shrink-0 shadow-lg">
                 <div className="flex justify-between items-start mb-4">
-                  <h1 className="text-2xl font-black tracking-tight">Help</h1>
+                  <h1 className="text-2xl font-black tracking-tight">{t.rbotHelp}</h1>
                   <button onClick={() => setIsOpen(false)} className="hover:bg-white/10 p-1 rounded-full transition-all text-white"><X size={24} strokeWidth={3} /></button>
                 </div>
                 <div className="relative mt-2">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#00684A]" size={18} />
                   <input 
                     type="text" 
-                    placeholder="Search for help" 
+                    placeholder={t.searchHelpPlaceholder}
                     className="w-full bg-white text-[#001E2B] font-bold text-sm py-3.5 pl-12 pr-4 rounded-xl border-0 rbot-input-focus shadow-lg"
                   />
                 </div>
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-[#F9FBFA] dark:bg-gray-950 custom-scrollbar">
-                <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-2 mb-2">Suggested Articles</p>
+                <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-2 mb-2">{t.suggestedArticles}</p>
                 {[
                   "How to track a complaint?",
                   "Contacting the Taluka Coordinator",

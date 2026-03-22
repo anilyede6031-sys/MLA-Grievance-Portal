@@ -126,7 +126,7 @@ export default function TrackPage() {
 
       {/* Search Card */}
       <div className="card mb-8">
-        <label className="label text-base mb-2">{t.complaintId} or {t.mobile}</label>
+        <label className="label text-base mb-2">{t.complaintId} {t.or} {t.mobile}</label>
         <div className="flex gap-3">
           <input value={query} onChange={e => setQuery(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSearch()}
@@ -346,9 +346,8 @@ export default function TrackPage() {
               return (
                 <div key={cfg.label} className="flex items-center gap-2.5">
                   <span className={`${cfg.class} flex items-center gap-1 px-2 py-1`}>
-                    <Icon size={12} /> {cfg.label}
+                    <Icon size={12} /> <span className="font-marathi text-sm text-gray-600 dark:text-gray-400">{cfg.mr}</span>
                   </span>
-                  <span className="font-marathi text-sm text-gray-600 dark:text-gray-400">{cfg.mr}</span>
                 </div>
               );
             })}
