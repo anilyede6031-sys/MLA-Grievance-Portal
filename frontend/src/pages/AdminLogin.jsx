@@ -53,17 +53,17 @@ export default function AdminLogin() {
           <div className="w-16 h-16 bg-gov-navy rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
             <Shield size={30} className="text-saffron-400" />
           </div>
-          <h1 className="text-2xl font-extrabold text-gov-navy dark:text-white">{t.adminLogin}</h1>
-          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Authorized Personnel Only</p>
-          <p className="font-marathi text-xs text-gray-400 mt-1">केवळ अधिकृत कर्मचार्‍यांसाठी</p>
+          <h1 className="text-2xl font-extrabold text-gov-navy dark:text-white uppercase tracking-tight">{t.adminLogin}</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">{t.authPersonnelOnly}</p>
+          <p className="font-marathi text-xs text-gray-400 mt-1">{t.marathiAuthSub}</p>
         </div>
 
-        <div className="card border border-gray-200 dark:border-gray-700 shadow-lg">
+        <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl p-8 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-2xl transition-all">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="label">Mobile Number</label>
+              <label className="label">{t.mobile}</label>
               <input value={form.mobile} onChange={e => setForm(f => ({...f, mobile: e.target.value}))}
-                className="input-field" placeholder="Admin mobile number" required />
+                className="input-field" placeholder={t.mobilePlaceholder} required />
             </div>
             <div>
               <label className="label">{t.password}</label>
@@ -78,8 +78,8 @@ export default function AdminLogin() {
               </div>
             </div>
             <button type="submit" disabled={loading}
-              className="btn-primary w-full justify-center py-3 text-base disabled:opacity-60">
-              {loading ? <><Loader2 size={18} className="animate-spin" /> Logging in...</> : <><LogIn size={18} /> {t.login}</>}
+              className="btn-primary w-full justify-center py-4 text-base font-bold shadow-green-200 disabled:opacity-60 transition-all hover:scale-[1.02]">
+              {loading ? <><Loader2 size={18} className="animate-spin" /> {t.loggingIn}</> : <><LogIn size={18} /> {t.login}</>}
             </button>
           </form>
 

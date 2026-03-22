@@ -65,13 +65,13 @@ export default function AIAssistant() {
            </div>
            <div>
              <h1 className="rbot-header-title text-xl leading-tight">RBot</h1>
-             <p className="text-[11px] text-[#8392A5] font-bold leading-tight">The team can also help</p>
+             <p className="text-[11px] text-[#8392A5] font-bold leading-tight">{t.aiTeamHelp}</p>
            </div>
         </div>
         <div className="flex items-center gap-4">
            <div className="hidden md:flex items-center gap-2 bg-green-50 px-3 py-1 rounded-full border border-green-100">
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-[10px] font-black text-green-700 uppercase tracking-widest">Online & Ready</span>
+              <span className="text-[10px] font-black text-green-700 uppercase tracking-widest">{t.aiOnlineReady}</span>
            </div>
            <button className="p-2 text-gray-400 hover:text-[#001E2B] transition-colors"><MoreHorizontal size={24} /></button>
         </div>
@@ -103,7 +103,7 @@ export default function AIAssistant() {
                     </div>
                  </div>
                  <p className={`text-[10px] text-[#8392A5] mt-3 font-black tracking-widest uppercase ${m.type === 'user' ? 'mr-2' : 'ml-14'}`}>
-                   {m.type === 'bot' ? 'RBot • AI Agent • Now' : 'Citizen • Now'}
+                   {m.type === 'bot' ? t.aiRBotPersona : `${t.roles.citizen} • Now`}
                  </p>
               </div>
            ))}
@@ -135,15 +135,15 @@ export default function AIAssistant() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
-                placeholder="Message RBot..."
-                className="bg-transparent border-0 focus:ring-0 p-1 rbot-text md:text-lg w-full resize-none min-h-[50px] font-medium placeholder:text-gray-400"
+                placeholder={t.aiMessageRBot}
+                className="bg-transparent border-0 focus:ring-0 focus:outline-none p-1 rbot-text md:text-lg w-full resize-none min-h-[50px] font-medium placeholder:text-gray-400"
                 rows="1"
               />
               <div className="flex items-center justify-between mt-3">
                  <div className="flex items-center gap-5 md:gap-7 text-gray-500">
-                    <button onClick={() => fileInputRef.current?.click()} className="hover:text-[#4285F4] transition-colors p-1"><Paperclip size={24} /></button>
-                    <button onClick={startListening} className={`hover:text-[#4285F4] transition-colors p-1 ${isListening ? 'text-red-500 animate-pulse' : ''}`}><Mic size={24} /></button>
-                    <button className="hover:text-[#4285F4] transition-colors p-1"><Smile size={24} /></button>
+                    <button onClick={() => toast.error('File attachment coming soon!')} className="hover:text-[#4285F4] transition-colors p-1"><Paperclip size={24} /></button>
+                    <button onClick={() => toast.error('Voice input coming soon!')} className={`hover:text-[#4285F4] transition-colors p-1 ${isListening ? 'text-red-500 animate-pulse' : ''}`}><Mic size={24} /></button>
+                    <button onClick={() => toast.error('Stickers coming soon!')} className="hover:text-[#4285F4] transition-colors p-1"><Smile size={24} /></button>
                  </div>
                  <button 
                    onClick={() => handleSend()}
@@ -158,7 +158,7 @@ export default function AIAssistant() {
               </div>
            </div>
            <p className="text-[9px] text-center text-gray-400 uppercase tracking-[0.2em] font-medium pt-2">
-              RBot can make mistakes. Verify important info.
+              {t.aiMistakesDisclaimer}
            </p>
         </div>
       </div>

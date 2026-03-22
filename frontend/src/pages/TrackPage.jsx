@@ -136,6 +136,9 @@ export default function TrackPage() {
               <AlertTriangle size={48} className="mx-auto text-yellow-400 mb-4" />
               <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-1">{t.noComplaintsTitle}</h3>
               <p className="text-gray-500 dark:text-gray-400">{t.noComplaintsSub}</p>
+              <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-8 font-medium">
+            {t.complaintIdOrMobile}
+          </p>
             </div>
           ) : (
             <div className="space-y-4">

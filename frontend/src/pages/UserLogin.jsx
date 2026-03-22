@@ -50,16 +50,16 @@ export default function UserLogin() {
           <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
             <UserCircle size={30} className="text-blue-600" />
           </div>
-          <h1 className="text-2xl font-extrabold text-gov-navy dark:text-white">Citizen Login</h1>
-          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Access your complaints</p>
+          <h1 className="text-2xl font-extrabold text-gov-navy dark:text-white uppercase tracking-tight">{t.citizenLogin}</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">{t.accessComplaintsSub}</p>
         </div>
 
-        <div className="card border border-gray-200 dark:border-gray-700 shadow-lg">
+        <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl p-8 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-2xl transition-all">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="label">Mobile Number</label>
+              <label className="label">{t.mobile}</label>
               <input value={form.mobile} onChange={e => setForm(f => ({...f, mobile: e.target.value}))}
-                className="input-field" placeholder="10-digit mobile number" required />
+                className="input-field" placeholder={t.mobilePlaceholder} required />
             </div>
             <div>
               <label className="label">{t.password}</label>
@@ -74,14 +74,14 @@ export default function UserLogin() {
               </div>
             </div>
             <button type="submit" disabled={loading}
-              className="btn-primary w-full justify-center py-3 text-base disabled:opacity-60">
-              {loading ? <><Loader2 size={18} className="animate-spin" /> Logging in...</> : <><LogIn size={18} /> {t.login}</>}
+              className="btn-primary w-full justify-center py-4 text-base font-bold shadow-green-200 disabled:opacity-60 transition-all hover:scale-[1.02]">
+              {loading ? <><Loader2 size={18} className="animate-spin" /> {t.loggingIn}</> : <><LogIn size={18} /> {t.login}</>}
             </button>
           </form>
 
-          <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800 text-center">
-            <p className="text-sm text-gray-500">Don't have an account?</p>
-            <Link to="/signup" className="text-blue-600 font-semibold hover:underline mt-1 inline-block">Register here</Link>
+          <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 text-center">
+            <p className="text-sm text-gray-500 font-medium">{t.dontHaveAccount}</p>
+            <Link to="/signup" className="text-gov-green dark:text-saffron-400 font-bold hover:underline mt-2 inline-block text-lg transition-colors">{t.registerHere}</Link>
           </div>
         </div>
       </div>

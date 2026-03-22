@@ -271,7 +271,7 @@ export default function HomePage() {
         </div>
         <div className="grid md:grid-cols-3 gap-8">
           {[
-            { icon: '🤖', title: t.aiAssistantTitle, desc: t.aiAssistantDesc, color: 'text-indigo-600', bg: 'bg-indigo-50 dark:bg-indigo-900/20', link: '/ai-assistant' },
+            { icon: '🤖', title: t.aiAssistantTitle, desc: t.aiAssistantDesc, color: 'text-indigo-600', bg: 'bg-indigo-50 dark:bg-indigo-900/20', link: '/ai' },
             { icon: '🚨', title: t.emergencyContactsTitle, desc: t.emergencyContactsDesc, color: 'text-red-600', bg: 'bg-red-50 dark:bg-red-900/20', link: '/emergency' },
           ].map((feature) => (
             <div key={feature.title} className="card hover:shadow-xl transition-all group border border-gray-100 dark:border-gray-800">
