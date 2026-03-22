@@ -138,7 +138,7 @@ export default function AIAssistant() {
       {/* Floating Gemini Pill Input Bar */}
       <div className="gemini-bg p-4 md:pb-12 flex-shrink-0">
         <div className="max-w-3xl mx-auto space-y-4">
-           <div className="bg-white rounded-[2.5rem] p-4 md:p-6 gemini-pill-shadow relative focus-within:ring-1 focus-within:ring-[#4285F4]/20 transition-all">
+           <div className="bg-transparent rounded-none p-4 md:p-6 relative transition-all border-t border-gray-100 dark:border-gray-800">
               <textarea 
                 ref={textareaRef}
                 value={input}
