@@ -62,15 +62,15 @@ export default function HelpWidget() {
           {/* VIEW: HOME (MENU) */}
           {view === 'menu' && (
             <>
-              <div className="bg-gradient-to-br from-[#00684A] to-[#014130] p-8 text-white relative flex-shrink-0">
+              <div className="bg-gradient-to-br from-[#00684A] to-[#014130] p-4 text-white relative flex-shrink-0">
                 <div className="flex justify-between items-start mb-6">
-                  <span className="text-[10px] font-black opacity-70 tracking-[0.2em] uppercase">{t.daundVikasMitra}</span>
+                  <span className="text-[9px] font-black opacity-70 tracking-[0.2em] uppercase">{t.daundVikasMitra}</span>
                   <button onClick={() => setIsOpen(false)} className="hover:bg-white/10 p-1.5 rounded-full transition-all text-white">
                     <ChevronDown size={24} strokeWidth={3} />
                   </button>
                 </div>
                 <h1 className="rbot-greeting text-white mb-2 leading-[1.1]">{t.helloHowHelp}</h1>
-                <div className="flex items-center gap-2 mt-6 bg-black/10 w-fit px-3 py-1.5 rounded-full border border-white/10 text-green-400">
+                <div className="flex items-center gap-2 mt-3 bg-black/10 w-fit px-2 py-1 rounded-full border border-white/10 text-green-400">
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
