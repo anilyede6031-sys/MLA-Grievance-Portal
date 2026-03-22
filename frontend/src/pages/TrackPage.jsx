@@ -270,12 +270,12 @@ export default function TrackPage() {
                           <p className="text-sm font-bold text-gray-800 dark:text-gray-200">{t.replyMorePhotos}</p>
                           {(c.remarks || (c.adminPhotos?.length > 0)) && (
                             <span className="animate-pulse bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-[10px] px-2 py-0.5 rounded-full font-bold border border-blue-200 dark:border-blue-800">
-                              {lang === 'en' ? 'Reply Needed' : 'प्रतिसाद आवश्यक'}
-                            </span>
+                            {t.replyNeeded}
+                          </span>
                           )}
                         </div>
                         <p className="text-xs text-gray-500 mb-3">
-                          {c.remarks ? (lang === 'en' ? 'Admin has left a remark. You can upload more photos if requested.' : 'प्रशासकाने टिप्पणी दिली आहे. विनंती केल्यास आपण अधिक फोटो अपलोड करू शकता.') : t.replyLimitInfo?.replace('{n}', 5 - (c.citizenPhotos?.length || 0))}
+                          {c.remarks ? t.adminRemarkPrompt : t.replyLimitInfo?.replace('{n}', 5 - (c.citizenPhotos?.length || 0))}
                         </p>
                         <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
                           <label className="flex-1 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors w-full flex flex-col items-center justify-center min-h-[100px]">
@@ -324,7 +324,7 @@ export default function TrackPage() {
       {!searched && (
         <div className="card bg-saffron-50 dark:bg-saffron-900/20 border-saffron-200 dark:border-saffron-700">
           <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
-            <FileText size={18} className="text-saffron-500" /> {user?.role === 'citizen' ? 'Complaint Guide' : 'Status Guide'}
+            <FileText size={18} className="text-saffron-500" /> {user?.role === 'citizen' ? t.complaintGuide : t.statusGuide}
           </h3>
           <div className="grid sm:grid-cols-2 gap-3">
             {Object.values(statusConfig).map(cfg => {
@@ -341,7 +341,7 @@ export default function TrackPage() {
           </div>
           {user?.role === 'citizen' && (
             <div className="mt-4 pt-4 border-t border-saffron-200 dark:border-saffron-800 text-sm text-saffron-800 dark:text-saffron-400">
-              <p>📍 All complaints filed with your mobile number **{user.mobile}** are automatically shown above.</p>
+              <p>📍 {t.automaticSyncNotice?.replace('{n}', user.mobile)}</p>
             </div>
           )}
         </div>

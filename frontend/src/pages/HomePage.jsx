@@ -103,16 +103,16 @@ export default function HomePage() {
             <div className="lg:col-span-7 animate-slide-up">
               <div className="inline-flex items-center gap-2 bg-saffron-500/10 border border-saffron-400/20 backdrop-blur-md rounded-full px-4 py-1.5 text-saffron-400 text-sm font-semibold mb-8 shadow-sm">
                 <span className="flex h-2 w-2 rounded-full bg-saffron-500 animate-ping" />
-                🏛️ {t.mlaName} Office · Daund
+                🏛️ {t.mlaName} {t.officeDaund}
               </div>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.1] mb-6 tracking-tight bg-gradient-to-r from-white via-white to-white/70 bg-clip-text text-transparent">
                 {t.welcome}
               </h1>
               <p className="text-xl md:text-2xl text-saffron-400 mb-4 font-marathi font-medium">
-                आपल्या समस्यांचे निराकरण आमची प्राथमिकता
+                {t.priorityMsg}
               </p>
               <p className="text-blue-100/70 mb-10 text-base md:text-lg leading-relaxed max-w-xl">
-                {t.welcomeSub} Join thousands of citizens in Daund who are getting their grievances resolved swiftly and transparently through our official portal.
+                {t.joinThousands}
               </p>
               <div className="flex flex-wrap gap-5">
                 <Link to="/complaint"
@@ -134,7 +134,7 @@ export default function HomePage() {
                   ))}
                 </div>
                 <div className="text-sm text-blue-200/60">
-                  <span className="text-white font-bold">5,000+</span> citizens already registered
+                  <span className="text-white font-bold">5,000+</span> {t.citizensRegistered}
                 </div>
               </div>
             </div>
@@ -160,14 +160,14 @@ export default function HomePage() {
 
                   <div className="space-y-1 text-center">
                     <h3 className="text-2xl font-extrabold text-white tracking-tight">{t.mlaName}</h3>
-                    <p className="text-saffron-400 font-marathi font-semibold">आमदार - दौंड मतदारसंघ</p>
-                    <p className="text-blue-300/60 text-xs font-medium uppercase tracking-[0.2em] pt-2">Maharashtra Legislative Assembly</p>
+                    <p className="text-saffron-400 font-marathi font-semibold">{t.mlaTitle}</p>
+                    <p className="text-blue-300/60 text-[10px] font-medium uppercase tracking-[0.2em] pt-2">{t.assemblyName}</p>
                   </div>
 
                   <div className="mt-8 grid grid-cols-2 gap-3">
                     <div className="bg-white/5 rounded-2xl p-4 border border-white/5 text-center">
                       <p className="text-xl font-bold text-white">100%</p>
-                      <p className="text-[10px] text-blue-300/40 uppercase font-bold tracking-wider mt-1">Response Rate</p>
+                      <p className="text-[10px] text-blue-300/40 uppercase font-bold tracking-wider mt-1">{t.responseRate}</p>
                     </div>
                     <div className="bg-white/5 rounded-2xl p-4 border border-white/5 text-center">
                       <p className="text-xl font-bold text-white">24/7</p>
@@ -217,9 +217,9 @@ export default function HomePage() {
         </div>
         <div className="grid md:grid-cols-3 gap-6">
           {[
-            { step: '01', icon: '📝', title: 'File Complaint', mr: 'तक्रार नोंदवा', desc: 'Fill in the complaint form with your details and description.' },
-            { step: '02', icon: '🔔', title: 'Get Complaint ID', mr: 'क्रमांक मिळवा', desc: 'Receive a unique Complaint ID for tracking your complaint.' },
-            { step: '03', icon: '✅', title: 'Track Resolution', mr: 'निराकरण ट्रॅक करा', desc: 'Track the status and get notified when resolved.' },
+            { step: '01', icon: '📝', title: t.step1Title, mr: t.fileComplaint, desc: t.step1Desc },
+            { step: '02', icon: '🔔', title: t.step2Title, mr: t.complaintId, desc: t.step2Desc },
+            { step: '03', icon: '✅', title: t.step3Title, mr: t.resolvedStatus, desc: t.step3Desc },
           ].map(({ step, icon, title, mr, desc }) => (
             <div key={step} className="card hover:shadow-md transition-shadow group">
               <div className="flex items-start gap-4">
@@ -242,16 +242,16 @@ export default function HomePage() {
       <section className="bg-gray-100 dark:bg-gray-900 py-14">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
-            <h2 className="section-title text-2xl">Complaint Categories</h2>
-            <p className="section-subtitle">We handle grievances across all government departments</p>
+            <h2 className="section-title text-2xl">{t.complaintCategories}</h2>
+            <p className="section-subtitle">{t.categoriesSub}</p>
           </div>
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
             {[
-              { icon: '🛣️', label: 'Road' }, { icon: '💧', label: 'Water' },
-              { icon: '⚡', label: 'Electricity' }, { icon: '📋', label: 'Revenue' },
-              { icon: '👮', label: 'Police' }, { icon: '🏥', label: 'Health' },
-              { icon: '🎓', label: 'Education' }, { icon: '🌾', label: 'Agriculture' },
-              { icon: '📁', label: 'Other' },
+              { icon: '🛣️', label: t.road }, { icon: '💧', label: t.waterDept },
+              { icon: '⚡', label: t.electricityDept }, { icon: '📋', label: t.revenue },
+              { icon: '👮', label: t.police }, { icon: '🏥', label: t.health },
+              { icon: '🎓', label: t.education }, { icon: '🌾', label: t.agri },
+              { icon: '📁', label: t.other },
             ].map(({ icon, label }) => (
               <Link key={label} to="/complaint"
                 className="card hover:shadow-md hover:border-saffron-200 dark:hover:border-saffron-700 transition-all flex flex-col items-center py-4 gap-2 group">
@@ -305,7 +305,7 @@ export default function HomePage() {
                    <div className="w-10 h-10 rounded-full bg-saffron-100 dark:bg-saffron-900/30 flex items-center justify-center text-xl">📊</div>
                    <div className="flex flex-col">
                       <span>{t.mlaFundTrackerTitle}</span>
-                      <span className="text-[9px] text-green-500 animate-pulse font-bold tracking-widest uppercase">● Live Updates Active</span>
+                      <span className="text-[9px] text-green-500 animate-pulse font-bold tracking-widest uppercase">● {t.liveUpdates}</span>
                    </div>
                 </h3>
                 <div className="flex items-center gap-4">
@@ -316,7 +316,7 @@ export default function HomePage() {
                     {t.viewDetails}
                   </button>
                   <div className="bg-gray-50 dark:bg-gray-800 px-4 py-2 rounded-full border border-gray-100 dark:border-gray-700">
-                  <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mr-2">Total Budget:</span>
+                  <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mr-2">{t.totalBudget}:</span>
                   <span className="text-gov-navy dark:text-saffron-400 font-bold">₹ {projectSummary.totalBudget || 0} {t.crore}</span>
                 </div>
               </div>
@@ -373,15 +373,15 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="bg-gradient-to-r from-saffron-500 to-saffron-600 rounded-2xl p-8 md:p-12 text-white text-center shadow-xl">
           <h2 className="text-2xl md:text-3xl font-extrabold mb-2">{t.fileComplaint}</h2>
-          <p className="font-marathi text-saffron-100 mb-6 text-lg">आपली समस्या आमच्यापर्यंत पोहोचवा</p>
+          <p className="font-marathi text-saffron-100 mb-6 text-lg">{t.priorityMsg}</p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link to="/complaint"
               className="inline-flex items-center gap-2 bg-white text-saffron-600 hover:bg-saffron-50 font-bold px-8 py-3 rounded-xl shadow-md hover:shadow-lg transition-all">
-              <FileText size={18} /> File Now <ChevronRight size={16} />
+              <FileText size={18} /> {t.fileNow} <ChevronRight size={16} />
             </Link>
             <Link to="/track"
               className="inline-flex items-center gap-2 bg-saffron-700 hover:bg-saffron-800 text-white font-semibold px-8 py-3 rounded-xl transition-all">
-              <Search size={18} /> Track Status
+              <Search size={18} /> {t.trackStatus}
             </Link>
           </div>
         </div>

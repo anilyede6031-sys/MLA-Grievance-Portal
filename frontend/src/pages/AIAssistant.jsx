@@ -7,7 +7,7 @@ import api from '../utils/api';
 export default function AIAssistant() {
   const { t } = useLang();
   const [messages, setMessages] = useState([
-    { id: 1, type: 'bot', text: '👋 Hi there! How can I help today?' }
+    { id: 1, type: 'bot', text: t.aiGreeting }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -83,7 +83,7 @@ export default function AIAssistant() {
            
            <div className="bg-white dark:bg-gray-900 p-5 rounded-3xl flex gap-4 text-xs md:text-sm text-gray-500 italic leading-relaxed rbot-bubble-shadow items-start animate-mbot-message">
               <Info size={20} className="text-[#00684A] shrink-0 mt-0.5" />
-              <p>This chat session is recorded to ensure service quality.</p>
+              <p>{t.recordingNotice}</p>
            </div>
 
            {messages.map((m) => (
@@ -109,9 +109,9 @@ export default function AIAssistant() {
            ))}
 
             <div className="flex flex-col items-start gap-4 pb-8 animate-mbot-message delay-150">
-               <button onClick={() => handleSend("That helped 👍")} className="px-6 py-3 bg-white rounded-full text-sm font-bold rbot-bubble-shadow hover:bg-gray-50 transition-all flex items-center gap-2 text-[#001E2B]">That helped 👍</button>
-               <button onClick={() => handleSend("Show me more 👀")} className="px-6 py-3 bg-white rounded-full text-sm font-bold rbot-bubble-shadow hover:bg-gray-50 transition-all flex items-center gap-2 text-[#001E2B]">Show me more 👀</button>
-               <button onClick={() => handleSend("Talk to a person 👤")} className="px-6 py-3 bg-white rounded-full text-sm font-bold rbot-bubble-shadow hover:bg-gray-50 transition-all flex items-center gap-2 text-[#001E2B]">Talk to a person 👤</button>
+               <button onClick={() => handleSend(t.helped)} className="px-6 py-3 bg-white rounded-full text-sm font-bold rbot-bubble-shadow hover:bg-gray-50 transition-all flex items-center gap-2 text-[#001E2B]">{t.helped}</button>
+               <button onClick={() => handleSend(t.showMore)} className="px-6 py-3 bg-white rounded-full text-sm font-bold rbot-bubble-shadow hover:bg-gray-50 transition-all flex items-center gap-2 text-[#001E2B]">{t.showMore}</button>
+               <button onClick={() => handleSend(t.talkPerson)} className="px-6 py-3 bg-white rounded-full text-sm font-bold rbot-bubble-shadow hover:bg-gray-50 transition-all flex items-center gap-2 text-[#001E2B]">{t.talkPerson}</button>
             </div>
 
            {isTyping && (

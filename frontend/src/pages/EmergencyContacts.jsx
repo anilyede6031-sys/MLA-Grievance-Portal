@@ -7,7 +7,7 @@ export default function EmergencyContacts() {
 
   const contacts = [
     {
-      category: 'Emergency Services',
+      category: t.emergencyServices,
       items: [
         { name: t.police, number: '100', icon: Shield, color: 'text-blue-600', bg: 'bg-blue-50' },
         { name: t.ambulance, number: '108', icon: Heart, color: 'text-red-600', bg: 'bg-red-50' },
@@ -15,7 +15,7 @@ export default function EmergencyContacts() {
       ]
     },
     {
-      category: 'Public Utilities',
+      category: t.publicUtilities,
       items: [
         { name: t.electricity, number: '1912', icon: Zap, color: 'text-yellow-600', bg: 'bg-yellow-50' },
         { name: t.tehsildar, number: '02117-262331', icon: Landmark, color: 'text-gov-navy', bg: 'bg-indigo-50' },
@@ -67,9 +67,9 @@ export default function EmergencyContacts() {
 
         <div className="mt-12 bg-saffron-50 dark:bg-saffron-900/10 border border-saffron-100 dark:border-saffron-900/30 rounded-3xl p-8 text-center">
             <div className="w-16 h-16 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-md">🚨</div>
-            <h3 className="text-xl font-bold text-saffron-800 dark:text-saffron-400 mb-2">Important Note</h3>
+            <h3 className="text-xl font-bold text-saffron-800 dark:text-saffron-400 mb-2">{t.importantNote}</h3>
             <p className="text-saffron-700/70 dark:text-saffron-300/50 text-sm max-w-lg mx-auto">
-                These numbers are for emergency and official use only. Please use them responsibly to ensure help reaches those in need promptly.
+                {t.emergencyDisclaimer}
             </p>
         </div>
       </div>
