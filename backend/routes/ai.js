@@ -29,9 +29,11 @@ function fileToGenerativePart(buffer, mimeType) {
 
 router.post('/chat', upload.array('images', 5), async (req, res) => {
   try {
-    const { message, location: locationStr } = req.body;
+    const { message, history: historyStr, location: locationStr } = req.body;
     const location = locationStr ? JSON.parse(locationStr) : null;
+    const history = historyStr ? JSON.parse(historyStr) : [];
     const files = req.files || []; // Multiple files
+    
     if (!process.env.GEMINI_API_KEY) {
       return res.status(500).json({ success: false, message: 'AI configuration error.' });
     }
@@ -100,36 +102,44 @@ ${projectSummary || 'No specific projects listed.'}
 ${specificComplaint}
 ${location ? `- Current User Location: Lat ${location.lat}, Lng ${location.lng}` : ''}
 
-Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳
+Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
 
-User Input: ${message || 'Please analyze this.'}`;
-
-
-    // AI Model Integration (Simplified for high availability)
+    // AI Model Integration
     const geminiKey = process.env.GEMINI_API_KEY;
     if (!geminiKey) throw new Error("GEMINI_API_KEY is not defined in environment.");
 
     const genAI = new GoogleGenerativeAI(geminiKey);
     
-    const promptParts = [systemPrompt];
+    // Transform history for Gemini
+    const contents = [];
+    history.forEach(msg => {
+      contents.push({
+        role: msg.type === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.text }]
+      });
+    });
+
+    // Add current message with images if any
+    const currentParts = [{ text: message || 'Please analyze this.' }];
     if (files.length > 0) {
       files.forEach(file => {
-        promptParts.push(fileToGenerativePart(file.buffer, file.mimetype));
+        currentParts.push(fileToGenerativePart(file.buffer, file.mimetype));
       });
     }
+    contents.push({ role: 'user', parts: currentParts });
 
-    // High-Availability Model Fallback Logic (Production Stable)
+    // High-Availability Model Fallback Logic
     const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-pro"];
     let lastError = null;
     let text = "";
-
     let modelErrors = {};
+
     for (const modelName of modelsToTry) {
       try {
-        if (files.length > 0 && (modelName === "gemini-pro" || modelName === "gemini-1.0-pro")) continue;
+        if (files.length > 0 && modelName.includes("pro") && !modelName.includes("1.5")) continue;
 
-        const model = genAI.getGenerativeModel({ model: modelName, safetySettings });
-        const result = await model.generateContent(promptParts);
+        const model = genAI.getGenerativeModel({ model: modelName, safetySettings, systemInstruction: systemPrompt });
+        const result = await model.generateContent({ contents });
         const response = await result.response;
         text = response.text();
         
