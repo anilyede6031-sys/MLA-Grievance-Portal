@@ -25,8 +25,9 @@ export default function HelpWidget() {
 
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+      textareaRef.current.style.height = '0px'; // Reset height to get true scrollHeight
+      const newHeight = textareaRef.current.scrollHeight;
+      textareaRef.current.style.height = `${Math.min(newHeight, 150)}px`;
     }
   }, [input]);
 
@@ -159,7 +160,7 @@ export default function HelpWidget() {
                          onChange={(e) => setInput(e.target.value)} 
                          onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())} 
                          placeholder="Message..." 
-                         className="bg-transparent border-0 focus:ring-0 p-0 text-sm rbot-text flex-1 resize-none font-sans overflow-y-auto custom-scrollbar" 
+                         className="bg-transparent border-none outline-none focus:outline-none focus:ring-0 active:outline-none appearance-none p-0 text-sm rbot-text flex-1 resize-none font-sans overflow-hidden" 
                          rows="1" 
                        />
                       <div className="flex items-center justify-between mt-1 pt-2 border-t border-gray-50">
