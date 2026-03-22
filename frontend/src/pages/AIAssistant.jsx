@@ -117,11 +117,7 @@ export default function AIAssistant() {
               </div>
            ))}
 
-            <div className="flex flex-col items-start gap-4 pb-8 animate-mbot-message delay-150">
-               <button onClick={() => handleSend(t.helped)} className="px-6 py-3 bg-white rounded-full text-sm font-bold rbot-bubble-shadow hover:bg-gray-50 transition-all flex items-center gap-2 text-[#001E2B]">{t.helped}</button>
-               <button onClick={() => handleSend(t.showMore)} className="px-6 py-3 bg-white rounded-full text-sm font-bold rbot-bubble-shadow hover:bg-gray-50 transition-all flex items-center gap-2 text-[#001E2B]">{t.showMore}</button>
-               <button onClick={() => handleSend(t.talkPerson)} className="px-6 py-3 bg-white rounded-full text-sm font-bold rbot-bubble-shadow hover:bg-gray-50 transition-all flex items-center gap-2 text-[#001E2B]">{t.talkPerson}</button>
-            </div>
+            {/* Suggestion buttons removed as per user request */}
 
            {isTyping && (
              <div className="flex justify-start animate-mbot-message mb-6">

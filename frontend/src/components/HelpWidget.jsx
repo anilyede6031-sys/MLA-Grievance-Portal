@@ -99,9 +99,7 @@ export default function HelpWidget() {
                        </div>
                     </div>
                  ))}
-                  <div className="flex flex-col items-start gap-2 pt-2 animate-mbot-message delay-150">
-                    <button onClick={() => handleSend(t.talkPerson || "Talk to a person 👤")} className="px-5 py-2.5 bg-white border border-[#E8EDEB] rounded-full text-sm font-bold rbot-bubble-shadow hover:border-[#00684A] hover:text-[#00684A] text-[#001E2B] transition-all">{t.talkPerson || "Talk to a person 👤"}</button>
-                  </div>
+                  {/* Talk to person button removed */}
                  {isTyping && (
                    <div className="flex justify-start animate-mbot-message">
                       <div className="bg-[#FFFFFF] p-4 rounded-xl rbot-bubble-shadow border border-[#E8EDEB] flex gap-1.5 items-center">
