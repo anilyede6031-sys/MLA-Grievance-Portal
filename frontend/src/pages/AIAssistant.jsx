@@ -3,7 +3,6 @@ import { Send, User, Bot, ArrowLeft, MessageSquare, List, AlertTriangle, X, Mic,
 import { Link } from 'react-router-dom';
 import { useLang } from '../context/LangContext';
 import api from '../utils/api';
-import '../index.css'; 
 
 export default function AIAssistant() {
   const { t } = useLang();

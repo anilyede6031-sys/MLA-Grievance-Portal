@@ -1,4 +1,8 @@
-/* RBot Premium Styles (v29 Deep Study Match) */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* RBot Premium Styles (v31 Ultimate Recovery) */
 
 @keyframes mbot-slide-up-fade {
   from {
