@@ -47,26 +47,26 @@ export default function UserSignup() {
           <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">{t.createAccountSub}</p>
         </div>
 
-        <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl p-8 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-2xl transition-all">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
+        <div className="bg-white/95 dark:bg-gray-900/98 backdrop-blur-2xl p-8 sm:p-10 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] transition-all">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
               <label className="label">{t.fullName}</label>
               <input value={form.name} onChange={e => setForm(f => ({...f, name: e.target.value}))}
                 className="input-field" placeholder={t.fullNamePlaceholder} required />
             </div>
-            <div>
+            <div className="space-y-2">
               <label className="label">{t.mobile}</label>
               <input type="tel" value={form.mobile} onChange={e => setForm(f => ({...f, mobile: e.target.value}))}
                 className="input-field" placeholder={t.mobilePlaceholder || "10-digit mobile number"} maxLength={10} required />
             </div>
-            <div>
+            <div className="space-y-2">
               <label className="label">{t.selectTalukaOptional}</label>
               <select value={form.taluka} onChange={e => setForm(f => ({...f, taluka: e.target.value}))} className="input-field">
                 <option value="">{t.selectTaluka}</option>
                 {TALUKAS.map(tl => <option key={tl} value={tl}>{tl}</option>)}
               </select>
             </div>
-            <div>
+            <div className="space-y-2">
               <label className="label">{t.password}</label>
               <div className="relative">
                 <input type={show ? 'text' : 'password'} value={form.password}

@@ -58,14 +58,14 @@ export default function AdminLogin() {
           <p className="font-marathi text-xs text-gray-400 mt-1">{t.marathiAuthSub}</p>
         </div>
 
-        <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl p-8 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-2xl transition-all">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
+        <div className="bg-white/95 dark:bg-gray-900/98 backdrop-blur-2xl p-8 sm:p-10 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] transition-all">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
               <label className="label">{t.mobile}</label>
               <input value={form.mobile} onChange={e => setForm(f => ({...f, mobile: e.target.value}))}
                 className="input-field" placeholder={t.mobilePlaceholder} required />
             </div>
-            <div>
+            <div className="space-y-2">
               <label className="label">{t.password}</label>
               <div className="relative">
                 <input type={show ? 'text' : 'password'} value={form.password}
