@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, User, Bot, ArrowLeft, MessageSquare, List, AlertTriangle, X, Mic, Volume2, VolumeX, Camera, Paperclip, MapPin, Smile, ArrowUp, MoreHorizontal, Info, Shield, Phone, Home, HelpCircle, ChevronRight } from 'lucide-react';
+import { Send, User, Bot, ArrowLeft, MessageSquare, List, AlertTriangle, X, Mic, Volume2, VolumeX, Camera, Paperclip, MapPin, Smile, ArrowUp, MoreHorizontal, Info, Shield, Phone, Home, HelpCircle, ChevronRight, Stars } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLang } from '../context/LangContext';
 import api from '../utils/api';
