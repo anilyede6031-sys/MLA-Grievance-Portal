@@ -6,7 +6,7 @@ import api from '../utils/api';
 
 export default function HelpWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const [view, setView] = useState('menu'); // 'menu', 'chat', 'help'
+  const [view, setView] = useState('chat'); // Simplified to Chat-only
   const { t } = useLang();
   const [messages, setMessages] = useState([
     { id: 1, type: 'bot', text: '👋 ' + (t.rbotGreeting || 'नमस्कार! आम्ही तुम्हाला कशी मदत करू शकतो?') }
@@ -68,53 +68,14 @@ export default function HelpWidget() {
       {isOpen && (
         <div className="w-[400px] h-[704px] bg-white dark:bg-gray-900 rounded-[24px] rbot-container-shadow overflow-hidden animate-mbot-widget pointer-events-auto origin-bottom-right border border-[#E8EDEB] flex flex-col">
           
-          {/* VIEW: HOME (MENU) */}
-          {view === 'menu' && (
-            <>
-              <div className="bg-gradient-to-br from-[#00684A] to-[#014130] py-1.5 px-4 text-white relative flex-shrink-0">
-                <div className="flex justify-between items-center mb-0.5">
-                  <span className="text-[9px] font-black opacity-70 tracking-[0.2em] uppercase">{t.daundVikasMitra}</span>
-                  <button onClick={() => setIsOpen(false)} className="hover:bg-white/10 p-1 rounded-full transition-all text-white">
-                    <ChevronDown size={18} strokeWidth={3} />
-                  </button>
-                </div>
-                <h1 className="rbot-greeting text-white mb-2 leading-[1.1]">{t.helloHowHelp}</h1>
-                <div className="flex items-center gap-2 mt-1 bg-black/10 w-fit px-2 py-0.5 rounded-full border border-white/10 text-green-400">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                  </span>
-                  <span className="text-[11px] font-black uppercase tracking-widest">{t.aiOnlineReady || 'Online & Ready'}</span>
-                </div>
-              </div>
-              <div className="flex-1 p-4 bg-gray-50 dark:bg-gray-950 space-y-4 overflow-y-auto custom-scrollbar">
-                <div className="bg-white dark:bg-gray-900 p-6 rounded-3xl rbot-bubble-shadow border border-gray-100 dark:border-gray-800">
-                  <h2 className="text-xl font-black rbot-text mb-1">{t.aiAssistantTitle}</h2>
-                  <p className="text-sm text-gray-500 font-bold mb-4">{t.aiAssistantDesc}</p>
-                  <button onClick={() => setView('chat')} className="w-full flex items-center justify-between p-4 bg-[#00684A] text-white rounded-2xl hover:bg-[#004D37] transition-all group shadow-lg rbot-button-hover">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"><MessageSquare size={20} /></div>
-                      <div className="text-left font-sans">
-                        <p className="text-xs font-black uppercase opacity-70">{t.sendMessageSub}</p>
-                        <p className="font-bold">{t.chatSupportSub}</p>
-                      </div>
-                    </div>
-                    <ChevronRight size={20} strokeWidth={3} />
-                  </button>
-                </div>
-              </div>
-            </>
-          )}
-
+          {/* CHAT-ONLY INTERFACE (v48 Simplified) */}
           {/* VIEW: CHAT (MESSAGES) */}
           {view === 'chat' && (
             <div className="flex flex-col h-full bg-white dark:bg-gray-950">
               <div className="h-[72px] border-b border-[#E8EDEB] px-4 flex items-center justify-between bg-white dark:bg-gray-900 rbot-bubble-shadow flex-shrink-0 z-10">
                 <div className="flex items-center gap-3">
-                  <button onClick={() => setView('menu')} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 transition-colors">
-                    <ArrowLeft size={18} strokeWidth={3} />
-                  </button>
-                  <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#00684A] border border-[#00684A]/10 shadow-sm relative flex-shrink-0">
+                   {/* Removed back button as menu is removed */}
+                   <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#00684A] border border-[#00684A]/10 shadow-sm relative flex-shrink-0">
                       <Bot size={22} strokeWidth={1.5} className="animate-pulse" />
                       <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
                   </div>
@@ -176,59 +137,8 @@ export default function HelpWidget() {
             </div>
           )}
 
-          {/* VIEW: HELP */}
-          {view === 'help' && (
-            <div className="flex flex-col h-full bg-white dark:bg-gray-950">
-              <div className="bg-[#00684A] p-8 text-white relative flex-shrink-0 shadow-lg">
-                <div className="flex justify-between items-start mb-4">
-                  <h1 className="text-2xl font-black tracking-tight">{t.rbotHelp}</h1>
-                  <button onClick={() => setIsOpen(false)} className="hover:bg-white/10 p-1 rounded-full transition-all text-white"><X size={24} strokeWidth={3} /></button>
-                </div>
-                <div className="relative mt-2">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#00684A]" size={18} />
-                  <input 
-                    type="text" 
-                    placeholder={t.searchHelpPlaceholder}
-                    className="w-full bg-white text-[#001E2B] font-bold text-sm py-3.5 pl-12 pr-4 rounded-xl border-0 rbot-input-focus shadow-lg"
-                  />
-                </div>
-              </div>
-              <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-[#F9FBFA] dark:bg-gray-950 custom-scrollbar">
-                <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-2 mb-2">{t.suggestedArticles}</p>
-                {[
-                  t.howTrackComplaint || "How to track a complaint?",
-                  t.contactTaluka || "Contacting the Taluka Coordinator",
-                  t.upcomingProjects || "Information about upcoming projects",
-                  t.languageSettings || "Language settings and accessibility",
-                  t.submittingPhotos || "Submitting photos of grievances"
-                ].map((item, idx) => (
-                  <button key={idx} onClick={() => handleSend(item)} className="w-full text-left p-4 bg-white border border-[#E8EDEB] rounded-2xl rbot-bubble-shadow hover:border-[#00684A] hover:text-[#00684A] transition-all flex items-center justify-between group">
-                    <span className="text-sm font-bold text-[#001E2B] group-hover:text-[#00684A] tracking-tight">{item}</span>
-                    <ChevronRight size={18} className="text-gray-300 group-hover:text-[#00684A]" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Calibrated Footer */}
-          <div className="bg-white dark:bg-gray-900 h-[81px] grid grid-cols-3 border-t border-[#EDEDED] flex-shrink-0">
-             <button onClick={() => setView('menu')} className={`flex flex-col items-center pt-[18px] pb-[10px] transition-all ${view === 'menu' ? 'text-[#00684A]' : 'text-[#6C6F74] rbot-button-hover'}`}>
-               <Home size={24} className={view === 'menu' ? 'fill-[#00684A]/10' : ''} />
-               <span className={`text-[14px] leading-[20px] mt-2 ${view === 'menu' ? 'font-bold' : 'font-medium'}`}>{t.rbotHome || 'Home'}</span>
-             </button>
-             <button onClick={() => setView('chat')} className={`flex flex-col items-center pt-[18px] pb-[10px] transition-all ${view === 'chat' ? 'text-[#00684A]' : 'text-[#6C6F74] rbot-button-hover'}`}>
-               <div className="relative">
-                  <MessageSquare size={24} className={view === 'chat' ? 'fill-[#00684A]/10' : ''} />
-                  <div className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white" />
-               </div>
-               <span className={`text-[14px] leading-[20px] mt-2 ${view === 'chat' ? 'font-bold' : 'font-medium'}`}>{t.rbotMessages || 'Messages'}</span>
-             </button>
-             <button onClick={() => setView('help')} className={`flex flex-col items-center pt-[18px] pb-[10px] transition-all ${view === 'help' ? 'text-[#00684A]' : 'text-[#6C6F74] rbot-button-hover'}`}>
-               <HelpCircle size={24} className={view === 'help' ? 'fill-[#00684A]/10' : ''} />
-               <span className={`text-[14px] leading-[20px] mt-2 ${view === 'help' ? 'font-bold' : 'font-medium'}`}>{t.rbotHelp || 'Help'}</span>
-             </button>
-          </div>
+          {/* Removed Help & Suggested Articles as per user request */}
+          {/* Footer Tabs Removed as per user request */}
         </div>
       )}
 
