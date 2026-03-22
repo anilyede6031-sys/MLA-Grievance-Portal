@@ -152,8 +152,8 @@ export default function HelpWidget() {
                  )}
                  <div ref={scrollRef} />
               </div>
-               <div className="p-3 bg-transparent border-t border-[#E8EDEB] flex-shrink-0">
-                   <div className="bg-transparent rounded-none p-3 border-0 flex flex-col min-h-[70px] transition-all">
+               <div className="p-2 bg-transparent border-t border-[#E8EDEB] flex-shrink-0">
+                   <div className="bg-transparent rounded-none p-1 border-0 flex flex-col min-h-[40px] transition-all">
                        <textarea 
                          ref={textareaRef}
                          value={input} 
@@ -163,7 +163,7 @@ export default function HelpWidget() {
                          className="bg-transparent border-none outline-none focus:outline-none focus:ring-0 active:outline-none appearance-none p-0 text-sm rbot-text flex-1 resize-none font-sans overflow-hidden" 
                          rows="1" 
                        />
-                      <div className="flex items-center justify-between mt-1 pt-2 border-t border-gray-50">
+                      <div className="flex items-center justify-between mt-0.5 pt-1 border-t border-gray-50/50">
                         <div className="flex items-center gap-5 text-gray-400">
                            <button onClick={() => fileInputRef.current?.click()} className="hover:text-[#00684A] transition-colors"><Paperclip size={20} /></button>
                            <button className="hover:text-[#00684A] transition-colors"><Smile size={20} /></button>
@@ -196,13 +196,13 @@ export default function HelpWidget() {
               <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-[#F9FBFA] dark:bg-gray-950 custom-scrollbar">
                 <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-2 mb-2">{t.suggestedArticles}</p>
                 {[
-                  "How to track a complaint?",
-                  "Contacting the Taluka Coordinator",
-                  "Information about upcoming projects",
-                  "Language settings and accessibility",
-                  "Submitting photos of grievances"
+                  t.howTrackComplaint || "How to track a complaint?",
+                  t.contactTaluka || "Contacting the Taluka Coordinator",
+                  t.upcomingProjects || "Information about upcoming projects",
+                  t.languageSettings || "Language settings and accessibility",
+                  t.submittingPhotos || "Submitting photos of grievances"
                 ].map((item, idx) => (
-                  <button key={idx} className="w-full text-left p-4 bg-white border border-[#E8EDEB] rounded-2xl rbot-bubble-shadow hover:border-[#00684A] hover:text-[#00684A] transition-all flex items-center justify-between group">
+                  <button key={idx} onClick={() => handleSend(item)} className="w-full text-left p-4 bg-white border border-[#E8EDEB] rounded-2xl rbot-bubble-shadow hover:border-[#00684A] hover:text-[#00684A] transition-all flex items-center justify-between group">
                     <span className="text-sm font-bold text-[#001E2B] group-hover:text-[#00684A] tracking-tight">{item}</span>
                     <ChevronRight size={18} className="text-gray-300 group-hover:text-[#00684A]" />
                   </button>
