@@ -235,7 +235,7 @@ export default function ComplaintForm() {
 
         {/* Photo Upload */}
         <div>
-          <label className="label">{t.photo} <span className="text-gray-400 text-xs">({t.photoOptional})</span></label>
+          <label className="label">{t.photo}</label>
           <div {...getRootProps()} className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all
             ${isDragActive ? 'border-saffron-400 bg-saffron-50 dark:bg-saffron-900/20' : 'border-gray-300 dark:border-gray-600 hover:border-saffron-300'}`}>
             <input {...getInputProps()} />
