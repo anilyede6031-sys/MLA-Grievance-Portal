@@ -69,6 +69,7 @@ export default function AIAssistant() {
     try {
       const formData = new FormData();
       formData.append('message', text);
+      formData.append('history', JSON.stringify(messages.map(m => ({ type: m.type, text: m.text }))));
       currentAttachments.forEach(file => formData.append('images', file));
 
       const res = await api.post('/ai/chat', formData, {
