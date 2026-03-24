@@ -73,13 +73,15 @@ export default function AIAssistant() {
       currentAttachments.forEach(file => formData.append('images', file));
 
       const response = await api.post('/ai/atomic-chat', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 60000
       });
       if (response.data.success) {
         setMessages(prev => [...prev, { id: Date.now() + 1, type: 'bot', text: response.data.reply }]);
       }
     } catch (err) {
       console.error(err);
+      setMessages(prev => [...prev, { id: Date.now() + 1, type: 'bot', text: "क्षमस्व, सर्व्हरला उशीर होत आहे. कृपया इंटरनेट तपासा आणि थोड्या वेळाने पुन्हा एकदा प्रयत्न करा. (Server delay. Please check network and retry.)" }]);
     } finally {
       setIsTyping(false);
     }
