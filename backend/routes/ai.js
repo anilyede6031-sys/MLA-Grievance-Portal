@@ -110,14 +110,14 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
 
     const genAI = new GoogleGenerativeAI(geminiKey);
     
-    // Transform history for Gemini startChat
-    const historyClean = [];
+    // Transform history for Gemini
+    const contents = [];
     let lastRole = null;
     
     history.forEach(msg => {
       const role = (msg.type === 'user' || msg.role === 'user') ? 'user' : 'model';
       if (role !== lastRole && msg.text) {
-        historyClean.push({
+        contents.push({
           role: role,
           parts: [{ text: msg.text }]
         });
@@ -125,17 +125,23 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
       }
     });
 
-    // Ensure history ends with 'model' if we are about to send a 'user' message
-    if (historyClean.length > 0 && historyClean[historyClean.length - 1].role !== 'model') {
-      // If user sent two messages in a row, combine them or remove one. 
-      // For chat simplicity, we just take the last history turn if same role.
-    }
+    // Add current message (must be user)
+    // If this is the FIRST message (no history), prepend the system instructions
+    const combinedMessage = (contents.length === 0) 
+      ? `${systemPrompt}\n\nUSER MESSAGE: ${message}`
+      : message;
 
-    const currentParts = [{ text: message || 'Please analyze this.' }];
+    const currentParts = [{ text: combinedMessage || 'Please analyze this.' }];
     if (files.length > 0) {
       files.forEach(file => {
         currentParts.push(fileToGenerativePart(file.buffer, file.mimetype));
       });
+    }
+
+    if (lastRole === 'user') {
+      contents[contents.length - 1].parts.push(...currentParts);
+    } else {
+      contents.push({ role: 'user', parts: currentParts });
     }
 
     // High-Availability Model Fallback Logic (Production Stable)
@@ -148,18 +154,8 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
       try {
         if (files.length > 0 && modelName.includes("pro") && !modelName.includes("1.5")) continue;
 
-        const model = genAI.getGenerativeModel({ 
-          model: modelName, 
-          safetySettings,
-          systemInstruction: systemPrompt 
-        });
-
-        const chat = model.startChat({
-          history: historyClean,
-          generationConfig: { maxOutputTokens: 1000 }
-        });
-
-        const result = await chat.sendMessage(currentParts);
+        const model = genAI.getGenerativeModel({ model: modelName, safetySettings });
+        const result = await model.generateContent({ contents });
         const response = await result.response;
         text = response.text();
         
