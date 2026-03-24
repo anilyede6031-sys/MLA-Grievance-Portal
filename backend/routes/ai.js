@@ -27,7 +27,72 @@ function fileToGenerativePart(buffer, mimeType) {
   };
 }
 
-router.post('/chat', upload.array('images', 5), async (req, res) => {
+router.post('/atomic-chat', upload.array('files'), async (req, res) => {
+  const { message, history: historyStr } = req.body;
+  const files = req.files || [];
+  let history = [];
+  
+  try {
+    if (historyStr) history = JSON.parse(historyStr);
+    
+    // ATOMIC SINGLE-TURN SDK BRIDGE (v71)
+    // Note: systemPrompt, safetySettings are globally defined and will be used.
+    // This route does not fetch dynamic data like projects, complaint stats, or location,
+    // so the systemPrompt will reflect default/empty values for those sections.
+    let flattenedPrompt = `${systemPrompt}\n\n`;
+    if (history && history.length > 0) {
+      flattenedPrompt += "--- PREVIOUS CONVERSATION ---\n";
+      history.forEach(msg => {
+        const roleName = (msg.type === 'user' || msg.role === 'user' || msg.type === 'Human') ? 'Citizen' : 'Seva Representative';
+        if (msg.text) flattenedPrompt += `${roleName}: ${msg.text}\n`;
+      });
+      flattenedPrompt += "--- END HISTORY ---\n\n";
+    }
+    flattenedPrompt += `Citizen's Latest Message: ${message}\n\nSeva Representative's Response:`;
+
+    const contents = [{ role: 'user', parts: [{ text: flattenedPrompt }] }];
+    if (files.length > 0) {
+      files.forEach(file => {
+        contents[0].parts.push({
+          inlineData: { mimeType: file.mimetype, data: file.buffer.toString('base64') }
+        });
+      });
+    }
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const modelsToTry = ["gemini-1.5-flash", "gemini-pro"];
+    let text = "";
+    
+    for (const modelName of modelsToTry) {
+      try {
+        // Skip gemini-pro if files are present, as it doesn't support multimodal input
+        if (files.length > 0 && modelName === "gemini-pro") continue;
+
+        const model = genAI.getGenerativeModel({ model: modelName, safetySettings });
+        const result = await model.generateContent({ contents });
+        const response = await result.response;
+        text = response.text();
+        if (text) break;
+      } catch (err) { 
+        // Log or store error for this model if needed, but continue trying other models
+        continue; 
+      }
+    }
+
+    if (!text) {
+      // Fallback for atomic-chat, without dynamic project/stats context
+      const fallback = getKeywordResponse(message, {}); 
+      return res.json({ success: true, reply: fallback || "नमस्कार, मी सध्या व्यस्त आहे. कृपया थोड्या वेळाने प्रयत्न करा.", isFallback: !fallback });
+    }
+
+    res.json({ success: true, reply: text });
+  } catch (err) {
+    console.error('Atomic AI Error:', err.message);
+    res.status(500).json({ success: false, message: 'AI Error', debug: err.message });
+  }
+});
+
+router.post('/chat', upload.array('files'), async (req, res) => {
   try {
     const { message, history: historyStr, location: locationStr } = req.body;
     const location = locationStr ? JSON.parse(locationStr) : null;

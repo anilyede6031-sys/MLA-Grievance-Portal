@@ -72,11 +72,11 @@ export default function AIAssistant() {
       formData.append('history', JSON.stringify(messages.map(m => ({ type: m.type, text: m.text }))));
       currentAttachments.forEach(file => formData.append('images', file));
 
-      const res = await api.post('/ai/chat', formData, {
+      const response = await api.post('/api/ai/atomic-chat', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      if (res.data.success) {
-        setMessages(prev => [...prev, { id: Date.now() + 1, type: 'bot', text: res.data.reply }]);
+      if (response.data.success) {
+        setMessages(prev => [...prev, { id: Date.now() + 1, type: 'bot', text: response.data.reply }]);
       }
     } catch (err) {
       console.error(err);

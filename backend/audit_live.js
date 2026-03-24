@@ -2,7 +2,7 @@ const axios = require('axios');
 const FormData = require('form-data');
 
 async function runAudit() {
-  const url = 'https://www.rahulkulmla.com/api/ai/chat';
+  const API_URL = 'https://www.rahulkulmla.com/api/ai/atomic-chat';
   
   console.log('--- AUDIT START: Live Production Stress Test ---');
 
