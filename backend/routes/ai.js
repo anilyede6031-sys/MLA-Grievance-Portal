@@ -110,61 +110,40 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
 
     const genAI = new GoogleGenerativeAI(geminiKey);
     
-    // Transform history for Gemini REST API (MOST COMPATIBLE v1 STRUCTURE)
-    const historyClean = [];
-    let lastRole = null;
+    // ULTRA-STABLE HISTORY FLATTENING (v69)
+    // We convert the entire multi-turn history into a single text prompt.
+    // This bypasses any 404 errors related to the 'contents' array size on production.
+    let flattenedPrompt = `${systemPrompt}\n\n`;
     
-    history.forEach(msg => {
-      const role = (msg.type === 'user' || msg.role === 'user' || msg.type === 'Human') ? 'user' : 'model';
-      if (role !== lastRole && msg.text) {
-        historyClean.push({
-          role: role,
-          parts: [{ text: msg.text }]
-        });
-        lastRole = role;
-      }
-    });
-
-    // If first message doesn't have system prompt, prepend it (only if history was empty)
-    if (historyClean.length === 0) {
-      historyClean.push({
-        role: 'user',
-        parts: [{ text: `${systemPrompt}\n\nUSER MESSAGE: ${message}` }]
+    if (history && history.length > 0) {
+      flattenedPrompt += "--- CONVERSATION HISTORY ---\n";
+      history.forEach(msg => {
+        const roleName = (msg.type === 'user' || msg.role === 'user' || msg.type === 'Human') ? 'Citizen' : 'Seva Representative';
+        if (msg.text) flattenedPrompt += `${roleName}: ${msg.text}\n`;
       });
-      // Add files if any to the first newly created turn
-      if (files.length > 0) {
-        files.forEach(file => {
-          historyClean[0].parts.push({
-            inlineData: {
-              mimeType: file.mimetype,
-              data: file.buffer.toString('base64'),
-            }
-          });
-        });
-      }
-    } else {
-      // If we have history, we must be careful. For "Safe Mode", we ensure current message 
-      // is added at the end as a 'user' role, alternating perfectly.
-      const currentParts = [{ text: message || 'Please analyze this.' }];
-      if (files.length > 0) {
-        files.forEach(file => {
-          currentParts.push({
-            inlineData: {
-              mimeType: file.mimetype,
-              data: file.buffer.toString('base64'),
-            }
-          });
-        });
-      }
-
-      if (lastRole === 'user') {
-        historyClean[historyClean.length - 1].parts.push(...currentParts);
-      } else {
-        historyClean.push({ role: 'user', parts: currentParts });
-      }
+      flattenedPrompt += "--- END HISTORY ---\n\n";
     }
 
-    // High-Availability Model Fallback Logic (Direct REST for Stability)
+    flattenedPrompt += `Citizen's Latest Message: ${message}\n\nPlease provide a helpful response as the Seva Representative:`;
+
+    const singleTurnContent = [{
+      role: 'user',
+      parts: [{ text: flattenedPrompt }]
+    }];
+
+    // Add files to the single turn if any
+    if (files.length > 0) {
+      files.forEach(file => {
+        singleTurnContent[0].parts.push({
+          inlineData: {
+            mimeType: file.mimetype,
+            data: file.buffer.toString('base64'),
+          }
+        });
+      });
+    }
+
+    // High-Availability Model Fallback Logic (Direct REST v1/v1beta)
     const modelsToTry = ["gemini-1.5-flash", "gemini-pro"];
     let text = "";
     let modelErrors = {};
@@ -173,12 +152,11 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
       try {
         if (files.length > 0 && modelName === "gemini-pro") continue; 
 
-        // v1 is most stable for Pro, v1beta for Flash-1.5 features
         const apiVersion = modelName.includes('1.5') ? 'v1beta' : 'v1';
         const apiURL = `https://generativelanguage.googleapis.com/${apiVersion}/models/${modelName}:generateContent?key=${geminiKey}`;
         
         const payload = {
-          contents: historyClean,
+          contents: singleTurnContent,
           safetySettings: [
             { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
             { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
@@ -201,7 +179,6 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
           if (text) break;
         }
       } catch (err) {
-        // Deep diagnostics
         modelErrors[modelName] = {
           status: err.response ? err.response.status : 'ERR',
           data: err.response ? JSON.stringify(err.response.data) : err.message
