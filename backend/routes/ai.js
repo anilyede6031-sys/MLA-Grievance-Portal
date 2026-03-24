@@ -110,23 +110,37 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
 
     const genAI = new GoogleGenerativeAI(geminiKey);
     
-    // Transform history for Gemini
+    // Transform history for Gemini with strict role alternation
     const contents = [];
+    let lastRole = null;
+    
     history.forEach(msg => {
-      contents.push({
-        role: msg.type === 'user' ? 'user' : 'model',
-        parts: [{ text: msg.text }]
-      });
+      const role = (msg.type === 'user' || msg.role === 'user') ? 'user' : 'model';
+      // Gemini requires strict user -> model -> user alternation
+      if (role !== lastRole && msg.text) {
+        contents.push({
+          role: role,
+          parts: [{ text: msg.text }]
+        });
+        lastRole = role;
+      }
     });
 
-    // Add current message with images if any
+    // Add current message (must be user)
     const currentParts = [{ text: message || 'Please analyze this.' }];
     if (files.length > 0) {
       files.forEach(file => {
         currentParts.push(fileToGenerativePart(file.buffer, file.mimetype));
       });
     }
-    contents.push({ role: 'user', parts: currentParts });
+
+    if (lastRole === 'user') {
+      // If history ended with a user message, we must append current text as a new part of that message
+      // or merge them. Here we just merge them for simplicity.
+      contents[contents.length - 1].parts.push(...currentParts);
+    } else {
+      contents.push({ role: 'user', parts: currentParts });
+    }
 
     // High-Availability Model Fallback Logic
     const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-pro"];
@@ -138,7 +152,14 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
       try {
         if (files.length > 0 && modelName.includes("pro") && !modelName.includes("1.5")) continue;
 
-        const model = genAI.getGenerativeModel({ model: modelName, safetySettings, systemInstruction: systemPrompt });
+        // Use 'models/' prefix for better SDK compatibility
+        const fullModelName = modelName.startsWith('models/') ? modelName : `models/${modelName}`;
+        const model = genAI.getGenerativeModel({ 
+          model: fullModelName, 
+          safetySettings, 
+          systemInstruction: { parts: [{ text: systemPrompt }] } 
+        });
+        
         const result = await model.generateContent({ contents });
         const response = await result.response;
         text = response.text();
