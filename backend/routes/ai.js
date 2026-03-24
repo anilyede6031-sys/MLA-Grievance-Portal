@@ -110,13 +110,12 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
 
     const genAI = new GoogleGenerativeAI(geminiKey);
     
-    // Transform history for Gemini REST API
+    // Transform history for Gemini REST API (MOST COMPATIBLE v1 STRUCTURE)
     const historyClean = [];
     let lastRole = null;
     
     history.forEach(msg => {
       const role = (msg.type === 'user' || msg.role === 'user' || msg.type === 'Human') ? 'user' : 'model';
-      // Gemini REST API requires strict alternation
       if (role !== lastRole && msg.text) {
         historyClean.push({
           role: role,
@@ -126,39 +125,59 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
       }
     });
 
-    const currentParts = [{ text: message || 'Please analyze this.' }];
-    if (files.length > 0) {
-      files.forEach(file => {
-        currentParts.push({
-          inlineData: {
-            mimeType: file.mimetype,
-            data: file.buffer.toString('base64'),
-          }
-        });
+    // If first message doesn't have system prompt, prepend it (only if history was empty)
+    if (historyClean.length === 0) {
+      historyClean.push({
+        role: 'user',
+        parts: [{ text: `${systemPrompt}\n\nUSER MESSAGE: ${message}` }]
       });
-    }
-
-    if (lastRole === 'user') {
-      historyClean[historyClean.length - 1].parts.push(...currentParts);
+      // Add files if any to the first newly created turn
+      if (files.length > 0) {
+        files.forEach(file => {
+          historyClean[0].parts.push({
+            inlineData: {
+              mimeType: file.mimetype,
+              data: file.buffer.toString('base64'),
+            }
+          });
+        });
+      }
     } else {
-      historyClean.push({ role: 'user', parts: currentParts });
+      // If we have history, we must be careful. For "Safe Mode", we ensure current message 
+      // is added at the end as a 'user' role, alternating perfectly.
+      const currentParts = [{ text: message || 'Please analyze this.' }];
+      if (files.length > 0) {
+        files.forEach(file => {
+          currentParts.push({
+            inlineData: {
+              mimeType: file.mimetype,
+              data: file.buffer.toString('base64'),
+            }
+          });
+        });
+      }
+
+      if (lastRole === 'user') {
+        historyClean[historyClean.length - 1].parts.push(...currentParts);
+      } else {
+        historyClean.push({ role: 'user', parts: currentParts });
+      }
     }
 
-    // High-Availability Model Fallback Logic (Direct REST)
-    const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-pro"];
+    // High-Availability Model Fallback Logic (Direct REST for Stability)
+    const modelsToTry = ["gemini-1.5-flash", "gemini-pro"];
     let text = "";
     let modelErrors = {};
 
     for (const modelName of modelsToTry) {
       try {
-        if (files.length > 0 && modelName.includes("pro") && !modelName.includes("1.5")) continue;
+        if (files.length > 0 && modelName === "gemini-pro") continue; 
 
-        const apiURL = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiKey}`;
+        // v1 is most stable for Pro, v1beta for Flash-1.5 features
+        const apiVersion = modelName.includes('1.5') ? 'v1beta' : 'v1';
+        const apiURL = `https://generativelanguage.googleapis.com/${apiVersion}/models/${modelName}:generateContent?key=${geminiKey}`;
         
         const payload = {
-          systemInstruction: {
-            parts: [{ text: systemPrompt }]
-          },
           contents: historyClean,
           safetySettings: [
             { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
@@ -168,13 +187,13 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
           ],
           generationConfig: {
             maxOutputTokens: 1000,
-            temperature: 0.7
+            temperature: 0.3
           }
         };
 
         const response = await axios.post(apiURL, payload, {
           headers: { 'Content-Type': 'application/json' },
-          timeout: 20000
+          timeout: 25000
         });
 
         if (response.data && response.data.candidates && response.data.candidates[0].content) {
@@ -184,9 +203,8 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
       } catch (err) {
         // Deep diagnostics
         modelErrors[modelName] = {
-          status: err.response ? err.response.status : 'TIMEOUT',
-          data: err.response ? JSON.stringify(err.response.data) : err.message,
-          payloadSent: historyClean.length > 1 ? JSON.stringify(historyClean) : 'short'
+          status: err.response ? err.response.status : 'ERR',
+          data: err.response ? JSON.stringify(err.response.data) : err.message
         };
         continue;
       }
