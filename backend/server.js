@@ -77,7 +77,7 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/ai', aiRoutes);
 
 // Health check
-app.get('/api/health', (req, res) => res.json({ success: true, message: 'MLA Grievance API is running v74-FINAL-SYNC 🇮🇳' }));
+app.get('/api/health', (req, res) => res.json({ success: true, message: 'MLA Grievance API is running v77-ID-MATCHER 🇮🇳' }));
 app.get('/api/version-ping', (req, res) => {
   res.json({ success: true, version: '2026-03-22-v41-absolute-perfection' });
 });

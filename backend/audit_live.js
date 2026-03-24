@@ -35,11 +35,10 @@ async function runAudit() {
       { type: 'user', text: 'माझ्या गावात पाण्याची समस्या आहे.' },
       { type: 'bot', text: r2.data.reply }
     ];
+    console.log('\n[T3] Providing Standalone GRV ID...');
     const fd3 = new FormData();
-    fd3.append('message', 'सुधीर मोरे');
+    fd3.append('message', 'GRV-MN4E92XR-D412');
     fd3.append('history', JSON.stringify(history2));
-
-    console.log('\n[T3] Providing Name...');
     const r3 = await axios.post(API_URL, fd3, { headers: fd3.getHeaders() });
     console.log('[R3]:', r3.data.reply);
     if (r3.data.debug) console.log('[D3] Debug:', r3.data.debug);
