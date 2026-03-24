@@ -138,8 +138,8 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
     if (files.length > 0) {
       files.forEach(file => {
         currentParts.push({
-          inline_data: {
-            mime_type: file.mimetype,
+          inlineData: {
+            mimeType: file.mimetype,
             data: file.buffer.toString('base64'),
           }
         });
