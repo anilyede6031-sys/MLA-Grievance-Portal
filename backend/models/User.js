@@ -24,6 +24,10 @@ userSchema.pre('save', async function() {
 
 // Method to compare passwords
 userSchema.methods.comparePassword = async function(candidatePassword) {
+  if (!this.password) {
+    console.error('[AUTH] comparePassword failed: current user has no password field in memory.');
+    return false;
+  }
   return bcrypt.compare(candidatePassword, this.password);
 };
 
