@@ -282,9 +282,11 @@ export default function HomePage() {
               <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-sm">
                 {feature.desc}
               </p>
-              <Link to={feature.link} className="mt-6 text-sm font-bold flex items-center gap-2 text-gray-400 group-hover:text-gov-navy dark:group-hover:text-saffron-400 transition-colors">
-                {t.viewDetails} <ChevronRight size={16} />
-              </Link>
+              {feature.link !== '/ai' && (
+                <Link to={feature.link} className="mt-6 text-sm font-bold flex items-center gap-2 text-gray-400 group-hover:text-gov-navy dark:group-hover:text-saffron-400 transition-colors">
+                  {t.viewDetails} <ChevronRight size={16} />
+                </Link>
+              )}
             </div>
           ))}
         </div>
