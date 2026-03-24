@@ -113,6 +113,16 @@ router.post('/atomic-chat', upload.array('files'), async (req, res) => {
       } catch (err) { continue; }
     }
 
+    // FINAL ATTEMPT: Zero-History Single-Turn Fallback (bypasses safety/length blocks)
+    if (!text) {
+      try {
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySettings });
+        const result = await model.generateContent(`${systemPrompt}\n\nCitizen's Message: ${message}\n\nResponse:`);
+        const response = await result.response;
+        text = response.text();
+      } catch (err) { /* silent fail to keyword assistant */ }
+    }
+
     if (!text) {
       const stats = { total: await Complaint.countDocuments({}), resolved: await Complaint.countDocuments({ status: 'Resolved' }) };
       const projects = await Project.find().limit(5).lean();

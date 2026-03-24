@@ -47,8 +47,13 @@ function getKeywordResponse(message, data) {
     return "रस्ते किंवा ड्रेनेज समस्येची दखल घेतली जाईल. कृपया तुमच्या गावाचे नाव सांगा. (Road/Drainage issue. Please mention your village name.)";
   }
 
-  // 8. Greetings & Help
-  if (msg.includes('hi') || msg.includes('hello') || msg.includes('नमस्कार') || msg.includes('हो') || msg.includes('नमस्कार') || msg.includes('राम राम') || msg.includes('help') || msg.includes('काय') || msg.includes('कोण')) {
+  // 8. Locations & Acknowledgments
+  if (msg.includes('daund') || msg.includes('दौंड') || msg.includes('गावात') || msg.includes('राहतो') || msg.includes('गाव') || msg.includes('पत्ता')) {
+    return "धन्यवाद! आपण सांगितलेले लोकेशन आम्ही नोंदवले आहे. कृपया आपली अडचण थोडक्यात सांगा किंवा 'File Complaint' बटण वापरून फोटो शेअर करा. (Location noted. Please describe your issue briefly or use 'File Complaint'.)";
+  }
+
+  // 9. Greetings & Help
+  if (msg.includes('hi') || msg.includes('hello') || msg.includes('ok') || msg.includes('ठीक') || msg.includes('हो') || msg.includes('नमस्कार') || msg.includes('राम राम') || msg.includes('help') || msg.includes('काय') || msg.includes('कोण')) {
     return "नमस्कार! मी 'दौंड डिजिटल सहाय्यक' (Daund Vikas Mitra) आहे. मी आपल्याला विकास प्रकल्पांची माहिती देणे, तक्रार नोंदवण्यास मदत करणे आणि आपत्कालीन संपर्क क्रमांक पुरवणे यामध्ये मदत करू शकतो. मी आपली काय मदत करू?";
   }
 
