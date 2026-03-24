@@ -5,7 +5,7 @@ const complaintSchema = new mongoose.Schema({
   complaintId: {
     type: String,
     unique: true,
-    default: () => 'GRV-' + Date.now().toString(36).toUpperCase() + '-' + uuidv4().slice(0, 4).toUpperCase(),
+    default: () => `DK-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`,
   },
   name: { type: String, required: true, trim: true },
   mobile: { type: String, required: true, trim: true },

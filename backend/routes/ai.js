@@ -151,8 +151,8 @@ router.post('/atomic-chat', upload.array('images'), optionalAuth, async (req, re
     if (historyStr) history = JSON.parse(historyStr);
     const location = locationStr ? JSON.parse(locationStr) : null;
 
-    const idMatch = message.match(/(GRV-[A-Z0-9-]+)/i);
-    const systemPrompt = await getFullSystemPrompt(location, idMatch ? idMatch[1] : null);
+    const idMatch = message.match(/dk-\d{4}-\d{5}/i) || message.match(/(GRV-[A-Z0-9-]+)/i);
+    const systemPrompt = await getFullSystemPrompt(location, idMatch ? idMatch[0] : null);
 
     // ATOMIC SINGLE-TURN SDK BRIDGE (v72)
     let flattenedPrompt = `${systemPrompt}\n\n`;

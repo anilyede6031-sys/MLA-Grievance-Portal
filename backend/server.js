@@ -193,8 +193,8 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
     const count = await User.countDocuments();
     if (count === 0) {
       const salt = await bcrypt.genSalt(10);
-      const adminPass = await bcrypt.hash('Admin@MLA2024', salt);
-      const userPass = await bcrypt.hash('Citizen@123', salt);
+      const adminPass = 'Admin@MLA2024';
+      const userPass = 'Citizen@123';
 
       await User.create({
         name: 'MLA Admin Hub',

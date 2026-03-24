@@ -11,8 +11,8 @@ function getKeywordResponse(message, data) {
   const askedForVillage = lastBotMsg && (lastBotMsg.includes('गावाचे नाव') || lastBotMsg.includes('village name'));
 
   // 1. Complaint Status & Inquiries
-  if (msg.includes('complaint') || msg.includes('tarkrar') || msg.includes('तक्रार') || msg.includes('ग्रिव्हन्स') || msg.includes('अडचण') || msg.match(/grv-[a-z0-9-]+/i)) {
-    const idMatch = msg.match(/grv-[a-z0-9-]+/i);
+  if (msg.includes('complaint') || msg.includes('tarkrar') || msg.includes('तक्रार') || msg.includes('ग्रिव्हन्स') || msg.includes('अडचण') || msg.match(/dk-\d{4}-\d{5}/i) || msg.match(/grv-[a-z0-0-]+/i)) {
+    const idMatch = msg.match(/dk-\d{4}-\d{5}/i) || msg.match(/grv-[a-z0-9-]+/i);
     if (idMatch || msg.includes('status') || msg.includes('check') || msg.includes('track') || msg.includes('कधी') || msg.includes('स्थिती')) {
       const idStr = idMatch ? ` (ID: ${idMatch[0].toUpperCase()})` : '';
       return `आपल्या तक्रारीची स्थिती${idStr} जाणून घेण्यासाठी कृपया वर दिलेल्या 'Track' बटणावर क्लिक करा आणि आपला तक्रार क्रमांक टाइप करा. (To check status, use 'Track' button with your GRV ID.)\nवर्तमान आकडेवारी: ${stats.total || 0} एकूण तक्रारी, ${stats.resolved || 0} पूर्ण.`;
