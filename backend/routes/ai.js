@@ -110,14 +110,18 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
 
     const genAI = new GoogleGenerativeAI(geminiKey);
     
-    // Transform history for Gemini
+    // Transform history for Gemini REST API
     const contents = [];
     let lastRole = null;
     
+    // Add system instruction turn if supported by legacy mode (prepending works better)
+    // Prepend system prompt to first user message for 100% safety
+    const historyClean = [];
     history.forEach(msg => {
-      const role = (msg.type === 'user' || msg.role === 'user') ? 'user' : 'model';
+      const role = (msg.type === 'user' || msg.role === 'user' || msg.type === 'Human') ? 'user' : 'model';
+      // Gemini REST API requires strict alternation
       if (role !== lastRole && msg.text) {
-        contents.push({
+        historyClean.push({
           role: role,
           parts: [{ text: msg.text }]
         });
@@ -126,27 +130,30 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
     });
 
     // Add current message (must be user)
-    // If this is the FIRST message (no history), prepend the system instructions
-    const combinedMessage = (contents.length === 0) 
+    const combinedMessage = (historyClean.length === 0) 
       ? `${systemPrompt}\n\nUSER MESSAGE: ${message}`
       : message;
 
     const currentParts = [{ text: combinedMessage || 'Please analyze this.' }];
     if (files.length > 0) {
       files.forEach(file => {
-        currentParts.push(fileToGenerativePart(file.buffer, file.mimetype));
+        currentParts.push({
+          inline_data: {
+            mime_type: file.mimetype,
+            data: file.buffer.toString('base64'),
+          }
+        });
       });
     }
 
     if (lastRole === 'user') {
-      contents[contents.length - 1].parts.push(...currentParts);
+      historyClean[historyClean.length - 1].parts.push(...currentParts);
     } else {
-      contents.push({ role: 'user', parts: currentParts });
+      historyClean.push({ role: 'user', parts: currentParts });
     }
 
-    // High-Availability Model Fallback Logic (Production Stable)
+    // High-Availability Model Fallback Logic (Direct REST)
     const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-pro"];
-    let lastError = null;
     let text = "";
     let modelErrors = {};
 
@@ -154,15 +161,31 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
       try {
         if (files.length > 0 && modelName.includes("pro") && !modelName.includes("1.5")) continue;
 
-        const model = genAI.getGenerativeModel({ model: modelName, safetySettings });
-        const result = await model.generateContent({ contents });
-        const response = await result.response;
-        text = response.text();
+        const apiURL = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiKey}`;
         
-        if (text) break;
+        const response = await axios.post(apiURL, {
+          contents: historyClean,
+          safetySettings: [
+            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+          ],
+          generationConfig: {
+            maxOutputTokens: 1000,
+            temperature: 0.7
+          }
+        }, {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 20000
+        });
+
+        if (response.data && response.data.candidates && response.data.candidates[0].content) {
+          text = response.data.candidates[0].content.parts[0].text;
+          if (text) break;
+        }
       } catch (err) {
-        modelErrors[modelName] = err.message;
-        lastError = err;
+        modelErrors[modelName] = err.response ? err.response.data : err.message;
         continue;
       }
     }
@@ -177,7 +200,7 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
       return res.status(500).json({
         success: false,
         message: 'AI Assistant Error.',
-        debug: modelErrors, // Detailed errors for each model
+        debug: modelErrors,
         hint: 'The AI is currently under high load or API key is invalid.'
       });
     }
