@@ -62,6 +62,23 @@ function getKeywordResponse(message, data) {
 
   // 9. Greetings & Common Phrases
   if (msg.includes('hi') || msg.includes('hello') || msg.includes('gm') || msg.includes('morning') || msg.includes('सकाळ') || msg.includes('नमस्कार') || msg.includes('राम राम') || msg.includes('hey') || msg.includes('ok') || msg.includes('ठीक') || msg.includes('हो') || msg.includes('help') || msg.includes('कोण') || msg.includes('कोणती') || msg.includes('night') || msg.includes('gn') || msg.includes('रात्री') || msg.includes('shubh')) {
+    // Language/Identity Keywords
+    if (msg.includes('hinglish') || msg.includes('english')) {
+        return "नक्कीच! मी आतापासून Hinglish/English मध्ये देखील संवाद साधू शकतो. सांगा, मी तुमची काय मदत करू? (Sure! I can communicate in Hinglish/English too. How can I help you?)";
+    }
+    if (msg.includes('marathi') || msg.includes('मराठी')) {
+        return "हो, मी मराठीतच बोलणार आहे. सांगा, तुमची काय समस्या आहे? (Yes, I will speak in Marathi. What is your issue?)";
+    }
+    if (msg.includes('कोण आहे') || msg.includes('who are you') || msg.includes('tula kay bou')) {
+        return "मी आपला 'डिजिटल सेवा प्रतिनिधी' आहे. मी आमदार राहुलजी कुल साहेबांच्या मार्गदर्शनाखाली नागरिकांना मदत करण्यासाठी बनवला गेलो आहे. (I am your Digital Seva Representative, created to assist citizens under MLA Rahul Kul's guidance.)";
+    }
+
+    // Default Fallback (Persona check)
+    // If we've already sent a greeting, don't just repeat it.
+    if (lastBotMsg && (lastBotMsg.includes('कशी मदत करू') || lastBotMsg.includes('How can I help'))) {
+        return "मी तुमची समस्या समजून घेण्यास तयार आहे. कृपया तुमची तक्रार सांगा किंवा 'File Complaint' पर्यायावर क्लिक करा. (I'm ready to understand your issue. Please state your complaint or click 'File Complaint'.)";
+    }
+
     return "नमस्कार! मी आपला 'डिजिटल सेवा प्रतिनिधी' आहे. तुम्ही पाठवलेला संदेश मिळाला! मी आपल्याला तक्रार नोंदवण्यासाठी किंवा इतर माहिती देण्यासाठी मदत करू शकतो. मी तुमची कशी मदत करू सांगा? (I am your Digital Seva Representative. How can I help you?)";
   }
 
