@@ -26,7 +26,7 @@ async function runAudit() {
     fd2.append('history', JSON.stringify(history1));
 
     console.log('\n[T2] Reporting Water Problem...');
-    const r2 = await axios.post(url, fd2, { headers: fd2.getHeaders() });
+    const r2 = await axios.post(API_URL, fd2, { headers: fd2.getHeaders() });
     console.log('[R2]:', r2.data.reply);
 
     // Turn 3: Name Provded
@@ -40,13 +40,15 @@ async function runAudit() {
     fd3.append('history', JSON.stringify(history2));
 
     console.log('\n[T3] Providing Name...');
-    const r3 = await axios.post(url, fd3, { headers: fd3.getHeaders() });
+    const r3 = await axios.post(API_URL, fd3, { headers: fd3.getHeaders() });
     console.log('[R3]:', r3.data.reply);
+    if (r3.data.debug) console.log('[D3] Debug:', r3.data.debug);
 
-    console.log('\n--- AUDIT COMPLETE: Flow Success ✅ ---');
+    console.log('\n--- AUDIT COMPLETE: SUCCESS ✅ ---');
   } catch (err) {
-    console.error('\n--- AUDIT FAILED ❌ ---');
-    console.error('Error:', err.response ? err.response.data : err.message);
+    console.log('\n--- AUDIT FAILED ❌ ---');
+    console.log('Error:', err.response ? err.response.data : err.message);
+    if (err.response && err.response.data && err.response.data.modelErrors) console.log('Model Errors:', err.response.data.modelErrors);
   }
 }
 
