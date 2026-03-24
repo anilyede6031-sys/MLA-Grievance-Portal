@@ -54,9 +54,9 @@ function getKeywordResponse(message, data) {
     return "धन्यवाद! आपण सांगितलेले लोकेशन आम्ही नोंदवले आहे. कृपया आपली अडचण थोडक्यात सांगा किंवा 'File Complaint' बटण वापरून फोटो शेअर करा. (Location noted. Please describe your issue briefly or use 'File Complaint'.)";
   }
 
-  // 9. Greetings & Help
-  if (msg.includes('hi') || msg.includes('hello') || msg.includes('ok') || msg.includes('ठीक') || msg.includes('हो') || msg.includes('नमस्कार') || msg.includes('राम राम') || msg.includes('help') || msg.includes('काय') || msg.includes('कोण')) {
-    return "नमस्कार! मी 'दौंड डिजिटल सहाय्यक' (Daund Vikas Mitra) आहे. मी आपल्याला विकास प्रकल्पांची माहिती देणे, तक्रार नोंदवण्यास मदत करणे आणि आपत्कालीन संपर्क क्रमांक पुरवणे यामध्ये मदत करू शकतो. मी आपली काय मदत करू?";
+  // 9. Greetings & Common Phrases
+  if (msg.includes('hi') || msg.includes('hello') || msg.includes('gm') || msg.includes('morning') || msg.includes('सकाळ') || msg.includes('नमस्कार') || msg.includes('राम राम') || msg.includes('hey') || msg.includes('ok') || msg.includes('ठीक') || msg.includes('हो') || msg.includes('help') || msg.includes('कोण') || msg.includes('कोणती') || msg.includes('night') || msg.includes('gn') || msg.includes('रात्री') || msg.includes('shubh')) {
+    return "नमस्कार! मी आपला 'डिजिटल सेवा प्रतिनिधी' आहे. तुम्ही पाठवलेला संदेश मिळाला! रात्रीची वेळ असली तरी काळजी करू नका, मी तुमची अडचण समजू शकतो. मी आपल्याला तक्रार नोंदवण्यासाठी किंवा इतर माहिती देण्यासाठी मदत करू शकतो. मी तुमची कशी मदत करू सांगा? (I am your Digital Seva Representative. How can I help you?)";
   }
 
   // --- FRUSTRATION TRIGGER (v83) ---

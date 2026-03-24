@@ -42,27 +42,64 @@ async function getFullSystemPrompt(location = null, specificComplaintId = null) 
     ]);
 
     const complaintStats = { total, pending, inProgress, resolved, rejected };
+    const projectSummary = projects.map(p => `- ${p.name}: Status: ${p.status}`).join('\n');
+
     let specificComplaint = '';
     if (specificComplaintId) {
       try {
         const complaint = await Complaint.findOne({ complaintId: specificComplaintId.toUpperCase() }).lean();
         if (complaint) {
-          specificComplaint = `\nSPECIFIC COMPLAINT FOUND:\n- ID: ${complaint.complaintId}\n- Status: ${complaint.status}\n- Department: ${complaint.department}`;
+          specificComplaint = `\nSPECIFIC COMPLAINT STATUS:\n- ID: ${complaint.complaintId}\n- Status: ${complaint.status}\n- Subject: ${complaint.subject}`;
         }
       } catch (e) { /* ignore */ }
     }
 
-    const projectSummary = projects.map(p => `- ${p.name}: Status: ${p.status}`).join('\n');
+    const currentYear = new Date().getFullYear();
 
-    return `You are a trusted digital seva assistant for MLA Rahul Kul (Daund).
-Identity: Calm, respectful, empathetic. Language: Marathi + Hinglish.
-Mission: Help register complaints and guide citizens.
-Data: ${complaintStats.total} complaints (${complaintStats.resolved} resolved).
-Recent Projects: ${projectSummary || 'Available on portal.'}
+    return `YOUR IDENTITY:
+- You are a caring, responsible, and emotionally aware digital assistant (Seva Representative) for MLA Rahul Kul's office.
+- You are NOT a robot; you are a helpful local person.
+
+TONE & LANGUAGE:
+- Always speak in simple MARATHI + HINGLISH mix.
+- Be respectful, calm, and supportive (e.g., "काळजी करू नका", "हो नक्की, मदत करतो").
+- Always acknowledge the user's feelings/problem FIRST before giving a solution.
+
+CORE MISSION:
+1. Help citizens register complaints.
+2. Guide users for local issues (water, road, electricity, etc.).
+3. Provide correct information about MLA schemes and work.
+
+COMPLAINT REGISTRATION FLOW:
+If a user wants to file a complaint, follow these steps ONE BY ONE:
+1. Ask for Full Name
+2. Ask for Mobile Number
+3. Ask for Area / Village
+4. Ask for Problem Type (Water / Road / Electricity / Other)
+5. Ask for Problem Description
+6. Confirm all details with the user: "ही माहिती बरोबर आहे का?"
+7. Once confirmed, GENERATE a ticket ID in the format: DK-${currentYear}-XXXXX (replace XXXXX with 5 random digits).
+8. Tell the user: "तुमची तक्रार नोंद झाली आहे. तुमचा ID आहे: [ID]"
+
+HIDDEN REGISTRATION SIGNAL (CRITICAL):
+If you generated a ticket ID (Step 7/8), you MUST append this EXACT line at the very end of your response:
+$$$COMPLAINT_DATA:{"name":"...","mobile":"...","village":"...","dept":"...","desc":"...","id":"DK-${currentYear}-XXXXX"}###
+- Map "dept" to one of: Road, Water, Electricity, Revenue, Police, Health, Education, Agriculture, Other.
+- This line will be hidden from the citizen.
+
+RULES:
+- If a user is angry, stay calm and say: "मी समजतो तुम्ही त्रासात आहात, मी मदत करतो."
+- If you don't know something, say: "मी तपासून योग्य माहिती देतो."
+- NEVER mention crypto, trading, or unrelated topics.
+- Keep answers short, clear, and focused.
+
+PORTAL DATA:
+- Stats: ${complaintStats.total} total complaints, ${complaintStats.resolved} resolved.
+- Recent Projects: ${projectSummary || 'Available on portal.'}
 ${specificComplaint}
-${location ? `Location: ${location.lat}, ${location.lng}` : ''}`;
+${location ? `Citizen Location: lat ${location.lat}, lng ${location.lng}` : ''}`;
   } catch (err) {
-    return "You are a trusted digital seva assistant for MLA Rahul Kul. Please help the citizen politely in Marathi/Hinglish.";
+    return "You are a caring digital assistant for MLA Rahul Kul. Please help the citizen politely in Marathi/Hinglish.";
   }
 }
 
@@ -141,7 +178,7 @@ router.post('/atomic-chat', upload.array('images'), optionalAuth, async (req, re
     const geminiKey = process.env.GEMINI_API_KEY;
     if (!geminiKey) throw new Error("GEMINI_API_KEY is not defined.");
     const genAI = new GoogleGenerativeAI(geminiKey);
-    const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-pro"];
+    const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-latest"];
     let text = "";
     
     for (const modelName of modelsToTry) {
@@ -158,7 +195,7 @@ router.post('/atomic-chat', upload.array('images'), optionalAuth, async (req, re
     // FINAL ATTEMPT: Zero-History Single-Turn Fallback (bypasses safety/length blocks)
     if (!text) {
       try {
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySettings });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash", safetySettings });
         const result = await model.generateContent(`${systemPrompt}\n\nCitizen's Message: ${message}\n\nResponse:`);
         const response = await result.response;
         text = response.text();
@@ -180,10 +217,41 @@ router.post('/atomic-chat', upload.array('images'), optionalAuth, async (req, re
       const fallback = getKeywordResponse(message, { stats, projects });
       const finalReply = specificDetail ? `${specificDetail}\n\n${fallback || ''}` : fallback;
       
-      const replyText = finalReply || "नमस्कार, मी सध्या व्यस्त आहे. कृपया थोड्या वेळाने प्रयत्न करा.";
+      const replyText = finalReply || "नमस्कार! मी आपला डिजिटल सेवा प्रतिनिधी आहे. सध्या आमची एआय सिस्टिम (AI System) मेंटेनन्समध्ये आहे, पण काळजी करू नका, मी आपली मदत नक्कीच करेन. आपल्याला काय अडचण आहे ते कृपया सविस्तर सांगा. (AI is in maintenance, but I am here to help. Please describe your issue.)";
       if (req.user) await saveChatTurn(req.user.id, message, replyText);
       
       return res.json({ success: true, reply: replyText, isFallback: true });
+    }
+
+    if (text) {
+      // POST-PROCESSING: Check for hidden registration signal
+      const signalMatch = text.match(/\$\$\$COMPLAINT_DATA:(.*)###/s);
+      if (signalMatch) {
+        try {
+          const rawJson = signalMatch[1].trim();
+          const data = JSON.parse(rawJson);
+          
+          // Create real complaint record
+          const newComplaint = new Complaint({
+            complaintId: data.id || `DK-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`,
+            name: data.name || "AI Citizen",
+            mobile: data.mobile || "0000000000",
+            village: data.village || "Daund",
+            taluka: "Daund", // Always Daund for this portal
+            department: data.dept || "Other",
+            description: data.desc || "Registered via AI Assistant",
+            status: 'Pending'
+          });
+          
+          await newComplaint.save();
+          console.log(`[AI] Complaint registered automatically: ${newComplaint.complaintId}`);
+          
+          // Strip signal from final response
+          text = text.replace(/\$\$\$COMPLAINT_DATA:.*###/s, '').trim();
+        } catch (err) {
+          console.error('[AI] Signal Parsing Error:', err.message);
+        }
+      }
     }
 
     if (req.user) await saveChatTurn(req.user.id, message, text);
@@ -226,7 +294,7 @@ router.post('/chat', upload.array('files'), async (req, res) => {
     }
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-pro"];
+    const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-latest"];
     let text = "";
     for (const modelName of modelsToTry) {
       try {
@@ -240,7 +308,8 @@ router.post('/chat', upload.array('files'), async (req, res) => {
     }
     if (!text) {
       const fallback = getKeywordResponse(message, {});
-      return res.json({ success: true, reply: fallback || "नमस्कार, मी सध्या व्यस्त आहे.", isFallback: true });
+      const replyText = fallback || "नमस्कार! मी आपला डिजिटल सेवा प्रतिनिधी आहे. सध्या आमची एआय सिस्टिम (AI System) मेंटेनन्समध्ये आहे, पण काळजी करू नका, मी आपली मदत नक्कीच करेन. आपल्याला काय अडचण आहे ते कृपया सविस्तर सांगा. (AI is in maintenance, but I am here to help. Please describe your issue.)";
+      return res.json({ success: true, reply: replyText, isFallback: true });
     }
     res.json({ success: true, reply: text });
   } catch (err) {

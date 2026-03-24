@@ -7,7 +7,7 @@ async function testAI() {
   formData.append('history', '[]');
 
   try {
-    const response = await axios.post('http://localhost:5000/api/ai/chat', formData, {
+    const response = await axios.post('http://localhost:5000/api/ai/atomic-chat', formData, {
       headers: formData.getHeaders()
     });
     console.log('--- TURN 1 (Greeting) ---');

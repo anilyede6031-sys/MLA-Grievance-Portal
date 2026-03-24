@@ -124,7 +124,7 @@ export default function AIAssistant() {
               <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 rounded-full border-2 border-white shadow-sm" />
            </div>
            <div>
-             <h1 className="rbot-header-title text-xl leading-tight">RBot</h1>
+             <h1 className="rbot-header-title text-xl leading-tight">{t.aiPersonaName || 'Digital Seva Representative'}</h1>
              <p className="text-[11px] text-[#8392A5] font-bold leading-tight">{t.aiTeamHelp}</p>
            </div>
         </div>

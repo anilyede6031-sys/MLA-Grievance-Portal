@@ -111,7 +111,7 @@ export default function HelpWidget() {
                       <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
                   </div>
                   <div>
-                    <h3 className="rbot-header-title">RBot</h3>
+                    <h3 className="rbot-header-title">{t.aiPersonaName || 'Digital Seva Representative'}</h3>
                     <p className="text-[11px] text-[#8392A5] font-bold leading-tight">{t.aiTeamHelp || 'The team can also help'}</p>
                   </div>
                 </div>
