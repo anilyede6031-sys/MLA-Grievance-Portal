@@ -7,9 +7,11 @@ function getKeywordResponse(message, data) {
   const { projects = [], stats = {} } = data;
 
   // 1. Complaint Status & Inquiries
-  if (msg.includes('complaint') || msg.includes('tarkrar') || msg.includes('तक्रार') || msg.includes('ग्रिव्हन्स') || msg.includes('अडचण')) {
-    if (msg.includes('status') || msg.includes('check') || msg.includes('track') || msg.includes('कधी') || msg.includes('स्थिती')) {
-      return `आपल्या तक्रारीची स्थिती जाणून घेण्यासाठी कृपया वर दिलेल्या 'Track' बटणावर क्लिक करा आणि आपला तक्रार क्रमांक (GRV-XXXX) टाइप करा. (To check status, use 'Track' button with your GRV ID.)\nवर्तमान आकडेवारी: ${stats.total} एकूण तक्रारी, ${stats.resolved} पूर्ण.`;
+  if (msg.includes('complaint') || msg.includes('tarkrar') || msg.includes('तक्रार') || msg.includes('ग्रिव्हन्स') || msg.includes('अडचण') || msg.match(/grv-[a-z0-9-]+/i)) {
+    const idMatch = msg.match(/grv-[a-z0-9-]+/i);
+    if (idMatch || msg.includes('status') || msg.includes('check') || msg.includes('track') || msg.includes('कधी') || msg.includes('स्थिती')) {
+      const idStr = idMatch ? ` (ID: ${idMatch[0].toUpperCase()})` : '';
+      return `आपल्या तक्रारीची स्थिती${idStr} जाणून घेण्यासाठी कृपया वर दिलेल्या 'Track' बटणावर क्लिक करा आणि आपला तक्रार क्रमांक टाइप करा. (To check status, use 'Track' button with your GRV ID.)\nवर्तमान आकडेवारी: ${stats.total || 0} एकूण तक्रारी, ${stats.resolved || 0} पूर्ण.`;
     }
     return `तक्रार नोंदवण्यासाठी कृपया मुख्य पानावर असलेल्या 'File Complaint' बटणावर क्लिक करा. आपण तिथे फोटो आणि लोकेशन देखील देऊ शकता. (To file a complaint, click 'File Complaint' on the home page.)`;
   }
