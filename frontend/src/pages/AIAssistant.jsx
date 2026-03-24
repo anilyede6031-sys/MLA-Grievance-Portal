@@ -40,6 +40,29 @@ export default function AIAssistant() {
   const commonEmojis = ['😊', '🙏', '👍', '📍', '✅', '🏗️', '🚜', '🇮🇳', '❤️', '🙌', '💧', '⚡', '💊', '🎓', '🏥'];
 
   useEffect(() => {
+    const fetchHistory = async () => {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (user) {
+        try {
+          const res = await api.get('/ai/history');
+          if (res.data.success && res.data.history.length > 0) {
+            // Map DB roles to frontend types
+            const formatted = res.data.history.map((m, i) => ({
+              id: `db-${i}`,
+              type: m.role === 'user' ? 'user' : 'bot',
+              text: m.text
+            }));
+            setMessages(formatted);
+          }
+        } catch (err) {
+          console.error('Failed to load history:', err);
+        }
+      }
+    };
+    fetchHistory();
+  }, []);
+
+  useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 

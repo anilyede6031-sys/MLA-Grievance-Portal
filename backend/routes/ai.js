@@ -4,6 +4,8 @@ const axios = require('axios');
 const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require('@google/generative-ai');
 const Project = require('../models/Project');
 const Complaint = require('../models/Complaint');
+const AIChat = require('../models/AIChat');
+const { authenticate } = require('../middleware/auth');
 const { getKeywordResponse } = require('../utils/keywordAssistant');
 
 const multer = require('multer');
@@ -64,7 +66,47 @@ ${location ? `Location: ${location.lat}, ${location.lng}` : ''}`;
   }
 }
 
-router.post('/atomic-chat', upload.array('files'), async (req, res) => {
+// Helper to save chat turn
+async function saveChatTurn(userId, userMsg, botMsg) {
+  try {
+    await AIChat.findOneAndUpdate(
+      { userId },
+      { 
+        $push: { 
+          messages: [
+            { role: 'user', text: userMsg },
+            { role: 'bot', text: botMsg }
+          ] 
+        },
+        $set: { lastInteraction: new Date() }
+      },
+      { upsert: true, new: true }
+    );
+  } catch (err) {
+    console.error('Error saving chat turn:', err);
+  }
+}
+
+// GET history
+router.get('/history', authenticate, async (req, res) => {
+  try {
+    const chat = await AIChat.findOne({ userId: req.user.id });
+    res.json({ success: true, history: chat ? chat.messages : [] });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to fetch history' });
+  }
+});
+
+// Optional auth for atomic-chat to support both logged-in and guest users
+const optionalAuth = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return authenticate(req, res, next);
+  }
+  next();
+};
+
+router.post('/atomic-chat', upload.array('images'), optionalAuth, async (req, res) => {
   try {
     const { message, history: historyStr, location: locationStr } = req.body;
     const files = req.files || [];
@@ -138,9 +180,13 @@ router.post('/atomic-chat', upload.array('files'), async (req, res) => {
       const fallback = getKeywordResponse(message, { stats, projects });
       const finalReply = specificDetail ? `${specificDetail}\n\n${fallback || ''}` : fallback;
       
-      return res.json({ success: true, reply: finalReply || "नमस्कार, मी सध्या व्यस्त आहे. कृपया थोड्या वेळाने प्रयत्न करा.", isFallback: true });
+      const replyText = finalReply || "नमस्कार, मी सध्या व्यस्त आहे. कृपया थोड्या वेळाने प्रयत्न करा.";
+      if (req.user) await saveChatTurn(req.user.id, message, replyText);
+      
+      return res.json({ success: true, reply: replyText, isFallback: true });
     }
 
+    if (req.user) await saveChatTurn(req.user.id, message, text);
     res.json({ success: true, reply: text });
   } catch (err) {
     console.error('Atomic AI Error:', err.message);
