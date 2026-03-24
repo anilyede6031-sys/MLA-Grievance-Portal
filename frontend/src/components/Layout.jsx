@@ -25,7 +25,6 @@ function Navbar({ darkMode, setDarkMode }) {
   if (!user || user.role === 'citizen') {
     navLinks.push({ to: '/complaint', label: t.fileComplaint });
     navLinks.push({ to: '/track', label: t.trackComplaint });
-    navLinks.push({ to: '/ai', label: t.aiAssistantTitle });
   } else {
     navLinks.push({ to: '/track', label: t.trackComplaint });
   }

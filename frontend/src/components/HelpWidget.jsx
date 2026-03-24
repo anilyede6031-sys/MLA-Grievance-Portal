@@ -9,7 +9,7 @@ export default function HelpWidget() {
   const [view, setView] = useState('chat'); // Simplified to Chat-only
   const { t, lang } = useLang();
   const [messages, setMessages] = useState([
-    { id: 1, type: 'bot', text: '👋 ' + (t.rbotGreeting || 'नमस्कार! आम्ही तुम्हाला कशी मदत करू शकतो?') }
+    { id: 1, type: 'bot', text: (t.rbotGreeting || 'नमस्कार! आम्ही तुम्हाला कशी मदत करू शकतो?') }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
