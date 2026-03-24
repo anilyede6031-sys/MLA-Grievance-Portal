@@ -15,7 +15,7 @@ const login = async (req, res) => {
 
   const { mobile, password, type } = req.body;
   try {
-    const user = await User.findOne({ mobile });
+    const user = await User.findOne({ mobile }).select('+password');
     if (!user || !user.isActive) return res.status(401).json({ success: false, message: 'Invalid credentials.' });
     
     // Check if user is logging into the correct portal
