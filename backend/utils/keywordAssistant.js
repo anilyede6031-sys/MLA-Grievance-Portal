@@ -59,6 +59,11 @@ function getKeywordResponse(message, data) {
     return "नमस्कार! मी 'दौंड डिजिटल सहाय्यक' (Daund Vikas Mitra) आहे. मी आपल्याला विकास प्रकल्पांची माहिती देणे, तक्रार नोंदवण्यास मदत करणे आणि आपत्कालीन संपर्क क्रमांक पुरवणे यामध्ये मदत करू शकतो. मी आपली काय मदत करू?";
   }
 
+  // --- FRUSTRATION TRIGGER (v83) ---
+  if (msg.match(/mad|nahi|nit|sangaych|broken|fail|wrong|aswer|cashing/) || (msg.includes('काम') && msg.includes('नाही'))) {
+    return "क्षमस्व! तुमची गैरसोय होत असल्याचे आम्हाला समजले. आम्ही सिस्टिम सुधारण्यासाठी सतत काम करत आहोत. कृपया तुमची अडचण थोडक्यात सांगा किंवा 'File Complaint' बटण वापरून फोटो शेअर करा, जेणेकरून आम्ही त्यावर तातडीने कारवाई करू शकू. (We apologize for the inconvenience. Please describe your issue briefly or use 'File Complaint' so we can take immediate action.)";
+  }
+
   return null;
 }
 
