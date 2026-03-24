@@ -182,8 +182,12 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
           if (text) break;
         }
       } catch (err) {
-        // Deep stringification of error for auditing
-        modelErrors[modelName] = err.response ? JSON.stringify(err.response.data) : err.message;
+        // Deep diagnostics
+        modelErrors[modelName] = {
+          status: err.response ? err.response.status : 'TIMEOUT',
+          data: err.response ? JSON.stringify(err.response.data) : err.message,
+          payloadSent: historyClean.length > 1 ? JSON.stringify(historyClean) : 'short'
+        };
         continue;
       }
     }
@@ -204,14 +208,11 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
 
   } catch (err) {
     console.error('Final AI Error:', err.message);
-    const isQuota = err.message?.includes('429') || err.message?.includes('quota');
     res.status(500).json({ 
       success: false, 
       message: 'AI Assistant Error.',
-      debug: err.message, // Temporarily expose for debugging
-      hint: isQuota 
-        ? 'Daily quota reached. Please try again later.' 
-        : 'The AI is currently experiencing high load or connectivity issues. Please try again in 5 minutes.'
+      debug: err.message,
+      hint: 'The AI is currently experiencing high load or connectivity issues.'
     });
   }
 });
