@@ -7,12 +7,12 @@ async function runAudit() {
   console.log('--- AUDIT START: Live Production Stress Test ---');
 
   try {
-    // Turn 1: Greeting
+    // Turn 1: Filter Plant Query
     const fd1 = new FormData();
-    fd1.append('message', 'नमस्कार, तुम्ही कोण आहात?');
+    fd1.append('message', 'Filter plant band aahe.');
     fd1.append('history', '[]');
     
-    console.log('[T1] Sending Greeting...');
+    console.log('[T1] Sending Filter Plant Query...');
     const r1 = await axios.post(API_URL, fd1, { headers: fd1.getHeaders() });
     console.log('[R1]:', r1.data.reply);
 
