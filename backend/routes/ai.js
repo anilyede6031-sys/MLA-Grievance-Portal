@@ -29,57 +29,39 @@ function fileToGenerativePart(buffer, mimeType) {
 
 // Shared System Prompt Logic
 async function getFullSystemPrompt(location = null, specificComplaintId = null) {
-  const [projects, total, pending, inProgress, resolved, rejected] = await Promise.all([
-    Project.find().lean().catch(() => []),
-    Complaint.countDocuments({}),
-    Complaint.countDocuments({ status: 'Pending' }),
-    Complaint.countDocuments({ status: 'In Progress' }),
-    Complaint.countDocuments({ status: 'Resolved' }),
-    Complaint.countDocuments({ status: 'Rejected' })
-  ]);
+  try {
+    const [projects, total, pending, inProgress, resolved, rejected] = await Promise.all([
+      Project.find().lean().catch(() => []),
+      Complaint.countDocuments({}).catch(() => 0),
+      Complaint.countDocuments({ status: 'Pending' }).catch(() => 0),
+      Complaint.countDocuments({ status: 'In Progress' }).catch(() => 0),
+      Complaint.countDocuments({ status: 'Resolved' }).catch(() => 0),
+      Complaint.countDocuments({ status: 'Rejected' }).catch(() => 0)
+    ]);
 
-  const complaintStats = { total, pending, inProgress, resolved, rejected };
-  let specificComplaint = '';
-  if (specificComplaintId) {
-    const complaint = await Complaint.findOne({ complaintId: specificComplaintId.toUpperCase() }).lean();
-    if (complaint) {
-      specificComplaint = `\nSPECIFIC COMPLAINT FOUND:\n- ID: ${complaint.complaintId}\n- Status: ${complaint.status}\n- Department: ${complaint.department}\n- Filed on: ${new Date(complaint.createdAt).toLocaleDateString()}`;
+    const complaintStats = { total, pending, inProgress, resolved, rejected };
+    let specificComplaint = '';
+    if (specificComplaintId) {
+      try {
+        const complaint = await Complaint.findOne({ complaintId: specificComplaintId.toUpperCase() }).lean();
+        if (complaint) {
+          specificComplaint = `\nSPECIFIC COMPLAINT FOUND:\n- ID: ${complaint.complaintId}\n- Status: ${complaint.status}\n- Department: ${complaint.department}`;
+        }
+      } catch (e) { /* ignore */ }
     }
-  }
 
-  const projectSummary = projects.map(p => `- ${p.name}: Budget ₹${p.budget} Cr, Status: ${p.status}, Dept: ${p.department}`).join('\n');
+    const projectSummary = projects.map(p => `- ${p.name}: Status: ${p.status}`).join('\n');
 
-  return `You are not just a chatbot. You are a trusted digital seva assistant for MLA Rahul Kul (Daund), representing the office to help citizens with real-life problems.
-
-Your Identity & Personality:
-- Calm, respectful, emotionally intelligent.
-- Speak like a helpful local person. Always supportive, never robotic.
-- Always reply in a simple Marathi + Hinglish mix.
-- Use natural human phrases: "हो नक्की, मी मदत करतो", "काळजी करू नका", "मी तुमची समस्या समजतो".
-- Keep responses short, clear, and practical.
-
-CORE MISSION:
-1. Help users register complaints properly.
-2. Guide citizens for local issues (water, road, electricity, schemes).
-3. Provide correct and structured information.
-4. Act like a bridge between people and the MLA office.
-
-INTELLIGENT FLOW SYSTEM:
-STEP 1: UNDERSTAND USER INTENT (Complaint, Information, Contact, or Urgent).
-STEP 2: EMOTIONAL RESPONSE FIRST. Acknowledge user feelings before solution.
-STEP 3: SMART ACTION
-   A) COMPLAINT FLOW: Step-by-step collect: Name, Mobile, Village, Type, Description. Confirm before generating ticket.
-   B) INFORMATION: Short, clear, structured answers.
-   C) ANGRY USER: Stay calm and empathetic.
-
-DATA CONTEXT:
-- Total Complaints: ${complaintStats.total} (${complaintStats.resolved} resolved).
-- Active Projects:
-${projectSummary || 'No specific projects listed.'}
+    return `You are a trusted digital seva assistant for MLA Rahul Kul (Daund).
+Identity: Calm, respectful, empathetic. Language: Marathi + Hinglish.
+Mission: Help register complaints and guide citizens.
+Data: ${complaintStats.total} complaints (${complaintStats.resolved} resolved).
+Recent Projects: ${projectSummary || 'Available on portal.'}
 ${specificComplaint}
-${location ? `- Current User Location: Lat ${location.lat}, Lng ${location.lng}` : ''}
-
-Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
+${location ? `Location: ${location.lat}, ${location.lng}` : ''}`;
+  } catch (err) {
+    return "You are a trusted digital seva assistant for MLA Rahul Kul. Please help the citizen politely in Marathi/Hinglish.";
+  }
 }
 
 router.post('/atomic-chat', upload.array('files'), async (req, res) => {
