@@ -126,8 +126,19 @@ router.post('/atomic-chat', upload.array('files'), async (req, res) => {
     if (!text) {
       const stats = { total: await Complaint.countDocuments({}), resolved: await Complaint.countDocuments({ status: 'Resolved' }) };
       const projects = await Project.find().limit(5).lean();
+      
+      let specificDetail = null;
+      if (idMatch) {
+         const comp = await Complaint.findOne({ complaintId: idMatch[1].toUpperCase() }).lean();
+         if (comp) {
+           specificDetail = `तक्रार क्रमांक ${comp.complaintId} सध्या '${comp.status}' स्थितीत आहे. (Status of ${comp.complaintId} is currently '${comp.status}')`;
+         }
+      }
+
       const fallback = getKeywordResponse(message, { stats, projects });
-      return res.json({ success: true, reply: fallback || "नमस्कार, मी सध्या व्यस्त आहे. कृपया थोड्या वेळाने प्रयत्न करा.", isFallback: true });
+      const finalReply = specificDetail ? `${specificDetail}\n\n${fallback || ''}` : fallback;
+      
+      return res.json({ success: true, reply: finalReply || "नमस्कार, मी सध्या व्यस्त आहे. कृपया थोड्या वेळाने प्रयत्न करा.", isFallback: true });
     }
 
     res.json({ success: true, reply: text });
