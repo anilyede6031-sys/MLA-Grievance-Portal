@@ -196,6 +196,5 @@ router.post('/chat', upload.array('files'), async (req, res) => {
     res.status(500).json({ success: false, message: 'AI Error', debug: err.message });
   }
 });
-});
 
 module.exports = router;
