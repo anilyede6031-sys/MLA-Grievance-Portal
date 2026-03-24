@@ -32,12 +32,27 @@ function getKeywordResponse(message, data) {
     return `तात्काळ मदतीसाठी 'Emergency' आयकॉनवर क्लिक करा. महत्त्वाचे क्रमांक: \n- पोलीस: १००\n- रुग्णवाहिका: १०२\n- अग्निशमन: १०१\n- संपर्क: १८००-XXX-XXXX`;
   }
 
-  // 5. Greetings & Help
-  if (msg.includes('hi') || msg.includes('hello') || msg.includes('नमस्कार') || msg.includes('राम राम') || msg.includes('help') || msg.includes('काय') || msg.includes('कोण')) {
+  // 5. Water & Filter Issues
+  if (msg.includes('pani') || msg.includes('water') || msg.includes('नळ') || msg.includes('पाणी') || msg.includes('filter') || msg.includes('फिल्टर')) {
+    return "पाण्याच्या तक्रारीबद्दल आम्हाला समजले. 'File Complaint' बटण वापरून तुम्ही याचे लोकेशन आणि फोटो देऊ शकता, जेणेकरून तातडीने दुरुस्ती करता येईल. (Water issue detected. Please use 'File Complaint' to provide location for quick repair.)";
+  }
+
+  // 6. Electricity & Light
+  if (msg.includes('light') || msg.includes('electricity') || msg.includes('लाईट') || msg.includes('वीज') || msg.includes('power') || msg.includes('विजेचा')) {
+    return "वीजपुरवठा खंडित असल्यास किंवा ट्रान्सफॉर्मरची तक्रार असल्यास, कृपया तुमचा ग्राहक नंबर सांगा. आम्ही MSEB सोबत पाठपुरावा करू. (Power issue detected. Please mention your Consumer No.)";
+  }
+
+  // 7. Roads & Drainage
+  if (msg.includes('road') || msg.includes('rasta') || msg.includes('रस्ता') || msg.includes('खड्डा') || msg.includes('पाऊस') || msg.includes('drainage')) {
+    return "रस्ते किंवा ड्रेनेज समस्येची दखल घेतली जाईल. कृपया तुमच्या गावाचे नाव सांगा. (Road/Drainage issue. Please mention your village name.)";
+  }
+
+  // 8. Greetings & Help
+  if (msg.includes('hi') || msg.includes('hello') || msg.includes('नमस्कार') || msg.includes('हो') || msg.includes('नमस्कार') || msg.includes('राम राम') || msg.includes('help') || msg.includes('काय') || msg.includes('कोण')) {
     return "नमस्कार! मी 'दौंड डिजिटल सहाय्यक' (Daund Vikas Mitra) आहे. मी आपल्याला विकास प्रकल्पांची माहिती देणे, तक्रार नोंदवण्यास मदत करणे आणि आपत्कालीन संपर्क क्रमांक पुरवणे यामध्ये मदत करू शकतो. मी आपली काय मदत करू?";
   }
 
-  return null; // Fallback to generic error if no keywords match
+  return null;
 }
 
 module.exports = { getKeywordResponse };

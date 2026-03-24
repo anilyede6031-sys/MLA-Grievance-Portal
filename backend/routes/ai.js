@@ -114,8 +114,10 @@ router.post('/atomic-chat', upload.array('files'), async (req, res) => {
     }
 
     if (!text) {
-      const fallback = getKeywordResponse(message, {});
-      return res.json({ success: true, reply: fallback || "नमस्कार, मी सध्या व्यस्त आहे. कृपया थोड्या वेळाने प्रयत्न करा." });
+      const stats = { total: await Complaint.countDocuments({}), resolved: await Complaint.countDocuments({ status: 'Resolved' }) };
+      const projects = await Project.find().limit(5).lean();
+      const fallback = getKeywordResponse(message, { stats, projects });
+      return res.json({ success: true, reply: fallback || "नमस्कार, मी सध्या व्यस्त आहे. कृपया थोड्या वेळाने प्रयत्न करा.", isFallback: true });
     }
 
     res.json({ success: true, reply: text });
