@@ -178,7 +178,7 @@ router.post('/atomic-chat', upload.array('images'), optionalAuth, async (req, re
     const geminiKey = process.env.GEMINI_API_KEY;
     if (!geminiKey) throw new Error("GEMINI_API_KEY is not defined.");
     const genAI = new GoogleGenerativeAI(geminiKey);
-    const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-latest"];
+    const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-flash-latest"];
     let text = "";
     
     for (const modelName of modelsToTry) {
@@ -189,7 +189,10 @@ router.post('/atomic-chat', upload.array('images'), optionalAuth, async (req, re
         const response = await result.response;
         text = response.text();
         if (text) break;
-      } catch (err) { continue; }
+      } catch (err) { 
+        console.error(`[AI] Model ${modelName} failed:`, err.message);
+        continue; 
+      }
     }
 
     // FINAL ATTEMPT: Zero-History Single-Turn Fallback (bypasses safety/length blocks)
@@ -199,7 +202,9 @@ router.post('/atomic-chat', upload.array('images'), optionalAuth, async (req, re
         const result = await model.generateContent(`${systemPrompt}\n\nCitizen's Message: ${message}\n\nResponse:`);
         const response = await result.response;
         text = response.text();
-      } catch (err) { /* silent fail to keyword assistant */ }
+      } catch (err) { 
+        console.error(`[AI] Zero-history fallback failed:`, err.message);
+      }
     }
 
     if (!text) {
@@ -294,7 +299,7 @@ router.post('/chat', upload.array('files'), async (req, res) => {
     }
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-latest"];
+    const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-flash-latest"];
     let text = "";
     for (const modelName of modelsToTry) {
       try {
@@ -304,10 +309,13 @@ router.post('/chat', upload.array('files'), async (req, res) => {
         const response = await result.response;
         text = response.text();
         if (text) break;
-      } catch (err) { continue; }
+      } catch (err) { 
+        console.error(`[AI] Legacy Model ${modelName} failed:`, err.message);
+        continue; 
+      }
     }
     if (!text) {
-      const fallback = getKeywordResponse(message, {});
+      const fallback = getKeywordResponse(message, { history });
       const replyText = fallback || "नमस्कार! मी आपला डिजिटल सेवा प्रतिनिधी आहे. सध्या आमची एआय सिस्टिम (AI System) मेंटेनन्समध्ये आहे, पण काळजी करू नका, मी आपली मदत नक्कीच करेन. आपल्याला काय अडचण आहे ते कृपया सविस्तर सांगा. (AI is in maintenance, but I am here to help. Please describe your issue.)";
       return res.json({ success: true, reply: replyText, isFallback: true });
     }
