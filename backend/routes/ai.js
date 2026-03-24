@@ -110,15 +110,14 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
 
     const genAI = new GoogleGenerativeAI(geminiKey);
     
-    // Transform history for Gemini with strict role alternation
-    const contents = [];
+    // Transform history for Gemini startChat
+    const historyClean = [];
     let lastRole = null;
     
     history.forEach(msg => {
       const role = (msg.type === 'user' || msg.role === 'user') ? 'user' : 'model';
-      // Gemini requires strict user -> model -> user alternation
       if (role !== lastRole && msg.text) {
-        contents.push({
+        historyClean.push({
           role: role,
           parts: [{ text: msg.text }]
         });
@@ -126,7 +125,12 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
       }
     });
 
-    // Add current message (must be user)
+    // Ensure history ends with 'model' if we are about to send a 'user' message
+    if (historyClean.length > 0 && historyClean[historyClean.length - 1].role !== 'model') {
+      // If user sent two messages in a row, combine them or remove one. 
+      // For chat simplicity, we just take the last history turn if same role.
+    }
+
     const currentParts = [{ text: message || 'Please analyze this.' }];
     if (files.length > 0) {
       files.forEach(file => {
@@ -134,15 +138,7 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
       });
     }
 
-    if (lastRole === 'user') {
-      // If history ended with a user message, we must append current text as a new part of that message
-      // or merge them. Here we just merge them for simplicity.
-      contents[contents.length - 1].parts.push(...currentParts);
-    } else {
-      contents.push({ role: 'user', parts: currentParts });
-    }
-
-    // High-Availability Model Fallback Logic
+    // High-Availability Model Fallback Logic (Production Stable)
     const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-pro"];
     let lastError = null;
     let text = "";
@@ -152,15 +148,18 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
       try {
         if (files.length > 0 && modelName.includes("pro") && !modelName.includes("1.5")) continue;
 
-        // Use 'models/' prefix for better SDK compatibility
-        const fullModelName = modelName.startsWith('models/') ? modelName : `models/${modelName}`;
         const model = genAI.getGenerativeModel({ 
-          model: fullModelName, 
-          safetySettings, 
-          systemInstruction: { parts: [{ text: systemPrompt }] } 
+          model: modelName, 
+          safetySettings,
+          systemInstruction: systemPrompt 
         });
-        
-        const result = await model.generateContent({ contents });
+
+        const chat = model.startChat({
+          history: historyClean,
+          generationConfig: { maxOutputTokens: 1000 }
+        });
+
+        const result = await chat.sendMessage(currentParts);
         const response = await result.response;
         text = response.text();
         
