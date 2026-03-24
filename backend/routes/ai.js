@@ -195,7 +195,7 @@ router.post('/atomic-chat', upload.array('images'), optionalAuth, async (req, re
     // FINAL ATTEMPT: Zero-History Single-Turn Fallback (bypasses safety/length blocks)
     if (!text) {
       try {
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash", safetySettings });
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySettings });
         const result = await model.generateContent(`${systemPrompt}\n\nCitizen's Message: ${message}\n\nResponse:`);
         const response = await result.response;
         text = response.text();
@@ -214,7 +214,7 @@ router.post('/atomic-chat', upload.array('images'), optionalAuth, async (req, re
          }
       }
 
-      const fallback = getKeywordResponse(message, { stats, projects });
+      const fallback = getKeywordResponse(message, { stats, projects, history });
       const finalReply = specificDetail ? `${specificDetail}\n\n${fallback || ''}` : fallback;
       
       const replyText = finalReply || "नमस्कार! मी आपला डिजिटल सेवा प्रतिनिधी आहे. सध्या आमची एआय सिस्टिम (AI System) मेंटेनन्समध्ये आहे, पण काळजी करू नका, मी आपली मदत नक्कीच करेन. आपल्याला काय अडचण आहे ते कृपया सविस्तर सांगा. (AI is in maintenance, but I am here to help. Please describe your issue.)";

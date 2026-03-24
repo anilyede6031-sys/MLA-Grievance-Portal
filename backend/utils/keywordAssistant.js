@@ -4,7 +4,11 @@
  */
 function getKeywordResponse(message, data) {
   const msg = message.toLowerCase();
-  const { projects = [], stats = {} } = data;
+  const { projects = [], stats = {}, history = [] } = data;
+
+  // Basic Memory: Check if we just asked for a village
+  const lastBotMsg = history.length > 0 ? (history[history.length - 1].text || '').toLowerCase() : '';
+  const askedForVillage = lastBotMsg && (lastBotMsg.includes('गावाचे नाव') || lastBotMsg.includes('village name'));
 
   // 1. Complaint Status & Inquiries
   if (msg.includes('complaint') || msg.includes('tarkrar') || msg.includes('तक्रार') || msg.includes('ग्रिव्हन्स') || msg.includes('अडचण') || msg.match(/grv-[a-z0-9-]+/i)) {
@@ -36,7 +40,8 @@ function getKeywordResponse(message, data) {
 
   // 5. Water & Filter Issues
   if (msg.includes('pani') || msg.includes('water') || msg.includes('नळ') || msg.includes('पाणी') || msg.includes('filter') || msg.includes('फिल्टर')) {
-    return "पाण्याच्या तक्रारीबद्दल आम्हाला समजले. 'File Complaint' बटण वापरून तुम्ही याचे लोकेशन आणि फोटो देऊ शकता, जेणेकरून तातडीने दुरुस्ती करता येईल. (Water issue detected. Please use 'File Complaint' to provide location for quick repair.)";
+    if (askedForVillage) return "पाण्याच्या समस्येबद्दल माहिती मिळाली. कृपया आपली अडचण थोडक्यात सांगा किंवा 'File Complaint' वर फोटो पाठवा. (Water issue noted. Please describe briefly or send photos via 'File Complaint'.)";
+    return "पाण्याच्या तक्रारीबद्दल आम्हाला समजले. कृपया तुमच्या गावाचे नाव सांगा. (Water issue detected. Please mention your village name.)";
   }
 
   // 6. Electricity & Light
@@ -46,6 +51,7 @@ function getKeywordResponse(message, data) {
 
   // 7. Roads & Drainage
   if (msg.includes('road') || msg.includes('rasta') || msg.includes('रस्ता') || msg.includes('खड्डा') || msg.includes('पाऊस') || msg.includes('drainage')) {
+    if (askedForVillage) return "रस्त्याची समस्या आम्ही समजलो आहोत. कृपया 'File Complaint' बटण वापरून तक्रार नोंदवा, म्हणजे आम्ही त्यावर काम करू शकू. (Road issue noted. Please use 'File Complaint' to register formally.)";
     return "रस्ते किंवा ड्रेनेज समस्येची दखल घेतली जाईल. कृपया तुमच्या गावाचे नाव सांगा. (Road/Drainage issue. Please mention your village name.)";
   }
 
@@ -56,12 +62,12 @@ function getKeywordResponse(message, data) {
 
   // 9. Greetings & Common Phrases
   if (msg.includes('hi') || msg.includes('hello') || msg.includes('gm') || msg.includes('morning') || msg.includes('सकाळ') || msg.includes('नमस्कार') || msg.includes('राम राम') || msg.includes('hey') || msg.includes('ok') || msg.includes('ठीक') || msg.includes('हो') || msg.includes('help') || msg.includes('कोण') || msg.includes('कोणती') || msg.includes('night') || msg.includes('gn') || msg.includes('रात्री') || msg.includes('shubh')) {
-    return "नमस्कार! मी आपला 'डिजिटल सेवा प्रतिनिधी' आहे. तुम्ही पाठवलेला संदेश मिळाला! रात्रीची वेळ असली तरी काळजी करू नका, मी तुमची अडचण समजू शकतो. मी आपल्याला तक्रार नोंदवण्यासाठी किंवा इतर माहिती देण्यासाठी मदत करू शकतो. मी तुमची कशी मदत करू सांगा? (I am your Digital Seva Representative. How can I help you?)";
+    return "नमस्कार! मी आपला 'डिजिटल सेवा प्रतिनिधी' आहे. तुम्ही पाठवलेला संदेश मिळाला! मी आपल्याला तक्रार नोंदवण्यासाठी किंवा इतर माहिती देण्यासाठी मदत करू शकतो. मी तुमची कशी मदत करू सांगा? (I am your Digital Seva Representative. How can I help you?)";
   }
 
   // --- FRUSTRATION TRIGGER (v83) ---
   if (msg.match(/mad|nahi|nit|sangaych|broken|fail|wrong|aswer|cashing/) || (msg.includes('काम') && msg.includes('नाही'))) {
-    return "क्षमस्व! तुमची गैरसोय होत असल्याचे आम्हाला समजले. आम्ही सिस्टिम सुधारण्यासाठी सतत काम करत आहोत. कृपया तुमची अडचण थोडक्यात सांगा किंवा 'File Complaint' बटण वापरून फोटो शेअर करा, जेणेकरून आम्ही त्यावर तातडीने कारवाई करू शकू. (We apologize for the inconvenience. Please describe your issue briefly or use 'File Complaint' so we can take immediate action.)";
+    return "क्षमस्व! तुमची गैरसोय होत असल्याचे आम्हाला समजले. आम्ही सिस्टिम सुधारण्यासाठी सतत काम करत आहोत. कृपया तुमची अडचण थोडक्यात सांगा किंवा 'File Complaint' बटण वापरून फोटो शेअर करा. (We apologize. Please describe your issue briefly or use 'File Complaint' for action.)";
   }
 
   return null;
