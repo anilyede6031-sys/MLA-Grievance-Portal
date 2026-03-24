@@ -10,14 +10,47 @@ function getKeywordResponse(message, data) {
   const lastBotMsg = history.length > 0 ? (history[history.length - 1].text || '').toLowerCase() : '';
   const askedForVillage = lastBotMsg && (lastBotMsg.includes('गावाचे नाव') || lastBotMsg.includes('village name'));
 
-  // 1. Complaint Status & Inquiries
-  if (msg.includes('complaint') || msg.includes('tarkrar') || msg.includes('तक्रार') || msg.includes('ग्रिव्हन्स') || msg.includes('अडचण') || msg.match(/dk-\d{4}-\d{5}/i) || msg.match(/grv-[a-z0-0-]+/i)) {
-    const idMatch = msg.match(/dk-\d{4}-\d{5}/i) || msg.match(/grv-[a-z0-9-]+/i);
-    if (idMatch || msg.includes('status') || msg.includes('check') || msg.includes('track') || msg.includes('कधी') || msg.includes('स्थिती')) {
-      const idStr = idMatch ? ` (ID: ${idMatch[0].toUpperCase()})` : '';
-      return `आपल्या तक्रारीची स्थिती${idStr} जाणून घेण्यासाठी कृपया वर दिलेल्या 'Track' बटणावर क्लिक करा आणि आपला तक्रार क्रमांक टाइप करा. (To check status, use 'Track' button with your GRV ID.)\nवर्तमान आकडेवारी: ${stats.total || 0} एकूण तक्रारी, ${stats.resolved || 0} पूर्ण.`;
+  // 1. STATEFUL SEQUENTIAL FLOW (v84)
+  // If LLM fails, we manually drive the 7-step sequence based on history.
+  const getUserReplyFor = (botTextPart) => {
+    for (let i = history.length - 1; i >= 0; i--) {
+      if (history[i].role === 'bot' && history[i].text && history[i].text.toLowerCase().includes(botTextPart)) {
+        return history[i+1] ? history[i+1].text : null;
+      }
     }
-    return `तक्रार नोंदवण्यासाठी कृपया मुख्य पानावर असलेल्या 'File Complaint' बटणावर क्लिक करा. आपण तिथे फोटो आणि लोकेशन देखील देऊ शकता. (To file a complaint, click 'File Complaint' on the home page.)`;
+    return null;
+  };
+
+  if (lastBotMsg.includes('full name') || lastBotMsg.includes('पूर्ण नाव')) {
+    return "धन्यवाद! आता कृपया आपला दहा अंकी मोबाईल नंबर सांगा. (Thank you! Now please provide your 10-digit mobile number.)";
+  }
+  if (lastBotMsg.includes('mobile number') || lastBotMsg.includes('मोबाईल नंबर')) {
+    return "उत्तम! आता आपल्या गावाचे किंवा परिसराचे नाव सांगा. (Great! Now tell us your Village or Area name.)";
+  }
+  if (lastBotMsg.includes('village') || lastBotMsg.includes('area') || lastBotMsg.includes('गावाचे') || lastBotMsg.includes('परिसराचे')) {
+    return "समजले. आपली समस्या कोणत्या प्रकारची आहे? (Water, Road, Electricity, or Other) - (Understood. What type of problem is it?)";
+  }
+  if (lastBotMsg.includes('problem type') || lastBotMsg.includes('समस्या कोणत्या प्रकारची')) {
+    return "कृपया आपल्या समस्येचे थोडक्यात वर्णन करा. (Please provide a brief description of your problem.)";
+  }
+  if (lastBotMsg.includes('brief description') || lastBotMsg.includes('थोडक्यात वर्णन')) {
+    return "मी सर्व माहिती नोंदवली आहे. एकदा तपासा: [माहिती]. ही माहिती बरोबर आहे का? (I've noted the details. Is this information correct? Reply with 'Yes'.)";
+  }
+  if (lastBotMsg.includes('बरोबर आहे का') || lastBotMsg.includes('information correct')) {
+    if (msg.includes('yes') || msg.includes('हो') || msg.includes('बरोबर')) {
+        const id = `DK-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`;
+        return `तुमची तक्रार यशस्वीरित्या नोंदवण्यात आली आहे! तुमचा तक्रार क्रमांक: ${id}. आम्ही लवकरच आपल्याशी संपर्क करू. (Your complaint is registered! Ticket ID: ${id}. We will contact you soon.) $$$COMPLAINT_DATA:{"id":"${id}"}###`;
+    }
+  }
+
+  // Initial Trigger for the flow
+  if (msg.includes('complaint') || msg.includes('tarkrar') || msg.includes('तक्रार') || msg.includes('नोंद')) {
+     if (msg.includes('status') || msg.includes('check') || msg.match(/dk-\d{4}-\d{5}/i) || msg.match(/grv-[a-z0-9-]+/i)) {
+       const idMatch = msg.match(/dk-\d{4}-\d{5}/i) || msg.match(/grv-[a-z0-9-]+/i);
+       const idStr = idMatch ? ` (ID: ${idMatch[0].toUpperCase()})` : '';
+       return `तक्रारीची स्थिती${idStr} पाहण्यासाठी 'Track' बटण वापरा. (Use 'Track' for status.)`;
+     }
+     return "नक्कीच! तुमची तक्रार नोंदवण्यासाठी, कृपया तुमचे पूर्ण नाव सांगा. (Sure! To register your complaint, please tell us your Full Name.)";
   }
 
   // 2. Project & Development Inquiries
