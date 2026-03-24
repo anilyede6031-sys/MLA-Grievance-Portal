@@ -111,12 +111,9 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
     const genAI = new GoogleGenerativeAI(geminiKey);
     
     // Transform history for Gemini REST API
-    const contents = [];
+    const historyClean = [];
     let lastRole = null;
     
-    // Add system instruction turn if supported by legacy mode (prepending works better)
-    // Prepend system prompt to first user message for 100% safety
-    const historyClean = [];
     history.forEach(msg => {
       const role = (msg.type === 'user' || msg.role === 'user' || msg.type === 'Human') ? 'user' : 'model';
       // Gemini REST API requires strict alternation
@@ -129,12 +126,7 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
       }
     });
 
-    // Add current message (must be user)
-    const combinedMessage = (historyClean.length === 0) 
-      ? `${systemPrompt}\n\nUSER MESSAGE: ${message}`
-      : message;
-
-    const currentParts = [{ text: combinedMessage || 'Please analyze this.' }];
+    const currentParts = [{ text: message || 'Please analyze this.' }];
     if (files.length > 0) {
       files.forEach(file => {
         currentParts.push({
@@ -163,7 +155,10 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
 
         const apiURL = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiKey}`;
         
-        const response = await axios.post(apiURL, {
+        const payload = {
+          systemInstruction: {
+            parts: [{ text: systemPrompt }]
+          },
           contents: historyClean,
           safetySettings: [
             { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
@@ -175,7 +170,9 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
             maxOutputTokens: 1000,
             temperature: 0.7
           }
-        }, {
+        };
+
+        const response = await axios.post(apiURL, payload, {
           headers: { 'Content-Type': 'application/json' },
           timeout: 20000
         });
@@ -185,23 +182,21 @@ Goal: Make user feel Heard, Respected, Supported, and Confident. 🇮🇳`;
           if (text) break;
         }
       } catch (err) {
-        modelErrors[modelName] = err.response ? err.response.data : err.message;
+        // Deep stringification of error for auditing
+        modelErrors[modelName] = err.response ? JSON.stringify(err.response.data) : err.message;
         continue;
       }
     }
 
     if (!text) {
-      // LAST RESORT: Try Keyword Fallback before giving up
       const fallbackReply = getKeywordResponse(message, { projects, stats: complaintStats });
-      if (fallbackReply) {
-        return res.json({ success: true, reply: fallbackReply, isFallback: true });
-      }
+      if (fallbackReply) return res.json({ success: true, reply: fallbackReply, isFallback: true });
 
       return res.status(500).json({
         success: false,
         message: 'AI Assistant Error.',
         debug: modelErrors,
-        hint: 'The AI is currently under high load or API key is invalid.'
+        hint: 'High load or invalid API configuration detected.'
       });
     }
 
