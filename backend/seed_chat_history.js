@@ -24,11 +24,11 @@ async function seedHistory() {
       { q: "धन्यवाद", a: "तुमचे स्वागत आहे!" }
     ];
 
-    // Generate 100 pseudo-unique turns
-    for (let i = 0; i < 100; i++) {
+    // Generate 1000 unique-ish turns
+    for (let i = 0; i < 1000; i++) {
         const topic = topics[i % topics.length];
-        messages.push({ role: 'user', text: `${topic.q} (Test ${i+1})` });
-        messages.push({ role: 'bot', text: `${topic.a} (ID: ${Math.random().toString(36).substr(2, 5)})` });
+        messages.push({ role: 'user', text: `${topic.q} (#${i+1})` });
+        messages.push({ role: 'bot', text: `${topic.a} [Reference: ${Math.random().toString(36).substr(2, 7)}]` });
     }
 
     await AIChat.findOneAndUpdate(

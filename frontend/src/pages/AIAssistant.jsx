@@ -9,6 +9,7 @@ export default function AIAssistant() {
   const [messages, setMessages] = useState([
     { id: 1, type: 'bot', text: t.aiGreeting }
   ]);
+  const [visibleLimit, setVisibleLimit] = useState(50);
   const [input, setInput] = useState('');
   const [attachments, setAttachments] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
@@ -137,9 +138,19 @@ export default function AIAssistant() {
       </div>
 
       {/* Main Messaging Area */}
-      <div className="flex-1 overflow-y-auto bg-[#F9FBFA] dark:bg-gray-950 custom-scrollbar">
-        <div className="max-w-4xl mx-auto p-4 md:p-12 space-y-8">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 pt-16 scrollbar-hide">
+          {messages.length > visibleLimit && (
+            <div className="flex justify-center pb-4">
+              <button 
+                onClick={() => setVisibleLimit(prev => prev + 100)}
+                className="text-xs bg-white/5 hover:bg-white/10 text-white/60 px-4 py-1.5 rounded-full border border-white/10 transition-all"
+              >
+                Load Older Messages ({messages.length - visibleLimit} more)
+              </button>
+            </div>
+          )}
            
+           <div className="max-w-4xl mx-auto p-4 md:p-12 space-y-8">
            <div className="bg-white dark:bg-gray-900 p-5 rounded-3xl flex gap-4 text-xs md:text-sm text-gray-500 italic leading-relaxed rbot-bubble-shadow items-start animate-mbot-message">
               <Info size={20} className="text-[#00684A] shrink-0 mt-0.5" />
               <p>{t.recordingNotice}</p>
