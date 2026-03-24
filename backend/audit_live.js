@@ -13,7 +13,7 @@ async function runAudit() {
     fd1.append('history', '[]');
     
     console.log('[T1] Sending Greeting...');
-    const r1 = await axios.post(url, fd1, { headers: fd1.getHeaders() });
+    const r1 = await axios.post(API_URL, fd1, { headers: fd1.getHeaders() });
     console.log('[R1]:', r1.data.reply);
 
     // Turn 2: Complaint Start
