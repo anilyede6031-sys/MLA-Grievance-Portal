@@ -1,7 +1,7 @@
+const OpenAI = require('openai');
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require('@google/generative-ai');
 const Project = require('../models/Project');
 const Complaint = require('../models/Complaint');
 const AIChat = require('../models/AIChat');
@@ -14,12 +14,12 @@ const upload = multer({ limits: { fileSize: 10 * 1024 * 1024 } }); // 10MB limit
 
 // Global initialization removed for per-request reliability
 
-const safetySettings = [
-  { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
-  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
-  { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
-  { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
-];
+// OpenAI Initialization Logic
+const getOpenAIClient = () => {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) return null;
+  return new OpenAI({ apiKey });
+};
 
 function fileToGenerativePart(buffer, mimeType) {
   return {
@@ -155,56 +155,35 @@ router.post('/atomic-chat', upload.array('images'), optionalAuth, async (req, re
     const idMatch = message.match(/dk-\d{4}-\d{5}/i) || message.match(/(GRV-[A-Z0-9-]+)/i);
     const systemPrompt = await getFullSystemPrompt(location, idMatch ? idMatch[0] : null);
 
-    // ATOMIC SINGLE-TURN SDK BRIDGE (v72)
-    let flattenedPrompt = `${systemPrompt}\n\n`;
-    if (history && history.length > 0) {
-      flattenedPrompt += "--- PREVIOUS CONVERSATION ---\n";
-      history.forEach(msg => {
-        const roleName = (msg.type === 'user' || msg.role === 'user' || msg.type === 'Human') ? 'Citizen' : 'Seva Representative';
-        if (msg.text) flattenedPrompt += `${roleName}: ${msg.text}\n`;
-      });
-      flattenedPrompt += "--- END HISTORY ---\n\n";
-    }
-    flattenedPrompt += `Citizen's Latest Message: ${message}\n\nSeva Representative's Response:`;
-
-    const contents = [{ role: 'user', parts: [{ text: flattenedPrompt }] }];
-    if (files.length > 0) {
-      files.forEach(file => {
-        contents[0].parts.push({
-          inlineData: { mimeType: file.mimetype, data: file.buffer.toString('base64') }
-        });
-      });
-    }
-
-    const geminiKey = process.env.GEMINI_API_KEY;
-    if (!geminiKey) throw new Error("GEMINI_API_KEY is not defined.");
-    const genAI = new GoogleGenerativeAI(geminiKey);
-    const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-flash-latest"];
+    // --- OPENAI PRIMARY ENGINE (v100) ---
+    const openai = getOpenAIClient();
     let text = "";
-    
-    for (const modelName of modelsToTry) {
+    if (openai) {
       try {
-        if (files.length > 0 && modelName === "gemini-pro") continue;
-        const model = genAI.getGenerativeModel({ model: modelName, safetySettings });
-        const result = await model.generateContent({ contents });
-        const response = await result.response;
-        text = response.text();
-        if (text) break;
-      } catch (err) { 
-        console.error(`[AI] Model ${modelName} failed:`, err.message);
-        continue; 
-      }
-    }
+        const messages = [
+          { role: "system", content: systemPrompt }
+        ];
 
-    // FINAL ATTEMPT: Zero-History Single-Turn Fallback (bypasses safety/length blocks)
-    if (!text) {
-      try {
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySettings });
-        const result = await model.generateContent(`${systemPrompt}\n\nCitizen's Message: ${message}\n\nResponse:`);
-        const response = await result.response;
-        text = response.text();
-      } catch (err) { 
-        console.error(`[AI] Zero-history fallback failed:`, err.message);
+        if (history && history.length > 0) {
+          history.forEach(msg => {
+            const role = (msg.type === 'user' || msg.role === 'user' || msg.type === 'Human') ? 'user' : 'assistant';
+            if (msg.text) messages.push({ role, content: msg.text });
+          });
+        }
+
+        messages.push({ role: "user", content: message });
+
+        const completion = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: messages,
+          max_tokens: 1000,
+          temperature: 0.7,
+        });
+
+        text = completion.choices[0].message.content;
+        if (text) console.log("[AI] OpenAI response successful.");
+      } catch (err) {
+        console.error(`[AI] OpenAI failed:`, err.message);
       }
     }
     
@@ -308,31 +287,38 @@ router.post('/chat', upload.array('files'), async (req, res) => {
     }
     flattenedPrompt += `Citizen's Latest Message: ${message}\n\nSeva Representative's Response:`;
 
-    const contents = [{ role: 'user', parts: [{ text: flattenedPrompt }] }];
-    if (files.length > 0) {
-      files.forEach(file => {
-        contents[0].parts.push({
-          inlineData: { mimeType: file.mimetype, data: file.buffer.toString('base64') }
-        });
-      });
-    }
-
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-flash-latest"];
+    // --- OPENAI PRIMARY ENGINE (v100) ---
+    const openai = getOpenAIClient();
     let text = "";
-    for (const modelName of modelsToTry) {
+    if (openai) {
       try {
-        if (files.length > 0 && modelName === "gemini-pro") continue;
-        const model = genAI.getGenerativeModel({ model: modelName, safetySettings });
-        const result = await model.generateContent({ contents });
-        const response = await result.response;
-        text = response.text();
-        if (text) break;
-      } catch (err) { 
-        console.error(`[AI] Legacy Model ${modelName} failed:`, err.message);
-        continue; 
+        const messages = [
+          { role: "system", content: systemPrompt }
+        ];
+
+        if (history && history.length > 0) {
+          history.forEach(msg => {
+            const role = (msg.type === 'user' || msg.role === 'user' || msg.type === 'Human') ? 'user' : 'assistant';
+            if (msg.text) messages.push({ role, content: msg.text });
+          });
+        }
+
+        messages.push({ role: "user", content: message });
+
+        const completion = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: messages,
+          max_tokens: 1000,
+          temperature: 0.7,
+        });
+
+        text = completion.choices[0].message.content;
+        if (text) console.log("[AI] Legacy OpenAI response successful.");
+      } catch (err) {
+        console.error(`[AI] Legacy OpenAI failed:`, err.message);
       }
     }
+
     if (!text) {
       const fallback = getKeywordResponse(message, { history });
       const replyText = fallback || "नमस्कार! मी आपला डिजिटल सेवा प्रतिनिधी आहे. सध्या आमची एआय सिस्टिम (AI System) मेंटेनन्समध्ये आहे, पण काळजी करू नका, मी आपली मदत नक्कीच करेन. आपल्याला काय अडचण आहे ते कृपया सविस्तर सांगा. (AI is in maintenance, but I am here to help. Please describe your issue.)";
