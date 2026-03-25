@@ -7,6 +7,7 @@ const Complaint = require('../models/Complaint');
 const AIChat = require('../models/AIChat');
 const { authenticate } = require('../middleware/auth');
 const { getKeywordResponse } = require('../utils/keywordAssistant');
+const Anthropic = require('@anthropic-ai/sdk');
 
 const multer = require('multer');
 const upload = multer({ limits: { fileSize: 10 * 1024 * 1024 } }); // 10MB limit
@@ -206,6 +207,24 @@ router.post('/atomic-chat', upload.array('images'), optionalAuth, async (req, re
         console.error(`[AI] Zero-history fallback failed:`, err.message);
       }
     }
+    
+    // --- CLAUDE FALLBACK (v85) ---
+    if (!text && process.env.ANTHROPIC_API_KEY) {
+      try {
+        console.log("[AI] Attempting Claude Fallback...");
+        const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+        const claudeResponse = await anthropic.messages.create({
+          model: "claude-3-5-sonnet-20241022",
+          max_tokens: 1024,
+          system: systemPrompt,
+          messages: [{ role: "user", content: message }],
+        });
+        text = claudeResponse.content[0].text;
+        if (text) console.log("[AI] Claude response successful.");
+      } catch (err) {
+        console.error(`[AI] Claude fallback failed:`, err.message);
+      }
+    }
 
     if (!text) {
       const stats = { total: await Complaint.countDocuments({}), resolved: await Complaint.countDocuments({ status: 'Resolved' }) };
@@ -213,16 +232,16 @@ router.post('/atomic-chat', upload.array('images'), optionalAuth, async (req, re
       
       let specificDetail = null;
       if (idMatch) {
-         const comp = await Complaint.findOne({ complaintId: idMatch[1].toUpperCase() }).lean();
+         const comp = await Complaint.findOne({ complaintId: idMatch[0].toUpperCase() }).lean();
          if (comp) {
            specificDetail = `तक्रार क्रमांक ${comp.complaintId} सध्या '${comp.status}' स्थितीत आहे. (Status of ${comp.complaintId} is currently '${comp.status}')`;
          }
       }
 
       const fallback = getKeywordResponse(message, { stats, projects, history });
-      const finalReply = specificDetail ? `${specificDetail}\n\n${fallback || ''}` : fallback;
+      const finalReply = (specificDetail ? `${specificDetail}\n\n${fallback || ''}` : fallback || '').replace(/\$\$\$.*###/s, '').trim();
       
-      const replyText = finalReply || "नमस्कार! मी आपला डिजिटल सेवा प्रतिनिधी आहे. सध्या आमची एआय सिस्टिम (AI System) मेंटेनन्समध्ये आहे, पण काळजी करू नका, मी आपली मदत नक्कीच करेन. आपल्याला काय अडचण आहे ते कृपया सविस्तर सांगा. (AI is in maintenance, but I am here to help. Please describe your issue.)";
+      const replyText = finalReply || "नमस्कार! मी आपला डिजिटल सेवा प्रतिनिधी आहे...";
       if (req.user) await saveChatTurn(req.user.id, message, replyText);
       
       return res.json({ success: true, reply: replyText, isFallback: true });
@@ -275,8 +294,8 @@ router.post('/chat', upload.array('files'), async (req, res) => {
   try {
     if (historyStr) history = JSON.parse(historyStr);
     const location = locationStr ? JSON.parse(locationStr) : null;
-    const idMatch = message.match(/(GRV-[A-Z0-9-]+)/i);
-    const systemPrompt = await getFullSystemPrompt(location, idMatch ? idMatch[1] : null);
+    const idMatch = message.match(/dk-\d{4}-\d{5}/i) || message.match(/(GRV-[A-Z0-9-]+)/i);
+    const systemPrompt = await getFullSystemPrompt(location, idMatch ? idMatch[0] : null);
 
     let flattenedPrompt = `${systemPrompt}\n\n`;
     if (history && history.length > 0) {
