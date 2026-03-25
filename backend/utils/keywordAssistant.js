@@ -93,8 +93,45 @@ function getKeywordResponse(message, data) {
     return "धन्यवाद! आपण सांगितलेले लोकेशन आम्ही नोंदवले आहे. कृपया आपली अडचण थोडक्यात सांगा किंवा 'File Complaint' बटण वापरून फोटो शेअर करा. (Location noted. Please describe your issue briefly or use 'File Complaint'.)";
   }
 
-  // 9. Greetings & Common Phrases
-  if (msg.includes('hi') || msg.includes('hello') || msg.includes('gm') || msg.includes('morning') || msg.includes('सकाळ') || msg.includes('नमस्कार') || msg.includes('राम राम') || msg.includes('hey') || msg.includes('ok') || msg.includes('ठीक') || msg.includes('हो') || msg.includes('help') || msg.includes('कोण') || msg.includes('कोणती') || msg.includes('night') || msg.includes('gn') || msg.includes('रात्री') || msg.includes('shubh')) {
+  // 9. Navigation & Auth (v86)
+  if (msg.includes('login') || msg.includes('sign in') || msg.includes('लॉगिन') || msg.includes('अकाउंट')) {
+    return "आपल्या अकाउंटमध्ये 'Login' करण्यासाठी वरच्या उजव्या कोपऱ्यातील 'Login' बटण वापरा. जर आपण नवीन असाल, तर 'Sign Up' करून नोंदणी करा. (To Login, use the button in the top-right corner. Use 'Sign Up' if you are new.)";
+  }
+  if (msg.includes('track') || msg.includes('trak') || msg.includes('स्थिती') || msg.includes('check status')) {
+    return "तुमची तक्रार ट्रॅक करण्यासाठी 'Track Complaint' विभाग वापरा किंवा तुमचा 'DK-' नंबर मला सांगा. (Use 'Track Complaint' section or tell me your 'DK-' number to check status.)";
+  }
+
+  // 10. MLA Appointments & Office
+  if (msg.includes('office') || msg.includes('bhet') || msg.includes('meet') || msg.includes('appointment') || msg.includes('भेट') || msg.includes('पत्ता')) {
+    return "आमदार राहुलजी कुल साहेबांचे जनसंपर्क कार्यालय दौंड रेल्वे स्टेशन समोर आहे. आपण सकाळी १० ते २ या वेळेत कार्यालयाला भेट देऊ शकता. (MLA Rahul Kul's office is opposite Daund Railway Station. Visiting hours: 10 AM to 2 PM.)";
+  }
+
+  // 11. Local Utilities (Market/Transport)
+  if (msg.includes('bus') || msg.includes('st') || msg.includes('timing') || msg.includes('एसटी') || msg.includes('गाडी')) {
+    return "दौंड एसटी डेपोचे वेळापत्रक पाहण्यासाठी आपण डेपोच्या चौकशी खिडकीवर संपर्क साधू शकता किंवा अधिकृत एमएसआरटीसी ॲप चेक करू शकता. (Check MSRTC app or visit Daund ST Depot for latest timings.)";
+  }
+  if (msg.includes('market') || msg.includes('bajar') || msg.includes('दर') || msg.includes('rate') || msg.includes('भाव')) {
+    return "दौंड कृषी उत्पन्न बाजार समितीचे आजचे बाजारभाव 'Agriculture' विभागात किंवा समितीच्या नोटीस बोर्डवर उपलब्ध आहेत. (Check today's market rates in the 'Agriculture' section or on the APMC notice board.)";
+  }
+
+  // 12. Government Schemes & Help
+  if (msg.includes('ration') || msg.includes('रेशन') || msg.includes('card') || msg.includes('card')) {
+    return "नवीन रेशन कार्ड किंवा बदलांसाठी तहसील कार्यालयातील 'पुरवठा विभाग' (Supply Dept) ला भेट द्या. (Visit the Supply Dept at Tahsil office for Ration Card services.)";
+  }
+  if (msg.includes('pension') || msg.includes('पेन्शन') || msg.includes('योजना') || msg.includes('scheme')) {
+    return "श्रावणबाळ किंवा संजय गांधी निराधार योजनेच्या माहितीसाठी जवळील 'सेतू केंद्रा'ला (Setu Kendra) भेट द्या. (Visit nearest Setu Kendra for Shravanbal or Sanjay Gandhi Pension scheme info.)";
+  }
+
+  // 13. System & Fun
+  if (msg.includes('who made you') || msg.includes('developer') || msg.includes('सिस्टम') || msg.includes('बनवले')) {
+    return "मला डीजीटल दौंडच्या (Digital Daund) टीमने आमदार राहुल कुल साहेबांच्या मार्गदर्शनाखाली तयार केले आहे. (I am created by the Digital Daund team under MLA Rahul Kul's guidance.)";
+  }
+  if (msg.includes('joke') || msg.includes('विशाल') || msg.includes('विनोद')) {
+    return "एक छोटा विनोद: रस्ता इतका गुळगुळीत झाला आहे की गाडी चालवताना टायरला फक्त आरसा बघायचा बाकी आहे! 😄 (Just a small joke: The roads are so smooth now that tires only need a mirror to see themselves!)";
+  }
+
+  // 14. Greetings & Common Phrases
+  if (msg.includes('hi') || msg.includes('hello') || msg.includes('gm') || msg.includes('morning') || msg.includes('सकाळ') || msg.includes('नमस्कार') || msg.includes('राम राम') || msg.includes('hey') || msg.includes('ok') || msg.includes('ठीक') || msg.includes('हो') || msg.includes('help') || msg.includes('night') || msg.includes('gn') || msg.includes('रात्री') || msg.includes('shubh')) {
     // Language/Identity Keywords
     if (msg.includes('hinglish') || msg.includes('english')) {
         return "नक्कीच! मी आतापासून Hinglish/English मध्ये देखील संवाद साधू शकतो. सांगा, मी तुमची काय मदत करू? (Sure! I can communicate in Hinglish/English too. How can I help you?)";
